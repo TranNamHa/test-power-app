@@ -14,7 +14,7 @@ Screen1 As screen:
 
     TextInput2 As text:
         Default: ="Text input"
-        X: =124
-        Y: =284
+        X: =80
+        Y: =295
         ZIndex: =3
 
