@@ -18,3 +18,15 @@ Screen1 As screen:
         Y: =295
         ZIndex: =3
 
+    TextInput1_1 As text:
+        Default: ="Text input"
+        X: =840
+        Y: =512
+        ZIndex: =4
+
+    TextInput2_1 As text:
+        Default: ="Text input"
+        X: =840
+        Y: =616
+        ZIndex: =5
+

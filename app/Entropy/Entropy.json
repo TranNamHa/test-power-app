@@ -7,11 +7,13 @@
     "Label1": 5,
     "Screen1": 4,
     "TextInput1": 6,
-    "TextInput2": 7
+    "TextInput1_1": 8,
+    "TextInput2": 7,
+    "TextInput2_1": 9
   },
   "FunctionParamsInvariantScripts": {},
   "FunctionParamsInvariantScriptsOnInstances": {},
-  "HeaderLastSavedDateTimeUTC": "05/31/2024 07:39:50",
+  "HeaderLastSavedDateTimeUTC": "05/31/2024 07:45:22",
   "IsLegacyComponentAllowGlobalScopeCase": false,
   "LocalConnectionIDReferences": {},
   "LocalDatabaseReferencesAsEmpty": true,
@@ -33,7 +35,9 @@
     "Label1": {},
     "Screen1": {},
     "TextInput1": {},
-    "TextInput2": {}
+    "TextInput1_1": {},
+    "TextInput2": {},
+    "TextInput2_1": {}
   },
   "PCFDynamicSchemaForIRRetrievalEntry": {},
   "PCFTemplateEntry": {},
@@ -43,14 +47,18 @@
     "Label1": 0,
     "Screen1": 0,
     "TextInput1": 0,
-    "TextInput2": 0
+    "TextInput1_1": 0,
+    "TextInput2": 0,
+    "TextInput2_1": 0
   },
   "ResourcesJsonIndices": {},
   "RuleScreenIdWithoutScreen": {},
   "TemplateVersions": {},
   "VolatileProperties": {
     "AnalysisLoadTime": 0.0970882,
-    "ControlCount": {}
+    "ControlCount": {
+      "text": 2
+    }
   },
   "WasLocalDatabaseReferencesEmpty": true
 }
