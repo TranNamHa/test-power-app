@@ -1,6 +1,8 @@
 App As appinfo:
     BackEnabled: =true
-    StartScreen: =// Comment from Test Commit Viet 1
+    StartScreen: |-
+        =// Comment from Test Commit Viet 1
+        // Comment from Test Commit Ha 1
     Theme: =PowerAppsTheme
 
     Host As hostControl.DefaultHostControlVariant:
