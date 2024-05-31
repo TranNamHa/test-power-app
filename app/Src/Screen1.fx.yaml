@@ -44,13 +44,13 @@ Screen1 As screen:
 
     TextInput3_3 As text:
         Default: ="Text input"
-        X: =428
-        Y: =380
+        X: =443
+        Y: =387
         ZIndex: =7
 
     TextInput3_4 As text:
         Default: ="Text input"
         X: =443
-        Y: =498
+        Y: =472
         ZIndex: =8
 
