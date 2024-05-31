@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "d63401b9-3db6-4496-acd7-ea6e82e2639d",
+    "Name": "TVS->DownloadFileExpTime-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "c67d7a17-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,3121 @@
+"ListDecentralization As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: =RGBA(248, 248, 249, 1)
+    OnHidden: =Set(isEditShowPopup, false);
+    OnVisible: |-
+        =Set(MenuSelect,"Admin");
+        Set(MenuSelect2,"Manager Authorization");
+        Set(HeaderText, "");
+        
+        //Clear(position);
+        Reset(Timer1_10);
+        Reset(Search_Input_2);
+        Set(isEditShowPopup,false);
+        Set(isDisable, false);
+        Set(isLoading,true);
+        Set(PageSizeNumberEmployee,10);
+        Set(currentPageIndexEmployee,0);
+        ClearCollect(
+            colEmployees,
+            'TVS->GetAllEmployee-V1'.Run(
+                PageSizeNumberEmployee,
+                currentPageIndexEmployee,
+                "",
+                resKeyOpenAll.open,
+                resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2
+            )
+        );
+        Set(isLoading,false);
+        
+        Set(isShowModifyModal,false);
+        UpdateContext({ShowNotification: false});
+        Set(ShowPageSizeSelectPopup,false);
+        
+        Set(pageCount1,First(colEmployees).pageCount);
+        //pageIndex
+        Set(maxList,[1,2,3,4]);
+        Set(pageIndexFirstEmployee,5 * RoundDown(currentPageIndexEmployee / 5,0) + 1);
+        ClearCollect(listPageIndexEmployee,pageIndexFirstEmployee);
+        ForAll(
+            maxList,
+            If(Last(listPageIndexEmployee).Value < pageCount1,
+            Collect(listPageIndexEmployee,Last(listPageIndexEmployee).Value + 1););  
+        );
+        Set(isCreate,true);
+        
+        Clear(DataProcess1);
+        Clear(DataGroups1);
+        Clear(ListItemToRemove);
+
+    White_Background_4 As htmlViewer:
+        Font: =Font.Arial
+        Height: =If(Parent.Width > 800, App.Height - Self.Y - 60, Parent.Height - 280)
+        HtmlText: |-
+            ="<div style='width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white;border-radius: 12px;box-shadow: "& If(Parent.Width > 600, "7px 5px 7px 0px rgba(0, 0, 0, 0.10)", "none") & ";
+            '></div>"
+        PaddingRight: =5.00
+        PaddingTop: =5.00
+        Size: =14.00
+        Width: =If(App.Width > 800, App.Width - If(MobileShowMenu, MenuItemsSideBar_4.Width, MenuItemsSideBar_Small_10.Width) - 20, App.Width + 5)
+        X: =If(Parent.Width > 800, If(MobileShowMenu, 258, 70), 5)
+        Y: =NewEmployeeButton_1.Y + NewEmployeeButton_1.Height + 10
+        ZIndex: =1
+
+    Search_Input_2 As text:
+        BorderColor: =RGBA(191, 191, 192, 1)
+        BorderThickness: =1
+        Default: =
+        FocusedBorderColor: =Self.HoverBorderColor
+        FocusedBorderThickness: =1
+        Font: =Font.Arial
+        Height: =44
+        HintText: ="Search ..."
+        HoverFill: =RGBA(0, 0, 0, 0)
+        LineHeight: =22
+        PaddingBottom: =10
+        PaddingLeft: =10
+        PaddingRight: =10.54
+        PaddingTop: =10.54
+        PressedFill: =
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Size: =If(App.Width > 600, 10.5, 12)
+        Width: =If(App.Width > 800, Min(448, App.Width - SearchAUMButton_8.Width - NewEmployeeButton_1.Width - btnRefresh.Width - If(MobileShowMenu, 240, 50) - 80), App.Width - 20)
+        X: =If(Parent.Width > 800, If(MobileShowMenu, 263, 73), 10)
+        Y: =Header_2.Y + Header_2.Height + 20
+        ZIndex: =2
+
+    ListOfEmployee_Title_1 As label:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Font: =Font.Arial
+        FontWeight: =FontWeight.Bold
+        Height: =33
+        PaddingRight: =5.00
+        PaddingTop: =5.00
+        Size: =16
+        Text: ="List of employees"
+        Width: =213.00
+        X: =White_Background_4.X + 10
+        Y: =White_Background_4.Y + 10
+        ZIndex: =3
+
+    Hr_8 As rectangle:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        BorderStyle: =BorderStyle.None
+        DisplayMode: =DisplayMode.View
+        Fill: =RGBA(191, 191, 192, 1)
+        Height: =1
+        Width: =White_Background_4.Width - 35
+        X: =ListOfEmployee_Title_1.X
+        Y: =Name_Header_3.Y + Name_Header_3.Height + TableHListEmp.Y
+        ZIndex: =4
+
+    TableHListEmp As groupContainer.horizontalAutoLayoutContainer:
+        DropShadow: =DropShadow.None
+        Height: =White_Background_4.Height - 70
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowX: =LayoutOverflow.Scroll
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Width: =Hr_8.Width
+        X: =Hr_8.X
+        Y: =White_Background_4.Y + 50
+        ZIndex: =5
+
+        Container3 As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            FillPortions: =0
+            Height: =TableHListEmp.Height - 20
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Status_Header_3.X + Status_Header_3.Width
+            ZIndex: =1
+
+            FromListEmployee_3 As gallery.galleryVertical:
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(255, 255, 255, 1)
+                DelayItemLoading: =true
+                Height: =Container3.Height - 45
+                Items: =First(colEmployees).listItem
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                OnSelect: =true
+                TemplateFill: =//If(Mod(Value(ThisItem.id), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Container3.Width
+                X: =No_Header_3.X
+                Y: =No_Header_3.Y + No_Header_3.Height + 5
+                ZIndex: =8
+
+                Label_No_Employee_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =10
+                    Size: =10.5
+                    Text: =ThisItem.STT
+                    Width: =No_Header_3.Width
+                    ZIndex: =1
+
+                Label_Name_Employee_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =10
+                    Size: =10.5
+                    Text: =ThisItem.name
+                    Width: =Name_Header_3.Width
+                    X: =Label_No_Employee_3.X + Label_No_Employee_3.Width
+                    ZIndex: =2
+
+                Label_Email_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: =ThisItem.email
+                    Width: =Email_Header_3.Width
+                    X: =Label_Name_Employee_3.X + Label_Name_Employee_3.Width
+                    ZIndex: =3
+
+                Label_Phone_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: =ThisItem.supervisor
+                    Width: =PhoneNumber_Header_3.Width
+                    X: =Label_title_3.X + Label_title_3.Width
+                    ZIndex: =4
+
+                Label_Division_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: =ThisItem.division
+                    Width: =Divison_Header_3.Width
+                    X: =Label_Email_3.X + Label_Email_3.Width
+                    ZIndex: =5
+
+                Label_title_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    OnSelect: =Select(Parent)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: =ThisItem.title
+                    Width: =Title_Header_3.Width
+                    Wrap: =false
+                    X: =Label_Division_3.X + Label_Division_3.Width
+                    ZIndex: =6
+
+                Status_Content_5 As label:
+                    Color: =Switch(ThisItem.status, "INACTIVE", RGBA(214, 27, 27, 1), "ACTIVE", RGBA(11, 201, 75, 1), RGBA(250, 219, 20, 1))
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    OnSelect: =Select(Parent);
+                    PaddingLeft: =25
+                    Size: =10.5
+                    Text: =Proper(ThisItem.status)
+                    Width: =Status_Header_3.Width
+                    X: =Label_Phone_3.X + Label_Phone_3.Width
+                    ZIndex: =7
+
+                DotIcon_5 As label:
+                    Color: =Switch(ThisItem.status, "INACTIVE", RGBA(214, 27, 27, 1), "ACTIVE", RGBA(11, 201, 75, 1), RGBA(250, 219, 20, 1))
+                    Font: =Font.Lato
+                    OnSelect: =Select(Parent)
+                    PaddingTop: =0
+                    Size: =40
+                    Text: ="."
+                    VerticalAlign: =VerticalAlign.Bottom
+                    Visible: =!IsEmpty(First(colEmployees).listItem)
+                    Width: =20
+                    X: =Label_Phone_3.X + Label_Phone_3.Width
+                    ZIndex: =8
+
+                Button_OverLay_5 As button:
+                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                    DisabledColor: =RGBA(0, 0, 0, 0)
+                    DisabledFill: =RGBA(0, 0, 0, 0)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Font: =Font.Arial
+                    HoverFill: =Self.Fill
+                    OnSelect: |
+                        =//Set(isLoading, true);
+                        Set(empSelect, ThisItem);
+                        Set(isEditShowPopup, true);
+                        Concurrent(
+                           
+                            ClearCollect(userRole, 'TVS->GetAllRoleUser-V1'.Run(ThisItem.id, envDEV, envTEST, envUAT1, envUAT2)),
+                            ClearCollect(processUser, 'TVS->GetAllEmployeeProcessCode-V1'.Run(empSelect.id,envDEV, envTEST, envUAT1, envUAT2,resKeyOpenAll.open,resKeyOpenAll.close)),
+                            ClearCollect(groupUser, 'TVS->GetAllEmployeeTeam-V1'.Run(empSelect.id, envDEV, envTEST, envUAT1, envUAT2, resKeyOpenAll.open,resKeyOpenAll.close)),
+                            ClearCollect(internalEmail, 'TVS->getAllinternalEmail-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2)),
+                            ClearCollect(groupApi,'TVS->GetAllApiEmployee-V1'.Run(envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open,resKeyOpenAll.close, ThisItem.id))
+                        );
+                        
+                        //Set(isLoading, false);
+                        
+                        Set(StatusSelectedValue, ThisItem.status);
+                        Set(processSelected, ProcessManagement);
+                        Set(process_code, First(processUser).process_code);
+                        
+                        ClearCollect(DataProcess1, Filter(ProcessManagement, Code in process_code));
+                        Clear(ProcessRoleByEmployeeResult);
+                        
+                        Set(isCreate, false);
+                        Set(isUpdate, true);
+                        
+                        If(CountRows(userRole) > 0, 
+                           ForAll(userRole As role, 
+                                Collect(ProcessRoleByEmployeeResult, 
+                                    {
+                                        mark: Now(),
+                                        company: role.company_permission_id,            
+                                        division: role.department_id,             
+                                        role: role.role_id,            
+                                        id: role.id,
+                                        mark1: GUID()
+                                    })));
+                        Clear(DataProcess1);
+                        If(CountRows(processUser) > 0, 
+                            ForAll(processUser As process, 
+                                Collect(DataProcess1, 
+                                    {
+                                        Id: process.id, 
+                                        Code: process.process_code,
+                                        Name: LookUp(ProcessManagement, Code = process.process_code).Name
+                                    })));
+                        Clear(DataGroups1);
+                        If(CountRows(groupUser) > 0, 
+                        ForAll(groupUser As group,
+                         Collect(DataGroups1, 
+                                {
+                                    Id: group.id, 
+                                    Code: group.name,
+                                    Name: LookUp(GroupsManagement, Code = group.name).Name
+                                }
+                            )));
+                        Clear(DataAPi);
+                        If(CountRows(groupApi) > 0, 
+                        ForAll(groupApi As api,
+                         Collect(DataAPi, 
+                                {
+                                    id: api.id, 
+                                    api_id: api.api_id
+                                }
+                            )));
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Text: =""
+                    Width: =FromListEmployee_3.Width
+                    ZIndex: =9
+
+                DeleteButton_4 As htmlViewer:
+                    Fill: =If(Mod(Value(ThisItem.STT), 2) = 0, RGBA(246,246,246,0), RGBA(0,0,0,0))
+                    Font: =Font.Arial
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer; display:flex; justify-content: center;align-items:center; height:"&Self.Height-2&"px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 16 16"" fill=""none"">
+                          <path d=""M4.66683 2.66634C4.66683 2.31272 4.8073 1.97358 5.05735 1.72353C5.3074 1.47348 5.64654 1.33301 6.00016 1.33301H10.0002C10.3538 1.33301 10.6929 1.47348 10.943 1.72353C11.193 1.97358 11.3335 2.31272 11.3335 2.66634V3.99967H14.0002C14.177 3.99967 14.3465 4.06991 14.4716 4.19494C14.5966 4.31996 14.6668 4.48953 14.6668 4.66634C14.6668 4.84315 14.5966 5.01272 14.4716 5.13775C14.3465 5.26277 14.177 5.33301 14.0002 5.33301H13.2875L12.7095 13.4277C12.6856 13.7641 12.535 14.0789 12.2882 14.3087C12.0415 14.5386 11.7167 14.6663 11.3795 14.6663H4.62016C4.28292 14.6663 3.95821 14.5386 3.71142 14.3087C3.46463 14.0789 3.31411 13.7641 3.29016 13.4277L2.7135 5.33301H2.00016C1.82335 5.33301 1.65378 5.26277 1.52876 5.13775C1.40373 5.01272 1.3335 4.84315 1.3335 4.66634C1.3335 4.48953 1.40373 4.31996 1.52876 4.19494C1.65378 4.06991 1.82335 3.99967 2.00016 3.99967H4.66683V2.66634ZM6.00016 3.99967H10.0002V2.66634H6.00016V3.99967ZM4.0495 5.33301L4.62083 13.333H11.3802L11.9515 5.33301H4.0495ZM6.66683 6.66634C6.84364 6.66634 7.01321 6.73658 7.13823 6.8616C7.26326 6.98663 7.3335 7.1562 7.3335 7.33301V11.333C7.3335 11.5098 7.26326 11.6794 7.13823 11.8044C7.01321 11.9294 6.84364 11.9997 6.66683 11.9997C6.49002 11.9997 6.32045 11.9294 6.19542 11.8044C6.0704 11.6794 6.00016 11.5098 6.00016 11.333V7.33301C6.00016 7.1562 6.0704 6.98663 6.19542 6.8616C6.32045 6.73658 6.49002 6.66634 6.66683 6.66634ZM9.3335 6.66634C9.51031 6.66634 9.67988 6.73658 9.8049 6.8616C9.92992 6.98663 10.0002 7.1562 10.0002 7.33301V11.333C10.0002 11.5098 9.92992 11.6794 9.8049 11.8044C9.67988 11.9294 9.51031 11.9997 9.3335 11.9997C9.15668 11.9997 8.98712 11.9294 8.86209 11.8044C8.73707 11.6794 8.66683 11.5098 8.66683 11.333V7.33301C8.66683 7.1562 8.73707 6.98663 8.86209 6.8616C8.98712 6.73658 9.15668 6.66634 9.3335 6.66634Z"" fill=""#D00C0C""/>
+                        </svg></div>"
+                    OnSelect: |-
+                        =Set(idProposalDelete, ThisItem.id);
+                        Set(isShowPopupDelete, true);
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Tooltip: ="Delete"
+                    Visible: ="EDIT" in LookUp(currenUserV2.permissionList, process_code = "Admin2", action)
+                    Width: =35
+                    X: =Status_Content_5.X + Status_Content_5.Width - Self.Width - 10
+                    ZIndex: =10
+
+            ListEmpHeader As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =8
+
+                No_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="No"
+                    Width: =40
+                    ZIndex: =1
+
+                Name_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Name"
+                    Width: =Max(White_Background_4.Width * 0.15, 120) - If(App.Width < 1500 && App.Width > 1300, 50, 0)
+                    X: =No_Header_3.X + No_Header_3. Width
+                    ZIndex: =2
+
+                Email_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Email"
+                    Width: =Max(White_Background_4.Width * 0.2, 220)
+                    X: =Name_Header_3.X + Name_Header_3.Width
+                    ZIndex: =3
+
+                PhoneNumber_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Supervisor"
+                    Width: =Max(White_Background_4.Width * 0.15, 150)
+                    X: =Title_Header_3.X + Title_Header_3.Width
+                    ZIndex: =4
+
+                Status_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Status"
+                    Width: =If(App.Width < 1500 && App.Width > 1300, Hr_8.X + Hr_8.Width - Self.X - TableHListEmp.X, Max(White_Background_4.Width * 0.15, 150, Hr_8.X + Hr_8.Width - Self.X - TableHListEmp.X))
+                    X: =PhoneNumber_Header_3.X + PhoneNumber_Header_3.Width
+                    ZIndex: =5
+
+                Divison_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Division"
+                    Width: =Max(White_Background_4.Width * 0.15, 220)
+                    X: =Email_Header_3.X + Email_Header_3.Width
+                    ZIndex: =6
+
+                Title_Header_3 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Position "
+                    Width: =Max(White_Background_4.Width * 0.15, 100)
+                    X: =Divison_Header_3.X + Divison_Header_3.Width
+                    ZIndex: =7
+
+    Label16_5 As label:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Font: =Font.Arial
+        FontWeight: =FontWeight.Semibold
+        Height: =44
+        PaddingLeft: =16
+        PaddingTop: =10
+        Size: =10.5
+        Text: ="Internal_email"
+        Visible: =isEditShowPopup
+        Width: =440
+        X: =608
+        Y: =513
+        ZIndex: =6
+
+    inputEditInternalEmail_1 As text:
+        BorderColor: =RGBA(191, 191, 192, 1)
+        BorderThickness: =1
+        Default: =If(!IsBlank(empSelect.internal_email), empSelect.internal_email)
+        FocusedBorderThickness: =2
+        Font: =Font.Arial
+        Height: =49
+        HoverBorderColor: =RGBA(191, 191, 192, 1)
+        HoverFill: =RGBA(0, 0, 0, 0)
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Size: =10.5
+        Visible: =isEditShowPopup
+        Width: =448
+        X: =608
+        Y: =557
+        ZIndex: =7
+
+    LabeError_5 As label:
+        Align: =Align.Center
+        Font: =Font.Arial
+        Text: ="Empty data."
+        Visible: =IsEmpty(First(colEmployees).listItem)
+        Width: =FromListEmployee_3.Width
+        X: =Hr_8.X
+        Y: =Hr_8.Y + 2
+        ZIndex: =12
+
+    Header_2 As Header:
+        ZIndex: =23
+
+    MenuItemsSideBar_4 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_4.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_4.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_4.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_4.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =24
+
+    MenuItemsSideBar_Small_10 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_10.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_10.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_10.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_10.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_10.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_10.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_10.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_10.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_10.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_10.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_10.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_10.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =25
+
+    Rectangle4_5 As rectangle:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Fill: =RGBA(0, 0, 0, 0.55)
+        Height: =App.Height
+        OnSelect: =App.Width
+        Visible: =isEditShowPopup
+        Width: =App.Width
+        ZIndex: =26
+
+    Container1_1 As groupContainer:
+        DropShadow: =DropShadow.None
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =Canvas5_3.Height + 70
+        Visible: =isEditShowPopup
+        Width: =If(App.Width > 800, 820, Parent.Width - 20)
+        X: =If(App.Width > 800, App.Width * 0.5 - Self.Width*0.5, 10)
+        Y: =70
+        ZIndex: =27
+
+        CancelButtonEdit_3 As button:
+            BorderStyle: =BorderStyle.None
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            HoverBorderColor: =Self.Fill
+            HoverFill: =globalVariables.button.redButtonHoverFill
+            OnSelect: |-
+                =Set(isEditShowPopup, false);
+                Set(isCheckFormatNumber, false);
+                Set(isCheckFormatEmail, false);
+                Set(isCheckFormatEmailInternal, false);
+                Reset(EmployeeEditinternalEmail_3);
+                Reset(EmployeeEditPhoneNumber_Input_3);
+                Reset(EmployeeEditEmail_Input_4);
+                Reset(EmployeeEditName_Input_4);
+                Clear(ProcessRoleByEmployeeResult);
+                UpdateContext({isResetCmb: true});
+                UpdateContext({isResetCmb: false});
+                Clear(ListItemToRemove)
+            PressedBorderColor: =RGBA(214, 27, 27, 1)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Cancel"
+            Visible: =isEditShowPopup
+            Width: =120
+            X: =SaveButtonEdit_3.X - 10 - Self.Width
+            Y: =SaveButtonEdit_3.Y
+            ZIndex: =48
+
+        SaveButtonEdit_3 As button:
+            BorderStyle: =BorderStyle.None
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(17, 79, 144, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            HoverBorderColor: =ColorFade(Self.Fill, 20%)
+            HoverFill: =globalVariables.button.blueButtonHoverFill
+            OnSelect: |
+                =Set(isSubmited,true);
+                If(CountRows(ProcessRoleByEmployeeResult) > 1, ClearCollect(ProcessRoleByEmployeeResult, Filter(ProcessRoleByEmployeeResult, !(IsBlank(role) && IsBlank(company) && IsBlank(division)))));
+                UpdateContext({ShowNotification: false});
+                If(
+                    !rqEmail_3.Visible && !IsBlank(EmployeeEditName_Input_4.Text) && !IsBlank(EmployeeEditEmail_Input_4.Text) && !IsBlank(EmployeeEditinternalEmail_3.Text) && !isCheckFormatEmail && !isCheckFormatEmailInternal && !isCheckFormatNumber && !(!isUpdate && EmployeeEditinternalEmail_3.Text in internalEmail) && CountRows(Filter(ProcessRoleByEmployeeResult, !IsBlank(role) && !IsBlank(company) && !IsBlank(division))) > 0 && CountRows(Filter(ProcessRoleByEmployeeResult, IsBlank(role) || IsBlank(company) || IsBlank(division))) = 0,
+                // Validated
+                    Set(isLoading,true);
+                    Concurrent(
+                        ClearCollect(listUserRoleInsert,Filter(ProcessRoleByEmployeeResult,id = "")),
+                        ClearCollect(listUserRoleUpdate,Filter(ProcessRoleByEmployeeResult,id <> "")),
+                        ClearCollect(
+                            listUserRoleDelete,
+                            ListItemToRemove
+                        ),
+                //Edit Employee's Process
+                        ClearCollect(
+                            listUserProcessInsert,
+                            Filter(
+                                DataProcess1,
+                                Id = ""
+                            )
+                        ),
+                        ClearCollect(
+                            ListProcessUserRemove,
+                            Filter(
+                                ListProcessUserItemRemove,
+                                !IsBlank(Id)
+                            )
+                        ),
+                //Edit employee's GRoup
+                        ClearCollect(
+                            listUserGroupInsert,
+                            Filter(
+                                DataGroups1,
+                                Id = ""
+                            )
+                        ),
+                        ClearCollect(
+                            ListGroupUserRemove,
+                            Filter(
+                                ListGroupUserItemRemove,
+                                !IsBlank(Id)
+                            )
+                        ),
+                //EDIT employee' Api
+                        ClearCollect(
+                            listApiInsert,
+                            Filter(
+                                DataAPi,
+                                IsBlank(id)
+                            )
+                        ),
+                        ClearCollect(
+                            ListGroupApiRemove,
+                            Filter(
+                                ListAPiItemRemove,
+                                !IsBlank(id)
+                            )
+                        )    
+                    );
+                    Set(
+                            employeeCreated,
+                            {
+                                name: Text(EmployeeEditName_Input_4.Text),
+                                email: Text(EmployeeEditEmail_Input_4.Text),
+                                supervisor: Text(EmployeeEditPhoneNumber_Input_3.Text),
+                                internal_email: Text(EmployeeEditinternalEmail_3.Text),
+                                status: ComboBoxProcess_14.Selected.value,
+                                listApiInsert: listApiInsert,
+                                listApiDelete: ListGroupApiRemove
+                            }
+                        );
+                    If(
+                        IsBlank(empSelect.id),
+                        Set(
+                            resultEmployeeCreate,
+                            'TVS->CreateAndUpdateEmployee-V2'.Run(
+                                JSON(
+                                    employeeCreated,
+                                    JSONFormat.IndentFour
+                                ),
+                                0,
+                                If(
+                                    !IsBlank(currenUserV2.id),
+                                    currenUserV2.id,
+                                    ""
+                                ),
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                JSON(
+                                    listUserRoleInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserRoleUpdate,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserRoleDelete,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserProcessInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    ListProcessUserRemove,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserGroupInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    ListGroupUserRemove,
+                                    JSONFormat.IndentFour
+                                ),
+                                envDEV, envTEST, envUAT1, envUAT2,emailFromConfix
+                            ).result
+                        );
+                        If(
+                            resultEmployeeCreate = "true",
+                            Set(
+                                NoticationText,
+                                "Created successfully"
+                            );
+                            UpdateContext({ShowNotification: true});
+                            Set(
+                                IsError,
+                                false
+                            ),
+                            Set(
+                                NoticationText,
+                                "Creation failed"
+                            );
+                            UpdateContext({ShowNotification: true}),
+                            Set(
+                                IsError,
+                                true
+                            )
+                        ),
+                        Set(
+                            resultEmployeeUpdate,
+                            'TVS->CreateAndUpdateEmployee-V2'.Run(
+                                JSON(
+                                    employeeCreated,
+                                    JSONFormat.IndentFour
+                                ),
+                                empSelect.id,
+                                If(
+                                    !IsBlank(currenUserV2.id),
+                                    currenUserV2.id,
+                                    ""
+                                ),
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                JSON(
+                                    listUserRoleInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserRoleUpdate,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserRoleDelete,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserProcessInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    ListProcessUserRemove,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    listUserGroupInsert,
+                                    JSONFormat.IndentFour
+                                ),
+                                JSON(
+                                    ListGroupUserRemove,
+                                    JSONFormat.IndentFour
+                                ),
+                                envDEV, envTEST, envUAT1, envUAT2,emailFromConfix
+                            ).result
+                        );
+                        If(
+                            resultEmployeeUpdate = "true",
+                            Set(
+                                NoticationText,
+                                "Updated successfully"
+                            );
+                            UpdateContext({ShowNotification: true});
+                            Set(
+                                IsError,
+                                false
+                            ),
+                            Set(
+                                NoticationText,
+                                "Updated failed"
+                            );
+                            UpdateContext({ShowNotification: true});
+                            Set(
+                                IsError,
+                                true
+                            )
+                        );
+                    );
+                    Set(
+                        isLoading,
+                        false
+                    );
+                    Set(
+                        isEditShowPopup,
+                        false
+                    );
+                    // Set current user
+                Concurrent(
+                    ClearCollect(
+                        colEmployees,
+                        'TVS->GetAllEmployee-V1'.Run(
+                            PageSizeNumberEmployee,
+                            currentPageIndexEmployee,
+                            If(
+                                IsBlank(Search_Input_2.Text),
+                                "",
+                                Search_Input_2.Text
+                            ),
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            envDEV,envTEST, envUAT1, envUAT2
+                        )
+                    ),
+                    ClearCollect(
+                        currentUserV2Res,
+                        'TVS->GetCurrentUser-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            User().Email,
+                            envDEV,envTEST, envUAT1, envUAT2
+                        )
+                    ),
+                    ClearCollect(
+                        internalEmail,
+                        'TVS->getAllinternalEmail-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            envDEV, envTEST, envUAT1, envUAT2
+                        )
+                    )
+                );
+                Clear(permissionLst);
+                ForAll(
+                    currentUserV2Res,
+                    Collect(
+                        permissionLst,
+                        {
+                            process_code: ThisRecord.process_code,
+                            role: Distinct(
+                                Split(
+                                    ThisRecord.role,
+                                    "#"
+                                ),
+                                Value
+                            ),
+                            company: Distinct(
+                                Split(
+                                    ThisRecord.company,
+                                    "#"
+                                ),
+                                Value
+                            ),
+                            division: Distinct(
+                                Split(
+                                    ThisRecord.division,
+                                    "#"
+                                ),
+                                Value
+                            ),
+                            action: Distinct(
+                                Split(
+                                    ThisRecord.action,
+                                    "#"
+                                ),
+                                Value
+                            ),
+                            name_team: Distinct(
+                                Split(
+                                    ThisRecord.name_team,
+                                    "#"
+                                ),
+                                Value
+                            )
+                        }
+                    )
+                );
+                Set(
+                    currenUserV2,
+                    {
+                        id: First(currentUserV2Res).id,
+                        name: First(currentUserV2Res).name,
+                        email: First(currentUserV2Res).email,
+                        internal_email: First(currentUserV2Res).internal_email,
+                        phone_number: First(currentUserV2Res).phone_number,
+                        permissionList: permissionLst
+                    }
+                );
+                //Clear(EmpoloyeeProcessPermission);
+                Reset(EmployeeEditinternalEmail_3);
+                Reset(EmployeeEditPhoneNumber_Input_3);
+                Reset(EmployeeEditEmail_Input_4);
+                Reset(EmployeeEditName_Input_4);
+                UpdateContext({isResetCmb: true});
+                UpdateContext({isResetCmb: false});
+                Clear(ListItemToRemove);
+                Clear(ListAPiItemRemove);    
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Save"
+            Visible: =isEditShowPopup
+            Width: =120
+            X: =DataCard5_3.X + DataCard5_3.Width - Self.Width - 16
+            Y: =Canvas5_3.Y + Canvas5_3.Height + 20
+            ZIndex: =49
+
+        Canvas5_3 As fluidGrid.fluidGridWithBlankCard:
+            BorderThickness: =0
+            Height: =Min(App.Height - 100 - 70, Max(Gallery10_5.Y + Gallery10_5.Height, Gallery10_4.Y + Gallery10_4.Height) + 10)
+            Width: =Parent.Width
+            ZIndex: =50
+
+            DataCard5_3 As dataCard:
+                BorderColor: =RGBA(0, 0, 0, 1)
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =0
+                DisplayMode: =DisplayMode.Edit
+                Fill: =RGBA(0, 0, 0, 0)
+                Height: =Combobox_QT_6.Y + Combobox_QT_6.Height + 20
+                Width: =Parent.Width
+                X: =0
+                Y: =0
+                ZIndex: =1
+
+                EmployeeEditWhiteBackground_4 As htmlViewer:
+                    Color: =RGBA(56, 96, 178, 1)
+                    DisabledFill: =RGBA(166, 166, 166, 1)
+                    Fill: =
+                    Font: =Font.Arial
+                    Height: =
+                    HtmlText: |-
+                        ="<div style='width: 100%; height: "& Self.Height -20 &"px; background-color: white; border-radius: 8px;;
+                        '></div>"
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =16
+                    Visible: =isEditShowPopup
+                    Width: =Parent.Width
+                    ZIndex: =1
+
+                "GalleryPopup_3 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =Self.AllItemsCount * Self.TemplateHeight
+                    Items: =ProcessRoleByEmployeeResult
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 600, 120, 130)
+                    Visible: =isEditShowPopup
+                    Width: =Parent.Width - 10
+                    Y: =ComboBoxProcess_14.Y + ComboBoxProcess_14.Height + 25
+                    ZIndex: =4
+
+                    Container1 As groupContainer.manualLayoutContainer:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(244, 244, 245, 1)
+                        Height: =GalleryPopup_3.TemplateHeight - 10
+                        RadiusBottomLeft: =12
+                        RadiusBottomRight: =12
+                        RadiusTopLeft: =12
+                        RadiusTopRight: =12
+                        Width: =Parent.Width - 30
+                        X: =16
+                        ZIndex: =12
+
+                        iconDelete_3 As htmlViewer:
+                            Fill: =
+                            Font: =Font.Arial
+                            Height: =Combobox_Process_12.Height
+                            HtmlText: |-
+                                ="<div style=""display: flex; align-items: center;cursor: pointer; height:"&Self.Height - 2&"px; justify-content: center;""><svg xmlns=""http://www.w3.org/2000/svg"" width=""16"" height=""18"" viewBox=""0 0 16 18"" fill=""none"">
+                                  <path d=""M3 18C2.45 18 1.979 17.804 1.587 17.412C1.195 17.02 0.999333 16.5493 1 16V3H0V1H5V0H11V1H16V3H15V16C15 16.55 14.804 17.021 14.412 17.413C14.02 17.805 13.5493 18.0007 13 18H3ZM13 3H3V16H13V3ZM5 14H7V5H5V14ZM9 14H11V5H9V14Z"" fill=""#D61B1B""/>
+                                </svg></div>"
+                            OnSelect: |
+                                =If(GalleryPopup_3.AllItemsCount > 1,
+                                RemoveIf(ProcessRoleByEmployeeResult, mark1 = GalleryPopup_3.Selected.mark1);
+                                If(!isCreate && isUpdate,Collect(ListItemToRemove, ThisItem)))
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Tooltip: ="Delete"
+                            Visible: |
+                                =//!IsEmpty(First(listUserInApi).listItem)\
+                                //If(isCreate,true, If(ThisItem.id = First(ProcessRoleByEmployeeResult).id, false, true))
+                                GalleryPopup_3.AllItemsCount > 1
+                            Width: =38
+                            X: =Parent.X + Parent.Width - Self.Width - If(App.Width > 800, 16, 12)
+                            Y: =Combobox_Process_12.Y
+                            ZIndex: =12
+
+                        Group19 As group:
+                            Height: =5
+                            Width: =5
+                            X: =60
+                            Y: =60
+                            ZIndex: =14
+
+                            LabelCompany_2 As label:
+                                BorderColor: =RGBA(89, 0, 0, 1)
+                                Color: =RGBA(82, 82, 82, 1)
+                                Font: =Font.Arial
+                                Height: =22
+                                PaddingLeft: =0
+                                PaddingTop: =10
+                                Size: =10.5
+                                Text: ="Company"
+                                Visible: =isEditShowPopup
+                                Width: =(Container1.Width - If(App.Width > 800, 36, 8) - iconDelete_3.Width) / 3
+                                X: =If(App.Width > 600, 16, 5)
+                                Y: =5
+                                ZIndex: =1
+
+                            Combobox_Company_2 As text:
+                                BorderColor: =If(If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxCompany_2.Selected.id)), IsBlank(ComboBoxCompany_2.Selected.id) && !(IsBlank(ComboBoxDivison_2.Selected.id) && IsBlank(ComboBoxProcess_15.Selected.id))), RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                                BorderThickness: =1
+                                Default: =
+                                DisabledBorderColor: =Self.BorderColor
+                                DisplayMode: =
+                                FocusedBorderThickness: =1
+                                Font: =Font.Arial
+                                Height: =42
+                                HoverBorderColor: =Self.BorderColor
+                                HoverFill: =
+                                PaddingRight: =5.27
+                                PaddingTop: =5.27
+                                PressedBorderColor: =Self.BorderColor
+                                PressedFill: =RGBA(244, 244, 244, 1)
+                                RadiusBottomLeft: =8
+                                RadiusBottomRight: =8
+                                RadiusTopLeft: =8
+                                RadiusTopRight: =8
+                                Size: =10.5
+                                Width: =LabelCompany_2.Width
+                                X: =If(App.Width > 600, 16, 5)
+                                Y: =LabelCompany_2.Y + LabelCompany_2.Height + 10
+                                ZIndex: =2
+
+                            ComboBoxCompany_2 As combobox:
+                                BorderThickness: =0
+                                ChevronBackground: =
+                                ChevronFill: =RGBA(82, 82, 82, 1)
+                                ChevronHoverBackground: =
+                                ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                                DefaultSelectedItems: =LookUp(listCompany, id = ThisItem.company)
+                                DisplayFields: =["name"]
+                                FocusedBorderThickness: =0
+                                Font: =Font.Arial
+                                Height: =Combobox_Company_2.Height - 6
+                                HoverBorderColor: =
+                                HoverFill: =RGBA(230, 239, 250, 0.8)
+                                InputTextPlaceholder: ="Input Process"
+                                IsSearchable: =false
+                                Items: =Filter(listCompany, Not(id in ShowColumns(Filter(ProcessRoleByEmployeeResult, division = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).division && role = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).role),company )))
+                                NoSelectionText: ="Select"
+                                OnChange: |-
+                                    =Patch(ProcessRoleByEmployeeResult, LookUp(ProcessRoleByEmployeeResult, mark1 = selectedItem), {company: Self.Selected.id, division: ""});
+                                    //ClearCollect(departmentInCompanyt, 'TVS->GetAllDepartmentInCompany-Test'.Run(ComboBoxCompany.Selected.id))
+                                    //Set(isResetCmb, false);
+                                OnSelect: =Set(selectedItem, GalleryPopup_3.Selected.mark1);
+                                PressedBorderColor: =RGBA(0, 0, 0, 1)
+                                PressedColor: =RGBA(82, 82, 82, 1)
+                                PressedFill: =
+                                Reset: =isResetCmb
+                                SearchFields: =["id"]
+                                SearchItems: =[]
+                                SelectionFill: =RGBA(186, 202, 226, 1)
+                                SelectionTagFill: =
+                                SelectMultiple: =false
+                                Size: =10.5
+                                Width: =Combobox_Company_2.Width - 6
+                                X: =Combobox_Company_2.X + 3
+                                Y: |
+                                    =Combobox_Company_2.Y + 3
+                                ZIndex: =3
+
+                            rqCompany As label:
+                                Color: =RGBA(255, 0, 0, 1)
+                                Font: =Font.Arial
+                                Height: =If(App.Width > 600, 15, 30)
+                                PaddingLeft: =0
+                                Size: =10
+                                Text: =TextRequired
+                                Visible: =If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxCompany_2.Selected.id)), IsBlank(ComboBoxCompany_2.Selected.id) && !(IsBlank(ComboBoxDivison_2.Selected.id) && IsBlank(ComboBoxProcess_15.Selected.id)))
+                                Width: =Combobox_Company_2.Width
+                                X: =Combobox_Company_2.X
+                                Y: =Combobox_Company_2.Y + Combobox_Company_2.Height + 3
+                                ZIndex: =13
+
+                        Group18 As group:
+                            Height: =5
+                            Width: =5
+                            X: =60
+                            Y: =60
+                            ZIndex: =16
+
+                            LabelDivision_2 As label:
+                                BorderColor: =RGBA(89, 0, 0, 1)
+                                Color: =RGBA(82, 82, 82, 1)
+                                Font: =Font.Arial
+                                Height: =22
+                                PaddingLeft: =0
+                                PaddingTop: =10
+                                Size: =10.5
+                                Text: ="Divison"
+                                Visible: =isEditShowPopup
+                                Width: =(Container1.Width - If(App.Width > 800, 36, 8) - iconDelete_3.Width) / 3
+                                X: =LabelCompany_2.X + LabelCompany_2.Width + If(App.Width > 800, 10, 5)
+                                Y: =LabelCompany_2.Y
+                                ZIndex: =5
+
+                            Combobox_Divison_2 As text:
+                                BorderColor: =If(If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxDivison_2.Selected.id)), IsBlank(ComboBoxDivison_2.Selected.id) && !(IsBlank(ComboBoxCompany_2.Selected.id) && IsBlank(ComboBoxProcess_15.Selected.id))), RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                                BorderThickness: =1
+                                Default: =
+                                DisabledBorderColor: =Self.BorderColor
+                                DisplayMode: =
+                                FocusedBorderThickness: =1
+                                Font: =Font.Arial
+                                Height: =42
+                                HoverBorderColor: =Self.BorderColor
+                                HoverFill: =
+                                PaddingRight: =5.27
+                                PaddingTop: =5.27
+                                PressedBorderColor: =Self.BorderColor
+                                RadiusBottomLeft: =8
+                                RadiusBottomRight: =8
+                                RadiusTopLeft: =8
+                                RadiusTopRight: =8
+                                Size: =10.5
+                                Width: =LabelDivision_2.Width
+                                X: =LabelDivision_2.X
+                                Y: =LabelDivision_2.Y + LabelDivision_2.Height + 10
+                                ZIndex: =6
+
+                            ComboBoxDivison_2 As combobox:
+                                BorderThickness: =0
+                                ChevronBackground: =
+                                ChevronFill: =RGBA(82, 82, 82, 1)
+                                ChevronHoverBackground: =
+                                ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                                DefaultSelectedItems: =LookUp(listDepartment, id = ThisItem.division)
+                                DisplayFields: =["name"]
+                                FocusedBorderThickness: =0
+                                Font: =Font.Arial
+                                Height: =Combobox_Divison_2.Height - 6
+                                HoverBorderColor: =
+                                HoverFill: =RGBA(230, 239, 250, 0.8)
+                                IsSearchable: =false
+                                Items: |-
+                                    =Filter(Filter(listDepartment, company_permission_id = ComboBoxCompany_2.Selected.id), Not(id in ShowColumns(Filter(ProcessRoleByEmployeeResult, company = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).company &&
+                                    role = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).role), division )))
+                                NoSelectionText: ="Select"
+                                OnChange: |-
+                                    =Patch(ProcessRoleByEmployeeResult, LookUp(ProcessRoleByEmployeeResult, mark1 = selectedItem), {division: Self.Selected.id})
+                                OnSelect: =Set(selectedItem, GalleryPopup_3.Selected.mark1);
+                                PressedBorderColor: =
+                                PressedColor: =RGBA(82, 82, 82, 1)
+                                PressedFill: =
+                                Reset: =//isResetCbDivision
+                                SearchFields: =["code"]
+                                SearchItems: =[]
+                                SelectionFill: =RGBA(186, 202, 226, 1)
+                                SelectionTagFill: =
+                                SelectMultiple: =false
+                                Size: =10.5
+                                Width: =Combobox_Divison_2.Width - 6
+                                X: =Combobox_Divison_2.X + 3
+                                Y: =Combobox_Divison_2.Y + 3
+                                ZIndex: =7
+
+                            rqDivison As label:
+                                Color: =RGBA(255, 0, 0, 1)
+                                Font: =Font.Arial
+                                Height: =If(App.Width > 600, 15, 30)
+                                PaddingLeft: =0
+                                Size: =10
+                                Text: =TextRequired
+                                Visible: =If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxDivison_2.Selected.id)), IsBlank(ComboBoxDivison_2.Selected.id) && !(IsBlank(ComboBoxCompany_2.Selected.id) && IsBlank(ComboBoxProcess_15.Selected.id)))
+                                Width: =Combobox_Company_2.Width
+                                X: =Combobox_Divison_2.X
+                                Y: =Combobox_Divison_2.Y + Combobox_Divison_2.Height + 3
+                                ZIndex: =14
+
+                        Group20 As group:
+                            Height: =5
+                            Width: =5
+                            X: =60
+                            Y: =60
+                            ZIndex: =16
+
+                            LabelProcess_6 As label:
+                                BorderColor: =RGBA(89, 0, 0, 1)
+                                Color: =RGBA(82, 82, 82, 1)
+                                Font: =Font.Arial
+                                Height: =22
+                                PaddingLeft: =0
+                                PaddingTop: =10
+                                Size: =10.5
+                                Text: ="Role"
+                                Visible: =isEditShowPopup
+                                Width: =(Container1.Width - If(App.Width > 800, 36, 8) - iconDelete_3.Width) / 3
+                                X: =LabelDivision_2.X + LabelDivision_2.Width + If(App.Width > 800, 10, 5)
+                                Y: =LabelCompany_2.Y
+                                ZIndex: =9
+
+                            Combobox_Process_12 As text:
+                                BorderColor: =If(If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxProcess_15.Selected.id)), IsBlank(ComboBoxProcess_15.Selected.id) && !(IsBlank(ComboBoxDivison_2.Selected.id) && IsBlank(ComboBoxCompany_2.Selected.id))), RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                                BorderThickness: =1
+                                Default: =
+                                DisabledBorderColor: =Self.BorderColor
+                                DisplayMode: =
+                                FocusedBorderThickness: =1
+                                Font: =Font.Arial
+                                Height: =42
+                                HoverBorderColor: =Self.BorderColor
+                                HoverFill: =
+                                PaddingRight: =5.27
+                                PaddingTop: =5.27
+                                PressedBorderColor: =Self.BorderColor
+                                RadiusBottomLeft: =8
+                                RadiusBottomRight: =8
+                                RadiusTopLeft: =8
+                                RadiusTopRight: =8
+                                Size: =10.5
+                                Width: =LabelProcess_6.Width
+                                X: =LabelProcess_6.X
+                                Y: =LabelProcess_6.Y + LabelProcess_6.Height + 10
+                                ZIndex: =10
+
+                            ComboBoxProcess_15 As combobox:
+                                BorderThickness: =0
+                                ChevronBackground: =
+                                ChevronFill: =RGBA(82, 82, 82, 1)
+                                ChevronHoverBackground: =
+                                ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                                DefaultSelectedItems: =LookUp(RoleNoPage, id = ThisItem.role) 
+                                DisplayFields: =["name"]
+                                FocusedBorderThickness: =0
+                                Font: =Font.Arial
+                                Height: =Combobox_Process_12.Height - 6
+                                HoverBorderColor: =
+                                HoverFill: =RGBA(230, 239, 250, 0.8)
+                                IsSearchable: =false
+                                Items: |+
+                                    =Filter(RoleNoPageCheck, Not(id in ShowColumns(Filter(ProcessRoleByEmployeeResult, company = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).company &&
+                                    division = LookUp(ProcessRoleByEmployeeResult, mark1 = ThisItem.mark1).division),role )))
+                                    
+                                NoSelectionText: ="Select"
+                                OnChange: |-
+                                    =Patch(ProcessRoleByEmployeeResult, LookUp(ProcessRoleByEmployeeResult, mark1 = selectedItem), {role: Self.Selected.id})
+                                OnSelect: =Set(selectedItem, GalleryPopup_3.Selected.mark1);
+                                PressedBorderColor: =
+                                PressedColor: =RGBA(82, 82, 82, 1)
+                                PressedFill: =
+                                Reset: =isResetCmb
+                                SearchFields: =["name"]
+                                SearchItems: =[]
+                                SelectionFill: =RGBA(186, 202, 226, 1)
+                                SelectionTagFill: =
+                                SelectMultiple: =false
+                                Size: =10.5
+                                Width: =Combobox_Process_12.Width - 6
+                                X: =Combobox_Process_12.X + 3
+                                Y: =Combobox_Process_12.Y + 3
+                                ZIndex: =11
+
+                            rqRole As label:
+                                Color: =RGBA(255, 0, 0, 1)
+                                Font: =Font.Arial
+                                Height: =If(App.Width > 600, 15, 30)
+                                PaddingLeft: =0
+                                Size: =10
+                                Text: =TextRequired
+                                Visible: =If(First(ProcessRoleByEmployeeResult).mark1 = ThisItem.mark1, (isSubmited && IsBlank(ComboBoxProcess_15.Selected.id)), IsBlank(ComboBoxProcess_15.Selected.id) && !(IsBlank(ComboBoxDivison_2.Selected.id) && IsBlank(ComboBoxCompany_2.Selected.id)))
+                                Width: =Combobox_Company_2.Width
+                                X: =Combobox_Process_12.X
+                                Y: =Combobox_Process_12.Y + Combobox_Process_12.Height + 3
+                                ZIndex: =15
+
+                LabelSattus_6 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Color: =RGBA(82, 82, 82, 1)
+                    Font: =Font.Arial
+                    PaddingLeft: =0
+                    PaddingTop: =10
+                    Size: =10.5
+                    Text: ="Status"
+                    Visible: =isEditShowPopup
+                    Width: =(Parent.Width - 16 - 26 - 20) /2
+                    X: =16
+                    Y: =If(App.Width > 800, EmployeeEditinternalEmail_3.Y + EmployeeEditinternalEmail_3.Height + 5, EmployeeEditEmail_Input_4.Y + EmployeeEditEmail_Input_4.Height + 5)
+                    ZIndex: =11
+
+                Group1_4 As group:
+                    Height: =5
+                    Width: =5
+                    X: =40
+                    Y: =40
+                    ZIndex: =18
+
+                    Combobox_Process_11 As text:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =1
+                        Default: =
+                        DisabledBorderColor: =Self.BorderColor
+                        DisplayMode: =
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        HoverColor: =
+                        HoverFill: =RGBA(230, 239, 250, 0.8)
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedBorderColor: =Self.BorderColor
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =10.5
+                        Width: =LabelSattus_6.Width
+                        X: =16
+                        Y: =LabelSattus_6.Y + LabelSattus_6.Height
+                        ZIndex: =13
+
+                    ComboBoxProcess_14 As combobox:
+                        BorderThickness: =0
+                        ChevronBackground: =
+                        ChevronFill: =RGBA(82, 82, 82, 1)
+                        ChevronHoverBackground: =
+                        ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                        Default: |-
+                            ={title: "Active", value: "ACTIVE"}
+                        DefaultSelectedItems: |
+                            =If(!IsBlank(empSelect), {title: Proper(empSelect.status), value: empSelect.status}, {title: "Active", value: "ACTIVE"})
+                        DisplayFields: =["title"]
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =
+                        Font: =Font.Arial
+                        Height: =Combobox_Process_11.Height - 6
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverFill: =RGBA(230, 239, 250, 0.8)
+                        InputTextPlaceholder: =""
+                        IsSearchable: =false
+                        Items: |-
+                            =[{title:"Active", value: "ACTIVE"}, {title:"InActive", value: "INACTIVE"}]
+                        OnSelect: =false;
+                        PressedBorderColor: =RGBA(0, 0, 0, 0)
+                        PressedColor: =
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        Reset: =isResetCmb
+                        SearchFields: =["title"]
+                        SearchItems: =[]
+                        SelectionColor: =RGBA(0, 0, 0, 1)
+                        SelectionFill: =RGBA(186, 202, 226, 1)
+                        SelectionTagColor: =RGBA(0, 0, 0, 1)
+                        SelectionTagFill: =
+                        SelectMultiple: =false
+                        Size: =10.5
+                        Width: =Combobox_Process_11.Width - 6
+                        X: =Combobox_Process_11.X + 3
+                        Y: =Combobox_Process_11.Y + 3
+                        ZIndex: =14
+
+                BtnAddPer As group:
+                    Height: =5
+                    Width: =5
+                    X: =40
+                    Y: =40
+                    ZIndex: =32
+
+                    IconAddPer As htmlViewer:
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style=""height:"& Self.Height - 2 &"px; display: flex; align-items: center; justify-content: center;""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                              <path d=""M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"" fill=""#114F90""/>
+                            </svg></div>"
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingTop: =0
+                        Width: =40
+                        X: =ButtonAdd.X
+                        Y: =ButtonAdd.Y
+                        ZIndex: =30
+
+                    ButtonAdd As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(17, 79, 144, 1)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        HoverColor: =Self.Color
+                        HoverFill: =
+                        OnSelect: |-
+                            =Collect(ProcessRoleByEmployeeResult, {mark: Now(), id: "", role: "", company: "", division: "",mark1: GUID()});
+                        PressedColor: =Self.Color
+                        PressedFill: =
+                        Size: =10.5
+                        Text: ="Add"
+                        Width: =100
+                        X: =5
+                        Y: =GalleryPopup_3.Y + GalleryPopup_3.Height
+                        ZIndex: =31
+
+                Group2 As group:
+                    Height: =5
+                    Width: =5
+                    X: =60
+                    Y: =60
+                    ZIndex: =33
+
+                    EmployeeEditName_Input_4 As text:
+                        BorderColor: =If(IsBlank(EmployeeEditName_Input_4.Text) && isSubmited, RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                        BorderThickness: =1
+                        Default: =If(!IsBlank(empSelect), empSelect.name)
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        HoverBorderColor: =If(IsBlank(EmployeeEditName_Input_4.Text) && isSubmited, RGBA(214, 27, 27, 1), RGBA(0, 18, 107, 1))
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =If(App.Width > 600, 10.5, 12)
+                        Visible: =isEditShowPopup 
+                        Width: =EmployeeEditWhiteBackground_4.Width - 40
+                        X: =16
+                        Y: =EmployeeEditName_Label_4.Y + EmployeeEditName_Label_4.Height
+                        ZIndex: =10
+
+                    rqName_3 As label:
+                        Color: =RGBA(255, 0, 0, 1)
+                        Font: =Font.Arial
+                        Height: =15
+                        PaddingLeft: =0
+                        Size: =10
+                        Text: =TextRequired
+                        Visible: =isSubmited && Len(EmployeeEditName_Input_4.Text) <= 0
+                        Width: =EmployeeEditName_Input_4.Width
+                        X: =EmployeeEditName_Input_4.X
+                        Y: =EmployeeEditName_Input_4.Y + EmployeeEditName_Input_4.Height + 2
+                        ZIndex: =16
+
+                    EmployeeEditName_Label_4 As htmlViewer:
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        HtmlText: ="Name <font color=red>*</font>"
+                        PaddingLeft: =16
+                        Size: =10.5
+                        Width: =EmployeeEditWhiteBackground_4.Width * 0.5 - 10
+                        Y: =EmployeeEditTitle_4.Y + EmployeeEditTitle_4.Height + 20
+                        ZIndex: =32
+
+                Rectangle6 As rectangle:
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =20
+                    X: =Gallery10_5.X
+                    Y: =Gallery10_5.Y + Gallery10_5.Height
+                    ZIndex: =36
+
+                Company_7 As group:
+                    Height: =5
+                    Width: =5
+                    X: =27
+                    Y: =28
+                    ZIndex: =36
+
+                    LabelQt_4 As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =22
+                        PaddingLeft: =0
+                        PaddingTop: =10
+                        Size: =10.5
+                        Text: ="Process"
+                        Visible: =isEditShowPopup
+                        Width: =(Parent.Width - 16 - 16 - 20) /2
+                        X: =16
+                        Y: =ButtonAdd.Y + ButtonAdd.Height + 10
+                        ZIndex: =22
+
+                    Combobox_QT_4 As text:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =1
+                        Default: =
+                        DisabledBorderColor: =Self.BorderColor
+                        DisplayMode: =
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        Height: =42
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedBorderColor: =Self.BorderColor
+                        PressedFill: =RGBA(244, 244, 244, 1)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =10.5
+                        Width: =((Parent.Width - 16 - 16 - 20) / 2) - 5
+                        X: =16
+                        Y: =LabelQt_4.Y + LabelQt_4.Height + 5
+                        ZIndex: =23
+
+                    ComboBoxQt_4 As combobox:
+                        BorderThickness: =0
+                        ChevronBackground: =
+                        ChevronFill: =RGBA(82, 82, 82, 1)
+                        ChevronHoverBackground: =
+                        ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                        DefaultSelectedItems: =
+                        DisplayFields: =["Name"]
+                        FocusedBorderThickness: =0
+                        Font: =Font.Arial
+                        Height: =Combobox_QT_4.Height - 6
+                        HoverBorderColor: =
+                        HoverFill: =RGBA(230, 239, 250, 0.8)
+                        InputTextPlaceholder: ="Input Process"
+                        IsSearchable: =false
+                        Items: =Filter(ProcessManagement, Not(Code in ShowColumns(DataProcess1, Code)))
+                        OnChange: |+
+                            =If(!IsBlank(Self.Selected),
+                            If(CountIf(DataProcess1, Code = Self.Selected.Code) <= 0,
+                            Collect(DataProcess1,  {Id: "", Code: Self.Selected.Code, Name: Self.Selected.Name})
+                            ))
+                            
+                        PressedBorderColor: =RGBA(0, 0, 0, 1)
+                        PressedColor: =RGBA(82, 82, 82, 1)
+                        PressedFill: =
+                        Reset: =isResetCmb
+                        SearchFields: =["Name"]
+                        SearchItems: =[]
+                        SelectionFill: =RGBA(186, 202, 226, 1)
+                        SelectionTagFill: =
+                        SelectMultiple: =false
+                        Size: =10.5
+                        Width: =Combobox_QT_4.Width - 6
+                        X: =Combobox_QT_4.X + 3
+                        Y: |
+                            =Combobox_QT_4.Y + 3
+                        ZIndex: =24
+
+                Group5 As group:
+                    Height: =5
+                    Width: =5
+                    X: =40
+                    Y: =40
+                    ZIndex: =36
+
+                    EmployeeEditEmail_Input_4 As text:
+                        BorderColor: =If((IsBlank(EmployeeEditEmail_Input_4.Text) && isSubmited) || isCheckFormatEmail, RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                        BorderThickness: =1
+                        Default: =If(!IsBlank(empSelect), empSelect.email)
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        HoverBorderColor: =If((IsBlank(EmployeeEditEmail_Input_4.Text) && isSubmited) || isCheckFormatEmail, RGBA(214, 27, 27, 1), RGBA(0, 18, 107, 1))
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        OnChange: |+
+                            =Set(
+                                isCheckFormatEmail,
+                                false
+                            );
+                            If(Len(EmployeeEditEmail_Input_4.Text) > 0,
+                            If(
+                                !IsMatch(
+                                    EmployeeEditEmail_Input_4.Text,
+                                    "^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$"
+                                ),
+                                Set(
+                                    isCheckFormatEmail,
+                                    true
+                                ),
+                                Set(
+                                    isCheckFormatEmail,
+                                    false
+                                )
+                            )
+                            );
+                            
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =If(App.Width > 600, 10.5, 12)
+                        Visible: =isEditShowPopup
+                        Width: =If(App.Width > 800, (Parent.Width - 16 - 20 - 20) /2, EmployeeEditName_Input_4.Width)
+                        X: =EmployeeEditEmail_Label_4.X
+                        Y: =EmployeeEditEmail_Label_4.Y + EmployeeEditEmail_Label_4.Height
+                        ZIndex: =8
+
+                    rqEmailNor_3 As label:
+                        Color: =RGBA(255, 0, 0, 1)
+                        Font: =Font.Arial
+                        Height: =15
+                        PaddingLeft: =0
+                        Size: =10
+                        Text: =If(isCheckFormatEmail, TextRequiredEmail, TextRequired)
+                        Visible: =(isSubmited && Len(EmployeeEditEmail_Input_4.Text) <= 0) || isCheckFormatEmail
+                        Width: =EmployeeEditEmail_Input_4.Width
+                        X: =EmployeeEditEmail_Input_4.X
+                        Y: =EmployeeEditEmail_Input_4.Y + EmployeeEditEmail_Input_4.Height + 2
+                        ZIndex: =19
+
+                    EmployeeEditEmail_Label_4 As htmlViewer:
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        HtmlText: ="Email <font color=red>*</font>"
+                        PaddingLeft: =0
+                        Size: =10.5
+                        Width: =(Parent.Width - 16 - 16 - 20) /2
+                        X: =If(App.Width > 800, LabelInternalEmail_3.X + LabelInternalEmail_3.Width + 18, LabelInternalEmail_3.X)
+                        Y: =If(App.Width > 800, EmployeeEditName_Input_4.Y + EmployeeEditName_Input_4.Height + 15, EmployeeEditinternalEmail_3.Y + EmployeeEditinternalEmail_3.Height + 15)
+                        ZIndex: =34
+
+                Group6 As group:
+                    Height: =5
+                    Width: =5
+                    X: =40
+                    Y: =40
+                    ZIndex: =36
+
+                    EmployeeEditPhoneNumber_Input_3 As text:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =1
+                        Default: =If(!IsBlank(empSelect), empSelect.supervisor)
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        HoverBorderColor: =If((IsBlank(EmployeeEditPhoneNumber_Input_3.Text) && isSubmited) || isCheckFormatNumber, RGBA(214, 27, 27, 1), RGBA(0, 18, 107, 1))
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        OnChange: |
+                            =Set(isCheckFormatNumber,false);
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =If(App.Width > 600, 10.5, 12)
+                        Visible: =isEditShowPopup
+                        Width: =(Parent.Width - 16 - 20 - 20) /2
+                        X: =EmployeeEditPhoneNumber_Label_3.X
+                        Y: =EmployeeEditPhoneNumber_Label_3.Y + EmployeeEditPhoneNumber_Label_3.Height
+                        ZIndex: =9
+
+                    rqPhone_3 As label:
+                        Color: =RGBA(255, 0, 0, 1)
+                        Font: =Font.Arial
+                        Height: =15
+                        PaddingLeft: =0
+                        Size: =10
+                        Text: =If(isCheckFormatNumber, TextRequiredEmail, TextRequired)
+                        Visible: |-
+                            =//(isSubmited && Len(EmployeeEditPhoneNumber_Input_3.Text) <= 0) || isCheckFormatNumber
+                            isCheckFormatNumber
+                        Width: =EmployeeEditPhoneNumber_Input_3.Width
+                        X: =EmployeeEditPhoneNumber_Input_3.X
+                        Y: =EmployeeEditPhoneNumber_Input_3.Y + EmployeeEditPhoneNumber_Input_3.Height + 2
+                        ZIndex: =17
+
+                    EmployeeEditPhoneNumber_Label_3 As htmlViewer:
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        HtmlText: ="Supervisor <font color=red></font>"
+                        PaddingLeft: =0
+                        Size: =10.5
+                        Width: =(Parent.Width - 16 - 16 - 20) /2
+                        X: =LabelSattus_6.X + LabelSattus_6.Width + 18
+                        Y: =LabelSattus_6.Y + 10
+                        ZIndex: =35
+
+                Group4 As group:
+                    Height: =5
+                    Width: =5
+                    X: =100
+                    Y: =100
+                    ZIndex: =36
+
+                    EmployeeEditinternalEmail_3 As text:
+                        BorderColor: =If((IsBlank(EmployeeEditinternalEmail_3.Text) && isSubmited) || isCheckFormatEmailInternal, RGBA(214, 27, 27, 1), RGBA(191, 191, 192, 1))
+                        BorderThickness: =1
+                        Default: =If(!IsBlank(empSelect), empSelect.internal_email)
+                        FocusedBorderColor: =Self.HoverBorderColor
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        HoverBorderColor: =If((IsBlank(EmployeeEditinternalEmail_3.Text) && isSubmited) || isCheckFormatEmailInternal, RGBA(214, 27, 27, 1), RGBA(0, 18, 107, 1))
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        OnChange: |
+                            =Set(
+                                isCheckFormatEmailInternal,
+                                false
+                            );
+                            If(!isCreate, Set(isCreate, true));
+                            If(Len(EmployeeEditinternalEmail_3.Text) > 0,
+                            If(
+                                !IsMatch(
+                                    EmployeeEditinternalEmail_3.Text,
+                                    "^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$"
+                                ),
+                                Set(
+                                    isCheckFormatEmailInternal,
+                                    true
+                                ),
+                                Set(
+                                    isCheckFormatEmailInternal,
+                                    false
+                                )
+                            )
+                            );
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =If(App.Width > 600, 10.5, 12)
+                        Visible: =isEditShowPopup
+                        Width: =If(App.Width > 800, (Parent.Width - 16 - 26 - 20) /2, EmployeeEditName_Input_4.Width)
+                        X: =LabelInternalEmail_3.X
+                        Y: =LabelInternalEmail_3.Y + LabelInternalEmail_3.Height
+                        ZIndex: =15
+
+                    rqEmail_3 As label:
+                        Color: =RGBA(255, 0, 0, 1)
+                        Font: =Font.Arial
+                        Height: =15
+                        PaddingLeft: =0
+                        Size: =10
+                        Text: |-
+                            =If(
+                                EmployeeEditinternalEmail_3.Text in internalEmail && isCreate && (IsBlank(empSelect) || (!IsBlank(empSelect) && empSelect.internal_email <> EmployeeEditinternalEmail_3.Text)), TextExistsUsername,
+                                If(
+                                    isCheckFormatEmailInternal,
+                                    TextRequiredEmail,
+                                    TextRequired
+                                )
+                            )
+                        Visible: =(isSubmited && Len(EmployeeEditinternalEmail_3.Text) <= 0) || isCheckFormatEmailInternal || (EmployeeEditinternalEmail_3.Text in internalEmail && isCreate && (IsBlank(empSelect) || (!IsBlank(empSelect) && empSelect.internal_email <> EmployeeEditinternalEmail_3.Text)))
+                        Width: =EmployeeEditinternalEmail_3.Width
+                        X: =EmployeeEditinternalEmail_3.X
+                        Y: =EmployeeEditinternalEmail_3.Y + EmployeeEditinternalEmail_3.Height + 2
+                        ZIndex: =18
+
+                    LabelInternalEmail_3 As htmlViewer:
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        HtmlText: ="Username <font color=red>*</font>"
+                        PaddingLeft: =0
+                        Size: =10.5
+                        Width: =(Parent.Width - 16 - 26 - 20) /2
+                        X: =16
+                        Y: =EmployeeEditName_Input_4.Y + EmployeeEditName_Input_4.Height + 15
+                        ZIndex: =33
+
+                "Gallery10_4 As gallery.'BrowseLayout_Flexible_SocialFeed_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =Self.AllItemsCount * Self.TemplateHeight
+                    Items: =DataProcess1
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 800, 30, 50)
+                    Width: =Combobox_QT_4.Width
+                    X: =Combobox_QT_4.X
+                    Y: =Combobox_QT_4.Y + Combobox_QT_4.Height
+                    ZIndex: =37
+
+                    Label7_6 As label:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(77, 77, 77, 1)
+                        Font: =Font.Arial
+                        Height: =50
+                        OnSelect: =Select(Parent)
+                        Size: =10.5
+                        Text: =ThisItem.Name
+                        Width: =Gallery10_4.Width - HtmlText2_7.Width
+                        X: =HtmlText2_7.X + HtmlText2_7.Width
+                        ZIndex: =2
+
+                    HtmlText2_7 As htmlViewer:
+                        Font: =Font.Arial
+                        Height: =35
+                        HtmlText: |-
+                            ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""10"" height=""11"" viewBox=""0 0 10 11"" fill=""none"">
+                              <g clip-path=""url(#clip0_5576_58443)"">
+                                <path d=""M5 0.5C2.21429 0.5 0 2.71429 0 5.5C0 8.28571 2.21429 10.5 5 10.5C7.78571 10.5 10 8.28571 10 5.5C10 2.71429 7.78571 0.5 5 0.5ZM6.92857 8L5 6.07143L3.07143 8L2.5 7.42857L4.42857 5.5L2.5 3.57143L3.07143 3L5 4.92857L6.92857 3L7.5 3.57143L5.57143 5.5L7.5 7.42857L6.92857 8Z"" fill=""black""/>
+                              </g>
+                              <defs>
+                                <clipPath id=""clip0_5576_58443"">
+                                  <rect width=""10"" height=""10"" fill=""white"" transform=""translate(0 0.5)""/>
+                                </clipPath>
+                              </defs>
+                            </svg>"
+                        OnSelect: |-
+                            =Collect(ListProcessUserItemRemove, ThisItem);
+                            If(Gallery10_4.Selected.Code = ComboBoxQt_4.Selected.Code, Reset(ComboBoxQt_4));
+                            RemoveIf(DataProcess1, Code = Gallery10_4.Selected.Code);
+                        Width: =25
+                        ZIndex: =3
+
+                "Gallery10_5 As gallery.'BrowseLayout_Flexible_SocialFeed_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =Self.AllItemsCount * Self.TemplateHeight
+                    Items: =DataGroups1
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =30
+                    Width: =Combobox_QT_4.Width
+                    X: =Combobox_QT_5.X
+                    Y: =Combobox_QT_5.Y + Combobox_QT_5.Height
+                    ZIndex: =38
+
+                    Label7_8 As label:
+                        BorderColor: =RGBA(77, 77, 77, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        OnSelect: =Select(Parent)
+                        Size: =10.5
+                        Text: =ThisItem.Name
+                        Width: =330
+                        X: =HtmlText2_9.X + HtmlText2_9.Width
+                        ZIndex: =4
+
+                    HtmlText2_9 As htmlViewer:
+                        Font: =Font.Arial
+                        Height: =35
+                        HtmlText: |-
+                            ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""10"" height=""11"" viewBox=""0 0 10 11"" fill=""none"">
+                              <g clip-path=""url(#clip0_5576_58443)"">
+                                <path d=""M5 0.5C2.21429 0.5 0 2.71429 0 5.5C0 8.28571 2.21429 10.5 5 10.5C7.78571 10.5 10 8.28571 10 5.5C10 2.71429 7.78571 0.5 5 0.5ZM6.92857 8L5 6.07143L3.07143 8L2.5 7.42857L4.42857 5.5L2.5 3.57143L3.07143 3L5 4.92857L6.92857 3L7.5 3.57143L5.57143 5.5L7.5 7.42857L6.92857 8Z"" fill=""black""/>
+                              </g>
+                              <defs>
+                                <clipPath id=""clip0_5576_58443"">
+                                  <rect width=""10"" height=""10"" fill=""white"" transform=""translate(0 0.5)""/>
+                                </clipPath>
+                              </defs>
+                            </svg>"
+                        OnSelect: |-
+                            =Collect(ListGroupUserItemRemove, ThisItem);
+                            If(Gallery10_5.Selected.Code = ComboBoxQt_5.Selected.Code, Reset(ComboBoxQt_5));
+                            RemoveIf(DataGroups1, Code = Gallery10_5.Selected.Code);
+                        Width: =25
+                        ZIndex: =5
+
+                Company_9 As group:
+                    Height: =5
+                    Width: =5
+                    X: =24
+                    Y: =40
+                    ZIndex: =42
+
+                    LabelQt_6 As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Lighter
+                        Height: =22
+                        PaddingLeft: =0
+                        PaddingTop: =10
+                        Size: =10.5
+                        Text: ="Api"
+                        Visible: =isEditShowPopup
+                        Width: =(Parent.Width - 16 - 16 - 20) /2
+                        X: =Gallery10_4.X
+                        Y: =Gallery10_4.Y + Gallery10_4.Height + 10
+                        ZIndex: =39
+
+                    Combobox_QT_6 As text:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =1
+                        Default: =
+                        DisabledBorderColor: =Self.BorderColor
+                        DisplayMode: =
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        Height: =42
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedBorderColor: =Self.BorderColor
+                        PressedFill: =RGBA(244, 244, 244, 1)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =10.5
+                        Width: =((Parent.Width - 16 - 16 - 20) / 2) - 5
+                        X: =LabelQt_6.X
+                        Y: =LabelQt_6.Y + LabelQt_6.Height + 5
+                        ZIndex: =40
+
+                    ComboBoxQt_6 As combobox:
+                        BorderThickness: =0
+                        ChevronBackground: =
+                        ChevronFill: =RGBA(82, 82, 82, 1)
+                        ChevronHoverBackground: =
+                        ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                        DefaultSelectedItems: =
+                        DisplayFields: =["name"]
+                        FocusedBorderThickness: =0
+                        Font: =Font.Arial
+                        Height: =Combobox_QT_6.Height - 6
+                        HoverBorderColor: =
+                        HoverFill: =RGBA(230, 239, 250, 0.8)
+                        InputTextPlaceholder: ="Input Process"
+                        IsSearchable: =false
+                        Items: =Filter(apiDbGetAll, Not(id in ShowColumns(DataAPi, api_id)))
+                        OnChange: |+
+                            =If(!IsBlank(Self.Selected),
+                            If(CountIf(DataAPi, id = Self.Selected.id) <= 0,
+                            Collect(DataAPi,  {id: "", api_id : Self.Selected.id, Name: Self.Selected.name})
+                            ))
+                            
+                        PressedBorderColor: =RGBA(0, 0, 0, 1)
+                        PressedColor: =RGBA(82, 82, 82, 1)
+                        PressedFill: =
+                        Reset: =isResetCmb
+                        SearchFields: =["name"]
+                        SearchItems: =[]
+                        SelectionFill: =RGBA(186, 202, 226, 1)
+                        SelectionTagFill: =
+                        SelectMultiple: =false
+                        Size: =10.5
+                        Width: =Combobox_QT_6.Width - 6
+                        X: =Combobox_QT_6.X + 3
+                        Y: |
+                            =Combobox_QT_6.Y + 3
+                        ZIndex: =41
+
+                "Gallery10_6 As gallery.'BrowseLayout_Flexible_SocialFeed_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =Self.AllItemsCount * Self.TemplateHeight
+                    Items: =DataAPi
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 800, 30, 50)
+                    Width: =Combobox_QT_6.Width
+                    X: =Combobox_QT_6.X
+                    Y: =Combobox_QT_6.Y + Combobox_QT_6.Height
+                    ZIndex: =43
+
+                    Label7_7 As label:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(77, 77, 77, 1)
+                        Font: =Font.Arial
+                        Height: =30
+                        OnSelect: =Select(Parent)
+                        Size: =10.5
+                        Text: =LookUp(apiDbGetAll, id = ThisItem.api_id).name
+                        Width: =Gallery10_6.Width - HtmlText2_8.Width
+                        X: =HtmlText2_8.X + HtmlText2_8.Width
+                        ZIndex: =2
+
+                    HtmlText2_8 As htmlViewer:
+                        Font: =Font.Arial
+                        Height: =30
+                        HtmlText: |-
+                            ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""10"" height=""11"" viewBox=""0 0 10 11"" fill=""none"">
+                              <g clip-path=""url(#clip0_5576_58443)"">
+                                <path d=""M5 0.5C2.21429 0.5 0 2.71429 0 5.5C0 8.28571 2.21429 10.5 5 10.5C7.78571 10.5 10 8.28571 10 5.5C10 2.71429 7.78571 0.5 5 0.5ZM6.92857 8L5 6.07143L3.07143 8L2.5 7.42857L4.42857 5.5L2.5 3.57143L3.07143 3L5 4.92857L6.92857 3L7.5 3.57143L5.57143 5.5L7.5 7.42857L6.92857 8Z"" fill=""black""/>
+                              </g>
+                              <defs>
+                                <clipPath id=""clip0_5576_58443"">
+                                  <rect width=""10"" height=""10"" fill=""white"" transform=""translate(0 0.5)""/>
+                                </clipPath>
+                              </defs>
+                            </svg>"
+                        OnSelect: |-
+                            =ClearCollect(ListAPiItemRemove, ThisItem);
+                            If(Gallery10_6.Selected.api_id = ComboBoxQt_6.Selected.id, Reset(ComboBoxQt_6));
+                            RemoveIf(DataAPi, api_id = Gallery10_6.Selected.api_id);
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Width: =25
+                        ZIndex: =3
+
+                Company_8 As group:
+                    Height: =5
+                    Width: =5
+                    X: =30
+                    Y: =40
+                    ZIndex: =43
+
+                    LabelQt_5 As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Color: =RGBA(82, 82, 82, 1)
+                        Font: =Font.Arial
+                        Height: =22
+                        PaddingLeft: =0
+                        PaddingTop: =10
+                        Size: =10.5
+                        Text: ="Groups"
+                        Visible: =isEditShowPopup
+                        Width: =(Parent.Width - 16 - 16 - 20) /2
+                        X: =LabelQt_4.X + LabelQt_4.Width + 20
+                        Y: =LabelQt_4.Y
+                        ZIndex: =26
+
+                    Combobox_QT_5 As text:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =1
+                        Default: =
+                        DisabledBorderColor: =Self.BorderColor
+                        DisplayMode: =
+                        FocusedBorderThickness: =1
+                        Font: =Font.Arial
+                        Height: =42
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedBorderColor: =Self.BorderColor
+                        PressedFill: =RGBA(244, 244, 244, 1)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =10.5
+                        Width: =LabelQt_5.Width - 7
+                        X: =LabelQt_5.X
+                        Y: =LabelQt_5.Y + LabelQt_5.Height + 5
+                        ZIndex: =27
+
+                    ComboBoxQt_5 As combobox:
+                        BorderThickness: =0
+                        ChevronBackground: =
+                        ChevronFill: =RGBA(82, 82, 82, 1)
+                        ChevronHoverBackground: =
+                        ChevronHoverFill: =RGBA(82, 82, 82, 1)
+                        DefaultSelectedItems: =
+                        DisplayFields: =["Name"]
+                        FocusedBorderThickness: =0
+                        Font: =Font.Arial
+                        Height: =Combobox_QT_5.Height - 6
+                        HoverBorderColor: =
+                        HoverFill: =RGBA(230, 239, 250, 0.8)
+                        InputTextPlaceholder: ="Input Process"
+                        IsSearchable: =false
+                        Items: =Filter(GroupsManagement, Not(Code in ShowColumns(DataGroups1, Code)))
+                        OnChange: |+
+                            =If(!IsBlank(Self.Selected),
+                            If(CountIf(DataGroups1, Code = Self.Selected.Code) <= 0,
+                            Collect(DataGroups1,  {Id: "", Code: Self.Selected.Code, Name: Self.Selected.Name})
+                            ))
+                            
+                        PressedBorderColor: =RGBA(0, 0, 0, 1)
+                        PressedColor: =RGBA(82, 82, 82, 1)
+                        PressedFill: =
+                        Reset: =isResetCmb
+                        SearchFields: =["Name"]
+                        SearchItems: =[]
+                        SelectionFill: =RGBA(186, 202, 226, 1)
+                        SelectionTagFill: =
+                        SelectMultiple: =false
+                        Size: =10.5
+                        Width: =Combobox_QT_5.Width - 6
+                        X: =Combobox_QT_5.X + 3
+                        Y: |
+                            =Combobox_QT_5.Y + 3
+                        ZIndex: =28
+
+        EmployeeEditTitle_4 As label:
+            BorderColor: =RGBA(89, 0, 0, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Semibold
+            Height: =60
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Size: =14
+            Text: =If(isCreate && !isUpdate, "Create employee", "Update employee")
+            Visible: =isEditShowPopup
+            Width: =Parent.Width
+            X: =EmployeeEditWhiteBackground_4.X
+            Y: =EmployeeEditWhiteBackground_4.Y
+            ZIndex: =51
+
+        EmployeeEditCloseIcon_4 As htmlViewer:
+            AutoHeight: =true
+            Font: =Font.Arial
+            Height: =400
+            HtmlText: |-
+                ="<div style='cursor:pointer'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'>
+                <path d='M18 6L6 18M6 6L18 18' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                </svg>
+                </div>"
+            OnSelect: |-
+                =Set(isEditShowPopup, false);
+                Set(isCheckFormatNumber, false);
+                Set(isCheckFormatEmail, false);
+                Set(isCheckFormatEmailInternal, false);
+                Reset(EmployeeEditinternalEmail_3);
+                Reset(EmployeeEditPhoneNumber_Input_3);
+                Reset(EmployeeEditEmail_Input_4);
+                Reset(EmployeeEditName_Input_4);
+                Clear(ProcessRoleByEmployeeResult);
+                UpdateContext({isResetCmb: true});
+                UpdateContext({isResetCmb: false});
+            Visible: =isEditShowPopup
+            Width: =35
+            X: =EmployeeEditWhiteBackground_4.X + EmployeeEditWhiteBackground_4.Width - EmployeeEditCloseIcon_4.Width - 10
+            Y: =EmployeeEditWhiteBackground_4.Y + 5
+            ZIndex: =52
+
+        Hr_12 As rectangle:
+            BorderColor: =RGBA(89, 0, 0, 1)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =1
+            Width: =Parent.Width
+            Y: =EmployeeEditTitle_4.Y + EmployeeEditTitle_4.Height
+            ZIndex: =53
+
+        Hr_13 As rectangle:
+            BorderColor: =RGBA(89, 0, 0, 1)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =1
+            Width: =Parent.Width
+            Y: =Canvas5_3.Y + Canvas5_3.Height + 10
+            ZIndex: =54
+
+    NewEmployeeContainer_1 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =29
+
+        NewEmployeeButton_1 As button:
+            BorderThickness: =0
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =If(Parent.Width > 600, 44, 44)
+            OnSelect: |+
+                =Set(isLoading, true);
+                ClearCollect(internalEmail, 'TVS->getAllinternalEmail-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                //Navigate(AddEmployee);
+                Set(empSelect, Blank());
+                Set(StatusSelectedValue, Blank());
+                Set(isUpdate, false);
+                Set(isCreate, true);
+                Set(isSubmited, false);
+                Set(isCheckFormatEmail,false);
+                Set(isCheckFormatEmailInternal,false);
+                Clear(DataProcess1);
+                Clear(DataGroups1);
+                ClearCollect(ProcessRoleByEmployeeResult, {mark: Now(), id: "", role: "", company: "", division: "", mark1: GUID()});
+                Set(isLoading, false);
+                Set(isEditShowPopup, true);
+                
+            PaddingBottom: =10
+            PaddingLeft: =40
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            Size: =10.5
+            Text: ="New"
+            Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Admin1", action) || "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Admin", action)
+            Width: =120
+            X: =If(App.Width > 800, App.Width - NewEmployeeButton_1.Width - 23, App.Width - NewEmployeeButton_1.Width - 10)
+            Y: =If(Parent.Width > 800, Search_Input_2.Y, Search_Input_2.Y + Search_Input_2.Height + 10)
+            ZIndex: =8
+
+        NewEmployeeIcon_1 As icon.AddDocument:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =27
+            Icon: =Icon.AddDocument
+            OnSelect: |+
+                =Set(isLoading, true);
+                //Navigate(AddEmployee);
+                Set(empSelect, Blank());
+                Set(StatusSelectedValue, Blank());
+                ClearCollect(internalEmail, 'TVS->getAllinternalEmail-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                Set(isUpdate, false);
+                Set(isCreate, true);
+                Set(isSubmited, false);
+                Set(isCheckFormatEmail,false);
+                Set(isCheckFormatEmailInternal,false);
+                Clear(DataGroups1);
+                Clear(DataProcess1);
+                ClearCollect(ProcessRoleByEmployeeResult, {mark: Now(), id: "", role: "", company: "", division: "", mark1: GUID()});
+                Set(isLoading, false);
+                Set(isEditShowPopup, true);
+                
+            PaddingRight: =0.00
+            PaddingTop: =0.00
+            Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Admin1", action) || "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Admin", action)
+            Width: =25
+            X: =NewEmployeeButton_1.X + 20
+            Y: =NewEmployeeButton_1.Y + 7
+            ZIndex: =9
+
+    Group1 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =30
+
+        SearchAUMButton_8 As button:
+            BorderThickness: =0
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            OnSelect: |
+                =Set(isLoading,true);
+                // Set(PageSizeNumberEmployee,10);
+                Set(currentPageIndexEmployee,0);
+                ClearCollect(colEmployees,
+                    'TVS->GetAllEmployee-V1'.Run(
+                        PageSizeNumberEmployee,
+                        currentPageIndexEmployee,
+                        If(IsBlank(Search_Input_2.Text),"",Search_Input_2.Text),
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        envDEV,
+                        envTEST,
+                        envUAT1,
+                        envUAT2
+                    )
+                );
+                Set(isLoading,false);
+                Set(pageCount1,First(colEmployees).pageCount);
+                Set(pageIndexFirstEmployee, 5 * RoundDown(currentPageIndexEmployee / 5,0) + 1);
+                ClearCollect(listPageIndexEmployee,pageIndexFirstEmployee);
+                ForAll(maxList,
+                    If(Last(listPageIndexEmployee).Value < pageCount1,
+                        Collect(listPageIndexEmployee,Last(listPageIndexEmployee).Value + 1);
+                    );
+                );
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            Size: =10.5
+            Text: =""
+            Width: =44
+            X: =If(App.Width > 800, Search_Input_2.X + Search_Input_2.Width  + 10, NewEmployeeButton_1.X - btnRefresh.Width - Self.Width - 20)
+            Y: =If(App.Width > 800, Search_Input_2.Y, NewEmployeeButton_1.Y)
+            ZIndex: =10
+
+        SearchAUMIcon_3 As htmlViewer:
+            Font: =Font.Arial
+            Height: =35
+            HtmlText: |-
+                ="<div style=""display:flex;align-items:center; justify-content: center;; cursor: pointer; width: 30px; height: "&Self.Height - 2&"px""; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                  <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                </svg><div>"
+            OnSelect: |
+                =Set(isLoading,true);
+                // Set(PageSizeNumberEmployee,10);
+                Set(currentPageIndexEmployee,0);
+                ClearCollect(colEmployees,
+                    'TVS->GetAllEmployee-V1'.Run(
+                        PageSizeNumberEmployee,
+                        currentPageIndexEmployee,
+                        If(IsBlank(Search_Input_2.Text),"",Search_Input_2.Text),
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        envDEV,
+                        envTEST,
+                        envUAT1,
+                        envUAT2
+                    )
+                );
+                Set(isLoading,false);
+                Set(pageCount1,First(colEmployees).pageCount);
+                Set(pageIndexFirstEmployee, 5 * RoundDown(currentPageIndexEmployee / 5,0) + 1);
+                ClearCollect(listPageIndexEmployee,pageIndexFirstEmployee);
+                ForAll(maxList,
+                    If(Last(listPageIndexEmployee).Value < pageCount1,
+                        Collect(listPageIndexEmployee,Last(listPageIndexEmployee).Value + 1);
+                    );
+                );
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Width: =30
+            X: =SearchAUMButton_8.X + 6
+            Y: =SearchAUMButton_8.Y + 4
+            ZIndex: =20
+
+    Group17 As group:
+        Height: =5
+        Width: =5
+        X: =-823
+        Y: =-36
+        ZIndex: =32
+
+        btnRefresh As button:
+            BorderThickness: =0
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            OnSelect: |-
+                =Set(isLoading, true);
+                Reset(Search_Input_2);
+                ClearCollect(
+                    colEmployees,
+                    'TVS->GetAllEmployee-V1'.Run(
+                        PageSizeNumberEmployee,
+                        currentPageIndexEmployee,
+                        "",
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2
+                    )
+                );
+                Set(isLoading, false);
+                Set(pageCount1,First(colEmployees).pageCount);
+                
+                Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                
+                ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                
+                ForAll(
+                    maxList,
+                    If(
+                            Last(listPageIndexEmployee).Value < pageCount1
+                        ,
+                        Collect(
+                            listPageIndexEmployee,
+                            Last(listPageIndexEmployee).Value + 1
+                        );
+                        
+                    );
+                );
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            Size: =10.5
+            Text: =""
+            Width: =44
+            X: =SearchAUMButton_8.X + SearchAUMButton_8.Width + 10
+            Y: =SearchAUMButton_8.Y
+            ZIndex: =21
+
+        RefreshListIcon_1 As icon.Reload:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =20
+            Icon: =Icon.Reload
+            OnSelect: |-
+                =Set(isLoading, true);
+                Reset(Search_Input_2);
+                ClearCollect(
+                    colEmployees,
+                    'TVS->GetAllEmployee-V1'.Run(
+                        PageSizeNumberEmployee,
+                        currentPageIndexEmployee,
+                        "",
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2
+                    )
+                );
+                Set(isLoading, false);
+                Set(pageCount1,First(colEmployees).pageCount);
+                
+                Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                
+                ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                
+                ForAll(
+                    maxList,
+                    If(
+                            Last(listPageIndexEmployee).Value < pageCount1
+                        ,
+                        Collect(
+                            listPageIndexEmployee,
+                            Last(listPageIndexEmployee).Value + 1
+                        );
+                        
+                    );
+                );
+            Width: =20
+            X: =btnRefresh.X + RefreshListIcon_1.Width * 0.5
+            Y: =btnRefresh.Y + btnRefresh.Height * 0.5 - Self.Height*0.5
+            ZIndex: =22
+
+    NotificationBox_10 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(214, 27, 27, 1)
+        BorderThickness: =0
+        DisabledFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_10.Value <> 0
+        Width: =300
+        X: =App.Width - Self.Width - 2
+        Y: =80
+        ZIndex: =35
+
+    CloseNotiIcon_10 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_10)
+        Visible: =NotificationBox_10.Visible
+        Width: =15
+        X: =NotificationBox_10.X + NotificationBox_10.Width - 25
+        Y: =NotificationBox_10.Y + 17.5
+        ZIndex: =36
+
+    Timer1_10 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_10); UpdateContext({ShowNotification: false});
+        Start: =ShowNotification
+        Visible: =false
+        X: =1195
+        Y: =652
+        ZIndex: =37
+
+    Filter_Container_5 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =37
+
+        PreviousIcon_8 As icon.ChevronLeft:
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =15
+            Icon: =Icon.ChevronLeft
+            OnSelect: |
+                =Set(isLoading, true);
+                Set(currentPageIndexEmployee,currentPageIndexEmployee -1);
+                
+                ClearCollect(colEmployees,'TVS->GetAllEmployee-V1'.Run(
+                    PageSizeNumberEmployee,currentPageIndexEmployee,
+                    If(IsBlank(Search_Input_2.Text), "", Search_Input_2.Text),
+                    resKeyOpenAll.open,
+                            resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                Set(isLoading, false);
+                //ClearCollect(listRes,colEmployees.listItem);
+                
+                Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                
+                ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                
+                ForAll(
+                    maxList,
+                    If(
+                            Last(listPageIndexEmployee).Value < pageCount1
+                        ,
+                        Collect(
+                            listPageIndexEmployee,
+                            Last(listPageIndexEmployee).Value + 1
+                        );
+                        
+                    );
+                );
+            Tooltip: ="Previous page"
+            Visible: |
+                =If(currentPageIndexEmployee<=0,false,true)
+            Width: =15
+            X: =PageNumbers_8.X - 22
+            Y: =PageNumbers_8.Y + 12.5
+            ZIndex: =11
+
+        NextIcon_6 As icon.ChevronRight:
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =15
+            Icon: =Icon.ChevronRight
+            OnSelect: |
+                =Set(isLoading, true);
+                Set(currentPageIndexEmployee,currentPageIndexEmployee +1);
+                ClearCollect(colEmployees,'TVS->GetAllEmployee-V1'.Run(
+                    PageSizeNumberEmployee,currentPageIndexEmployee,
+                    If(IsBlank(Search_Input_2.Text), "", Search_Input_2.Text),
+                    resKeyOpenAll.open,resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                Set(isLoading, false);
+                
+                //ClearCollect(listRes,colEmployees.listItem);
+                
+                Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                
+                ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                
+                ForAll(
+                    maxList,
+                    If(
+                            Last(listPageIndexEmployee).Value < pageCount1
+                        ,
+                        Collect(
+                            listPageIndexEmployee,
+                            Last(listPageIndexEmployee).Value + 1
+                        );
+                        
+                    );
+                );
+            Tooltip: ="Next page"
+            Visible: |
+                =If(currentPageIndexEmployee>=pageCount1-1,false,true)
+            Width: =15
+            X: =WhiteBackground.X + WhiteBackground.Width - 50
+            Y: =PageNumbers_8.Y + 12.5
+            ZIndex: =13
+
+        "PageNumbers_8 As gallery.'BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            DelayItemLoading: =true
+            Height: =42
+            Items: =listPageIndexEmployee
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =35
+            Width: =PageNumbers_8.AllItemsCount * Self.TemplateWidth
+            X: =NextIcon_6.X - PageNumbers_8.Width
+            Y: =White_Background_4.Y + White_Background_4.Height
+            ZIndex: =14
+
+            pageIndex_7 As htmlViewer:
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+                Font: =Font.Arial
+                HtmlText: |-
+                    ="<div style='width: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 3px; background-color: transparent; border-radius: 5px; border: " & If(currentPageIndexEmployee + 1 = ThisItem.Value, "1px solid #1890FF", "none")&";'><font color=" & If(currentPageIndexEmployee + 1 = ThisItem.Value, "#1890FF", "black")&">" & (ThisItem.Value) & "</font></div>"
+                OnSelect: |
+                    =Set(isLoading, true);
+                    Set(currentPageIndexEmployee,ThisItem.Value -1);
+                    ClearCollect(colEmployees,'TVS->GetAllEmployee-V1'.Run(PageSizeNumberEmployee,currentPageIndexEmployee,If(IsBlank(Search_Input_2.Text), "", Search_Input_2.Text),resKeyOpenAll.open,resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                    Set(isLoading, false);
+                    //ClearCollect(listRes,colEmployees.listItem);
+                    Set(pageCount1,First(colEmployees).pageCount);
+                    //pageIndex
+                    Set(
+                        maxList,
+                        [
+                            1,
+                            2,
+                            3,
+                            4
+                            
+                        ]
+                    );
+                    
+                    Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                    
+                    ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                    
+                    ForAll(
+                        maxList,
+                        If(
+                                Last(listPageIndexEmployee).Value < pageCount1
+                            ,
+                            Collect(
+                                listPageIndexEmployee,
+                                Last(listPageIndexEmployee).Value + 1
+                            );
+                            
+                        );
+                    );
+                    If(currentPageIndexEmployee=ThisItem.Value,Color.Red);
+                PaddingRight: =0
+                Width: =40
+                ZIndex: =2
+
+        PopupGreyBg_3 As rectangle:
+            Fill: =RGBA(166, 166, 166, 0.5)
+            Height: =App.Height
+            OnSelect: =Set(ShowPageSizeSelectPopup, false)
+            Visible: =isShowModifyModal
+            Width: =App.Width
+            ZIndex: =15
+
+        PageDropdown_5 As button:
+            Align: =Align.Left
+            BorderThickness: =1
+            Color: =RGBA(82, 82, 82, 1)
+            DisabledFill: =RGBA(166, 166, 166, 0.5)
+            DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =32
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(241, 244, 249, 1)
+            OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+            PaddingLeft: =10
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            Size: =10.5
+            Text: =PageSizeNumberEmployee
+            Visible: =App.Width > 800
+            Width: =50
+            X: =PreviousIcon_8.X - 70
+            Y: =PageNumbers_8.Y + 2 
+            ZIndex: =16
+
+        PageChevron_7 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |
+                =If(ShowPageSizeSelectPopup, "<svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg>",
+                "<svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                </svg>"
+                )
+            OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =App.Width > 800
+            Width: =35
+            X: =PageDropdown_5.X + PageDropdown_5.Width - 28
+            Y: =PageDropdown_5.Y - 1
+            ZIndex: =17
+
+        PageCloseDropdown_7 As rectangle:
+            Fill: =RGBA(255, 255, 255, 0)
+            Height: =App.Height - 100
+            OnSelect: =Set(ShowPageSizeSelectPopup, false)
+            Visible: =ShowPageSizeSelectPopup
+            Width: =Parent.Width
+            Y: =100
+            ZIndex: =18
+
+        "PageItems_7 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =0.5
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =122
+            Items: |-
+                =[{value: 10}, {value: 20}, {value: 50}]
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =ShowPageSizeSelectPopup
+            Width: =PageDropdown_5.Width
+            X: =PageDropdown_5.X
+            Y: =PageDropdown_5.Y - 130
+            ZIndex: =19
+
+            Button6_24 As button:
+                Align: =Align.Left
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(PageSizeNumberRole = ThisItem.value, RGBA(241, 244, 249, 1) , RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =2
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |+
+                    =Set(isLoading, true);
+                    Set(PageSizeNumberEmployee, ThisItem.value);
+                    Set(ShowPageSizeSelectPopup, false);
+                    Set(currentPageIndexEmployee,0);
+                    ClearCollect(colEmployees,'TVS->GetAllEmployee-V1'.Run(
+                        PageSizeNumberEmployee,currentPageIndexEmployee,
+                        If(IsBlank(Search_Input_2.Text), "", Search_Input_2.Text),
+                        resKeyOpenAll.open,
+                                resKeyOpenAll.close,envDEV, envTEST, envUAT1, envUAT2));
+                    Set(isLoading, false);
+                    //ClearCollect(listRes,colEmployees.listItem);
+                    Set(pageCount1,First(colEmployees).pageCount);
+                    
+                    Set(pageIndexFirstEmployee, 5*RoundDown(currentPageIndexEmployee/5, 0)+1);
+                    
+                    ClearCollect(listPageIndexEmployee, pageIndexFirstEmployee);
+                    
+                    ForAll(
+                        maxList,
+                        If(
+                                Last(listPageIndexEmployee).Value < pageCount1
+                            ,
+                            Collect(
+                                listPageIndexEmployee,
+                                Last(listPageIndexEmployee).Value + 1
+                            );
+                            
+                        );
+                    );
+                    
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.value
+                Width: =70
+                X: =0.00
+                ZIndex: =1
+
+    NotificationScreen_8 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =38
+
+    LoadingQT2List_10 As LoadingComponent_4:
+        Visible: =isLoading
+        ZIndex: =39
+
+    DeleteConfirm_12 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =40
+
+        RejectPopupBack_25 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =28
+
+        DeleteConfirmBg_22 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 200, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_22.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =29
+
+        CancelResearchOpinionButton_19 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(214, 27, 27, 1)
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(214, 27, 27, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(214, 27, 27, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(214, 27, 27, 1)
+            PressedColor: =RGBA(214, 27, 27, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteResearchOpinionButton_19.X - Self.Width - 10
+            Y: =DeleteResearchOpinionButton_19.Y
+            ZIndex: =30
+
+        DeleteResearchOpinionButton_19 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(214, 27, 27, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isLoading, true);
+                Set(IsError, false);
+                UpdateContext({ShowNotification: false});
+                
+                Set(deleteStatus, 'TVS->DeleteEmployee-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, idProposalDelete).status);
+                Set(isLoading, false);
+                
+                If(Value(deleteStatus) = 200,
+                    Select(CancelResearchOpinionButton_19);
+                    ClearCollect(
+                        colEmployees,
+                        'TVS->GetAllEmployee-V1'.Run(
+                            PageSizeNumberEmployee,
+                            currentPageIndexEmployee,
+                            "",
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2
+                        )
+                    );
+                    Set(isLoading,false);
+                
+                    Set(isShowModifyModal,false);
+                    UpdateContext({ShowNotification: false});
+                    Set(ShowPageSizeSelectPopup,false);
+                    Set(MenuSelect,"Admin");
+                    Set(HeaderText,"Manager Authorization");
+                    Set(pageCount1,First(colEmployees).pageCount);
+                    //pageIndex
+                    Set(maxList,[1,2,3,4]);
+                    Set(pageIndexFirstEmployee,5 * RoundDown(currentPageIndexEmployee / 5,0) + 1);
+                    ClearCollect(listPageIndexEmployee,pageIndexFirstEmployee);
+                    ForAll(
+                        maxList,
+                        If(Last(listPageIndexEmployee).Value < pageCount1,
+                        Collect(listPageIndexEmployee,Last(listPageIndexEmployee).Value + 1););  
+                    );
+                
+                    Set(NoticationText,"Delete successfully!");UpdateContext({ShowNotification: true});,
+                    Set(IsError, true);Set(NoticationText,"System error, please reload this page again.");UpdateContext({ShowNotification: true});
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(214, 27, 27, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_22.X + DeleteConfirmBg_22.Width - 150
+            Y: =DeleteConfirmBg_22.Y + DeleteConfirmBg_22.Height - Self.Height - 30
+            ZIndex: =31
+
+        DeleteConfirmCloseIcon_24 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_22. X + DeleteConfirmBg_22.Width -50
+            Y: =DeleteConfirmBg_22.Y + 20
+            ZIndex: =32
+
+        DeleteConfirmLabel_25 As label:
+            Font: =Font.Arial
+            Size: =12
+            Text: =" Are you sure you want to delete this employee?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_22.Width - 40  - DeleteConfirmCloseIcon_24.Width
+            X: =Label2_18.X
+            Y: =Label2_18.Y + Label2_18.Height
+            ZIndex: =33
+
+        Label2_18 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =14
+            Text: ="Delete"
+            Visible: =isShowPopupDelete
+            X: =DeleteConfirmBg_22.X + 30
+            Y: =DeleteConfirmBg_22.Y + 10
+            ZIndex: =34
+

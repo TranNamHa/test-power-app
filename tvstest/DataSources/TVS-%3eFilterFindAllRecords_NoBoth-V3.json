@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "6ebe7584-c964-48a0-91ea-26d8bfc69a9d",
+    "Name": "TVS->FilterFindAllRecords_NoBoth-V3",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "4ca3f21d-c4a0-ee11-be37-6045bd58b6cb"
+  }
+]

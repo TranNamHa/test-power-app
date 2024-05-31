@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "8e9f4b4f-ae99-46da-8102-4ea2f995c97c",
+    "Name": "TVS->DeleteEmployee-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "79e8545a-2bd2-ee11-9079-6045bd5b2c0e"
+  }
+]

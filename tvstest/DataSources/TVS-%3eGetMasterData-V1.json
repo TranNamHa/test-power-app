@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "3396af80-7216-40eb-b3c9-616dba5d2339",
+    "Name": "TVS->GetMasterData-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0a69b541-749d-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,119 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://asia-001.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="TVS-&gt;FindByIdPEVCDivestmentProcess5" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="TVS-&gt;FindByIdPEVCDivestmentProcess5" />
+  <grammars>
+    <jsonTypes targetNamespace="https://asia-001.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <string name="ManualTriggerInput_text_def" />
+      <string name="ManualTriggerInput_text_1_def" />
+      <string name="ManualTriggerInput_text_2_def" />
+      <object name="ManualTriggerInput">
+        <property name="text" type="string" />
+        <property name="text_1" type="string" />
+        <property name="text_2" type="string" />
+      </object>
+      <string name="ResponseActionOutput_id_def" />
+      <string name="ResponseActionOutput_company_id_def" />
+      <string name="ResponseActionOutput_deal_name_def" />
+      <string name="ResponseActionOutput_deal_type_def" />
+      <string name="ResponseActionOutput_company_value_def" />
+      <string name="ResponseActionOutput_industry_def" />
+      <string name="ResponseActionOutput_price_per_share_def" />
+      <string name="ResponseActionOutput_total_gross_sales_proceeds_def" />
+      <string name="ResponseActionOutput_buyer_def" />
+      <string name="ResponseActionOutput_expected_fee_def" />
+      <string name="ResponseActionOutput_expected_ending_time_def" />
+      <string name="ResponseActionOutput_level_of_approval_def" />
+      <string name="ResponseActionOutput_status_def" />
+      <string name="ResponseActionOutput_group_rejected_def" />
+      <string name="ResponseActionOutput_stage_def" />
+      <string name="ResponseActionOutput_estimated_legal_fee_def" />
+      <string name="ResponseActionOutput_divested_equity_def" />
+      <string name="ResponseActionOutput_divested_debt_def" />
+      <string name="ResponseActionOutput_divested_percentage_ownership_def" />
+      <string name="ResponseActionOutput_accumulated_cost_of_equity_portion_def" />
+      <string name="ResponseActionOutput_accumulated_cost_of_debt_portion_def" />
+      <string name="ResponseActionOutput_accumulated_cost_of_percentage_ownership_def" />
+      <string name="ResponseActionOutput_deal_status_def" />
+      <string name="ResponseActionOutput_old_status_def" />
+      <string name="ResponseActionOutput_deal_main_procedure_def" />
+      <string name="ResponseActionOutput_share_def" />
+      <string name="ResponseActionOutput_company_name_def" />
+      <string name="ResponseActionOutput_pdi_created_by_def" />
+      <string name="ResponseActionOutput_created_by_name_def" />
+      <string name="ResponseActionOutput_pdi_created_date_def" />
+      <string name="ResponseActionOutput_close_date_def" />
+      <string name="ResponseActionOutput_write_date_def" />
+      <string name="ResponseActionOutput_write_by_def" />
+      <object name="ResponseActionOutput">
+        <property name="id" type="string" />
+        <property name="company_id" type="string" />
+        <property name="deal_name" type="string" />
+        <property name="deal_type" type="string" />
+        <property name="company_value" type="string" />
+        <property name="industry" type="string" />
+        <property name="price_per_share" type="string" />
+        <property name="total_gross_sales_proceeds" type="string" />
+        <property name="buyer" type="string" />
+        <property name="expected_fee" type="string" />
+        <property name="expected_ending_time" type="string" />
+        <property name="level_of_approval" type="string" />
+        <property name="status" type="string" />
+        <property name="group_rejected" type="string" />
+        <property name="stage" type="string" />
+        <property name="estimated_legal_fee" type="string" />
+        <property name="divested_equity" type="string" />
+        <property name="divested_debt" type="string" />
+        <property name="divested_percentage_ownership" type="string" />
+        <property name="accumulated_cost_of_equity_portion" type="string" />
+        <property name="accumulated_cost_of_debt_portion" type="string" />
+        <property name="accumulated_cost_of_percentage_ownership" type="string" />
+        <property name="deal_status" type="string" />
+        <property name="old_status" type="string" />
+        <property name="deal_main_procedure" type="string" />
+        <property name="share" type="string" />
+        <property name="company_name" type="string" />
+        <property name="pdi_created_by" type="string" />
+        <property name="created_by_name" type="string" />
+        <property name="pdi_created_date" type="string" />
+        <property name="close_date" type="string" />
+        <property name="write_date" type="string" />
+        <property name="write_by" type="string" />
+      </object>
+      <object name="Run_responses_default_def" />
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://asia-001.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="text" path="/text" type="xs:string" required="true">
+              <doc title="openKey" />
+            </param>
+            <param style="plain" name="text_1" path="/text_1" type="xs:string" required="true">
+              <doc title="closeKey" />
+            </param>
+            <param style="plain" name="text_2" path="/text_2" type="xs:string" required="true">
+              <doc title="idPEVC" />
+            </param>
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:ResponseActionOutput" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

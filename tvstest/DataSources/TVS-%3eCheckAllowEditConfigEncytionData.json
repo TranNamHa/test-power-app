@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "8e1249df-030f-4be6-8774-9a93a71fb7ba",
+    "Name": "TVS->CheckAllowEditConfigEncytionData",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "8c9dbc5b-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

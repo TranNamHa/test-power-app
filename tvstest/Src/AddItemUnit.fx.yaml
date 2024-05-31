@@ -1,0 +1,2407 @@
+"AddItemUnit As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: =RGBA(248, 248, 249, 1)
+    OnHidden: =Set(ListItemUnitConfig, 'TVS->GetAllItemUnitConfig'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2))
+    OnVisible: |-
+        =Set(isShowPopupDelete, false);
+        UpdateContext({ShowNotification: false});
+        Set(Language, "En");
+        Set(MenuSelect,"Portal");
+        Set(MenuSelect2,"Item Dictionary");
+        Set(HeaderText,"Add Item/Unit");
+        Set(searchInput, "");
+        Set(isSubmitAddItemUnitTab1, false);
+        Reset(input_item_name_vi);
+        Reset(input_item_name_en);
+        Reset(input_item_note);
+        Reset(TextInput2_3);
+        Set(reportTypeValue, "numeric");
+        Set(isLoading, true);
+        Set(isAddItem, false);
+        Set(isAddUnit, false);
+        Set(unitItemRes, 'TVS->FindAllItemAndUnit-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2));
+        ClearCollect(listItemUnit, unitItemRes.listItem);
+        ClearCollect(listUnit, unitItemRes.listUnit);
+        Set(itemLastest, unitItemRes.itemLastest);
+        Set(unitLastest, unitItemRes.unitLastest);
+        ClearCollect(listItemUnitToCreate, []);
+        ClearCollect(listUnitToCreate, []);
+        Set(dataTypeItems, [{text: "Date", value: "date"}, {text: "Numeric", value: "numeric"}, {text: "String", value: "string"}]);
+        Set(isLoading, false);
+        Set(isValidItemToAdd, true);
+        Set(isValidUnitToAdd, true);
+        Set(isAddItemValid, true);
+        Set(isAddUnitValid, true);
+        Set(hasPermissionAddItem, "EDIT" in LookUp(currenUserV2.permissionList, process_code = "Item_Dictionary", action));
+        If(!hasPermissionAddItem, Set(DealDetailTab, 3));
+
+    RectQuickActionBar6 As rectangle:
+        Height: =56
+        Width: =Parent.Width
+        ZIndex: =1
+
+    Canvas8 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =Parent.Height - Self.Y
+        Width: =Parent.Width
+        Y: =RectQuickActionBar6.Y + RectQuickActionBar6.Height
+        ZIndex: =2
+
+        DataCard8 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =Parent.Height - 100
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+            ListEncryptionWhiteBackground_2 As htmlViewer:
+                Font: =Font.Arial
+                Height: =If(DealDetailTab = 1, TextInput2_3.Y + TextInput2_3.Height - Self.Y + 50, DealDetailTab = 3, Container16_2.Y + Container16_2.Height - Self.Y + 50, Container16_1_ToAdd.Y + Container16_1_ToAdd.Height - Self.Y + 30)
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white;border-radius: 12px;box-shadow: 7px 5px 7px 0px rgba(0, 0, 0, 0.10);
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =14.00
+                Width: =If(App.Width > 800, App.Width - If(MobileShowMenu, MenuItemsSideBar_NL.Width, MenuItemsSideBar_Small_NL.Width) - 10, App.Width + 5)
+                X: =If(Parent.Width > 800, If(MobileShowMenu, 255, 60), 5)
+                Y: =70
+                ZIndex: =1
+
+            title_ITem As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =42
+                Size: =10.5
+                Text: ="Item"
+                Width: =50
+                X: =QT2Tabs_7.X + If(App.Width > 800, 10, 15)
+                Y: =If(DealDetailTab = 3, input_item_search.Y + input_item_search.Height + 10, QT2Tabs_7.Y + 50)
+                ZIndex: =4
+
+            label_item_name_vi As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =30
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =10.5
+                Text: ="Item name VI"
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =150.00
+                X: =drop_data_type.X
+                Y: =drop_data_type.Y + drop_data_type.Height + 10
+                ZIndex: =5
+
+            QT2TabsGroup_7 As group:
+                Height: =5
+                Width: =5
+                X: =-40
+                Y: =-40
+                ZIndex: =5
+
+                HrQT2_8 As rectangle:
+                    BorderColor: =RGBA(176, 176, 176, 1)
+                    Fill: =RGBA(191, 191, 192, 1)
+                    Height: =1
+                    Width: =If(App.Width > 800, input_item_name_vi.X + input_item_name_vi.Width - Self.X + 5, QT2Tabs_7.Width)
+                    X: =QT2Tabs_7.X
+                    Y: =QT2Tabs_7.Y + 40
+                    ZIndex: =2
+
+                QT2Tabs_7 As gallery.galleryHorizontal:
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =47
+                    Items: |-
+                        =If(hasPermissionAddItem,
+                            [{text: "Add Item/Unit", tab: 1},
+                            {text: "Input from excel", tab: 2},
+                            {text: "Current Item/Unit", tab: 3}],
+                            [{text: "Current Item/Unit", tab: 3}]
+                        )
+                    LoadingSpinner: =LoadingSpinner.Data
+                    ShowScrollbar: =false
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 800, 140, 130)
+                    Width: =If(Parent.Width > 600,White_Background_3.Width - 50, Parent.Width - 50)
+                    X: =ListEncryptionWhiteBackground_2.X + If(App.Width > 800, 10, 20)
+                    Y: =ListEncryptionWhiteBackground_2.Y + 10
+                    ZIndex: =3
+
+                    Button8_14 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        FontWeight: =If(DealDetailTab = ThisItem.tab, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =Self.Fill
+                        OnSelect: |-
+                            =Clear(invalidUnitRows); Clear(existedUnitRows);
+                            Set(DealDetailTab, ThisItem.tab);
+                            Set(HeaderText, ThisItem.text);
+                            Set(isSubmitAddItemUnitTab1, false);
+                            Set(isAddItem, false);
+                            Set(isAddUnit, false);
+                            ClearCollect(listItemUnitToCreate, []);
+                            ClearCollect(listUnitToCreate, []);
+                            Set(isValidItemToAdd, true);
+                            Set(isValidUnitToAdd, true);
+                            Set(isAddItemValid, true);
+                            Set(isAddUnitValid, true);
+                            Reset(input_item_name_vi);
+                            Reset(input_item_name_en);
+                            Reset(input_item_note);
+                            Set(reportTypeValue, "numeric");
+                            Reset(TextInput2_3);
+                            Reset(input_item_search);
+                            Set(searchInput, Trim(input_item_search.Text));
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedColor: =Self.Color
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 12, 10.5)
+                        Text: =ThisItem.text
+                        Tooltip: =ThisItem.text
+                        Width: =Parent.TemplateWidth
+                        Y: =5
+                        ZIndex: =1
+
+                    BottomBorder1_21 As rectangle:
+                        BorderColor: =If(DealDetailTab = ThisItem.tab, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = ThisItem.tab, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(ThisItem.tab = DealDetailTab, 2, 0)
+                        Width: =Parent.TemplateWidth
+                        Y: =40
+                        ZIndex: =2
+
+            input_item_name_vi As text:
+                BorderColor: =If(IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text) && isSubmitAddItemUnitTab1, Color.Red, RGBA(191, 191, 192, 1))
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HoverFill: =RGBA(255, 255, 255, 1)
+                MaxLength: =150
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =If(App.Width > 800, input_item_note.Width*2/3, App.Width - 90)
+                X: =label_item_name_vi.X
+                Y: =label_item_name_vi.Y + label_item_name_vi.Height
+                ZIndex: =6
+
+            label_item_note As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =30
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =10.5
+                Text: ="Note"
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =150.00
+                X: =input_item_name_en.X
+                Y: =input_item_name_en.Y + input_item_name_en.Height + 10 
+                ZIndex: =7
+
+            input_item_note As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =200
+                HoverFill: =RGBA(255, 255, 255, 1)
+                MaxLength: =3500
+                Mode: =TextMode.MultiLine
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =If(App.Width > 800, ListEncryptionWhiteBackground_2.Width - 60, App.Width - 90)
+                X: =label_item_note.X
+                Y: =label_item_note.Y + label_item_note.Height
+                ZIndex: =8
+
+            label_data_type As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =30
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =10.5
+                Text: ="Data type"
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =150.00
+                X: =title_ITem.X + 3
+                Y: =title_ITem.Y + title_ITem.Height + 10
+                ZIndex: =9
+
+            drop_data_type As button:
+                Align: =Align.Left
+                BorderColor: =If(IsBlank(Self.Text) && isSubmitAddItemUnitTab1, RGBA(214, 27, 27, 1), If(reportTypeShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%)))
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =RGBA(255, 255, 255, 1)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: =Set(reportTypeShowDropdown, !reportTypeShowDropdown)
+                PaddingLeft: =15
+                PaddingRight: =30
+                PaddingTop: =5.27
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Size: =10.5
+                Text: =First(Filter(dataTypeItems, reportTypeValue = value)).text
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =If(App.Width > 800, 300, input_item_name_vi.Width)
+                X: =label_data_type.X
+                Y: =label_data_type.Y + label_data_type.Height
+                ZIndex: =10
+
+            icon_drop_data_type As htmlViewer:
+                Font: =Font.Arial
+                Height: =44
+                HtmlText: |-
+                    =If(reportTypeShowDropdown,
+                    "<div style="""&If(!isDisable, "cursor: pointer")&"""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                    <g clip-path=""url(#clip0_1760_3688)"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                    </g>
+                    <defs>
+                    <clipPath id=""clip0_1760_3688"">
+                    <rect width=""24"" height=""24"" fill=""white""/>
+                    </clipPath>
+                    </defs>
+                    </svg></div>"
+                    , "<div style="""&If(!isDisable, "cursor: pointer")&"""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                    </svg></div>")
+                OnSelect: =If(!isDisable, Set(reportTypeShowDropdown, !reportTypeShowDropdown))
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                Size: =11.60
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =35
+                X: =drop_data_type.X + drop_data_type.Width - If(App.Width > 800, 40, 30)
+                Y: =drop_data_type.Y + 5
+                ZIndex: =11
+
+            label_item_name_en As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =30
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =10.5
+                Text: ="Item name EN"
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =150.00
+                X: =input_item_name_vi.X
+                Y: =input_item_name_vi.Y + input_item_name_vi.Height + 10 
+                ZIndex: =12
+
+            input_item_name_en As text:
+                BorderColor: =If(IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text) && isSubmitAddItemUnitTab1, Color.Red, RGBA(191, 191, 192, 1))
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HoverFill: =RGBA(255, 255, 255, 1)
+                MaxLength: =150
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 1 && isAddItem
+                Width: =If(App.Width > 800, input_item_note.Width*2/3, input_item_name_vi.Width)
+                X: =label_item_name_en.X
+                Y: =label_item_name_en.Y + label_item_name_en.Height
+                ZIndex: =13
+
+            SearchCloseDropdown_9 As rectangle:
+                Fill: =RGBA(255, 255, 255, 0)
+                Height: =App.Height - 100
+                OnSelect: |-
+                    =Set(reportTypeShowDropdown, false);
+                    Set(reportYearShowDropdown, false);
+                    Set(reportQuarterShowDropdown, false);
+                    Set(reportMonthShowDropdown, false);
+                    Set(reportWeekShowDropdown, false);
+                    Set(reportPrivacyShowDropdown, false);
+                Visible: =reportTypeShowDropdown || reportYearShowDropdown || reportQuarterShowDropdown || reportMonthShowDropdown || reportWeekShowDropdown || reportPrivacyShowDropdown
+                Width: =Parent.Width
+                X: =40
+                Y: =40
+                ZIndex: =14
+
+            InputDateHere_Label_2 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =44
+                Size: =10.5
+                Text: ="Unit"
+                Width: =50
+                X: =title_ITem.X
+                Y: =If(DealDetailTab = 1, If(isAddItem, input_item_note.Y + input_item_note.Height + 20, title_ITem.Y + title_ITem.Height + 10), DealDetailTab = 3, Container16_1.Y + Container16_1.Height, If(Container16_ToAdd.Visible, Container16_ToAdd.Y + Container16_ToAdd.Height + 10, Container16_ToAdd.Y))
+                ZIndex: =15
+
+            TextInput2_3 As text:
+                BorderColor: =If(IsBlank(Self.Text) && isSubmitAddItemUnitTab1, Color.Red, RGBA(191, 191, 192, 1))
+                BorderThickness: =1
+                Default: =
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HoverFill: =RGBA(186, 202, 226, 0)
+                MaxLength: =150
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 1 && isAddUnit
+                Width: =If(App.Width > 800, drop_data_type.Width, input_item_name_vi.Width)
+                X: =InputDateHere_Label_2.X
+                Y: =InputDateHere_Label_4.Y
+                ZIndex: =16
+
+            ButtonAddItem As button:
+                BorderStyle: =BorderStyle.None
+                Fill: =RGBA(17, 79, 144, 1)
+                Font: =Font.Arial
+                Height: =30
+                OnSelect: =Set(isAddItem, true);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Text: =""
+                Visible: =DealDetailTab = 1 && !isAddItem
+                Width: =30
+                X: =title_ITem.X + title_ITem.Width + 16
+                Y: =title_ITem.Y + 6
+                ZIndex: =17
+
+            icon_ButtonAddItem As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""display:flex ;align-items:center; justify-content: center;width: 30px;height: 30px;cursor:pointer;""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                      <path d=""M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"" fill=""#FEFEFE""/>
+                    </svg></div>"
+                OnSelect: =Set(isAddItem, true);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Visible: =DealDetailTab = 1 && !isAddItem
+                Width: =30
+                X: =ButtonAddItem.X
+                Y: =ButtonAddItem.Y
+                ZIndex: =18
+
+            Container16_1 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =Gallery8_2.Height + If(Gallery8_2.AllItemsCount = 0, 100, 70)
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Visible: =DealDetailTab = 3
+                Width: =ListEncryptionWhiteBackground_2.Width - If(App.Width > 800, 50, 90)
+                X: =label_data_type.X
+                Y: =title_ITem.Y + title_ITem.Height
+                ZIndex: =19
+
+                Container17_1 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =Gallery8_2.Width
+                    ZIndex: =1
+
+                    "Gallery8_2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        Height: =Min(Self.AllItemsCount, 5) * Self.TemplateHeight
+                        Items: |-
+                            =Filter(listItemUnit,
+                                searchInput in ThisRecord.item_name_vi ||
+                                searchInput in ThisRecord.item_name_en ||
+                                searchInput in ThisRecord.item_code ||
+                                searchInput in ThisRecord.data_type ||
+                                searchInput in ThisRecord.note
+                            )
+                        Layout: =Layout.Vertical
+                        TemplatePadding: =0
+                        TemplateSize: =If(App.Width > 600, 50, 70)
+                        Visible: =Parent.Visible
+                        Width: =tb_layout_note.X + tb_layout_note.Width + 15 - If(DealDetailTab = 1, Self.X, 0)
+                        Y: =tb_layout_company_type.Y + tb_layout_company_type.Height
+                        ZIndex: =13
+
+                        layout_issuer_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_company_type.Width
+                            ZIndex: =1
+
+                        layout_short_3 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_item_code.Width
+                            X: =layout_issuer_6.X + layout_issuer_6.Width
+                            Y: =layout_issuer_6.Y
+                            ZIndex: =2
+
+                        layout_issuer_Name_5 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_data_type.Width
+                            X: =layout_short_3.X + layout_short_3.Width
+                            Y: =layout_short_3.Y
+                            ZIndex: =3
+
+                        layout_sector_4 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_item_vi.Width 
+                            X: =layout_issuer_Name_5.X + layout_issuer_Name_5.Width
+                            Y: =layout_issuer_Name_5.Y
+                            ZIndex: =4
+
+                        label_issuer_6 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.company_type
+                            Width: =layout_issuer_6.Width
+                            X: =layout_issuer_6.X
+                            Y: =layout_issuer_6.Y
+                            ZIndex: =5
+
+                        label_short_3 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_code
+                            Width: =layout_short_3.Width
+                            X: =layout_short_3.X
+                            Y: =layout_short_3.Y
+                            ZIndex: =6
+
+                        label_issuer_name_5 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =If(IsBlank(First(Filter(dataTypeItems, value = ThisItem.data_type)).text), ThisItem.data_type, First(Filter(dataTypeItems, value = ThisItem.data_type)).text)
+                            Width: =layout_issuer_Name_5.Width
+                            X: =layout_issuer_Name_5.X
+                            Y: =layout_issuer_Name_5.Y
+                            ZIndex: =7
+
+                        label_sector_4 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_name_vi
+                            Width: =layout_sector_4.Width
+                            X: =layout_sector_4.X
+                            Y: =layout_sector_4.Y
+                            ZIndex: =8
+
+                        layout_sector_5 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_item_vi.Width 
+                            X: =layout_sector_4.X + layout_sector_4.Width
+                            Y: =layout_issuer_Name_5.Y
+                            ZIndex: =9
+
+                        label_sector_5 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_name_en
+                            Width: =layout_sector_5.Width
+                            X: =layout_sector_5.X
+                            ZIndex: =10
+
+                        layout_sector_6 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_2.TemplateHeight
+                            Width: =tb_layout_note.Width
+                            X: =layout_sector_5.X + layout_sector_5.Width
+                            Y: =layout_issuer_Name_5.Y
+                            ZIndex: =11
+
+                        label_sector_6 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_2.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.note
+                            Width: =layout_sector_6.Width 
+                            X: =layout_sector_6.X
+                            ZIndex: =12
+
+                    Label4 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: =Gallery8_2.AllItemsCount = 0
+                        Width: =tb_label_item_note.X + tb_label_item_note.Width - Self.X
+                        Y: =44
+                        ZIndex: =14
+
+                    AddItemHeader_Group As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =14
+
+                        tb_layout_company_type As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            ZIndex: =1
+
+                        tb_layout_item_code As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_company_type.X + tb_layout_company_type.Width
+                            Y: =tb_layout_company_type.Y
+                            ZIndex: =2
+
+                        tb_layout_data_type As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_item_code.X + tb_layout_item_code.Width
+                            Y: =tb_layout_item_code.Y
+                            ZIndex: =3
+
+                        tb_layout_item_vi As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =300
+                            X: =tb_layout_data_type.X + tb_layout_data_type.Width
+                            Y: =tb_layout_data_type.Y
+                            ZIndex: =4
+
+                        tb_label_company_type As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Company type"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_company_type.Width
+                            X: =tb_layout_company_type.X
+                            Y: =tb_layout_company_type.Y
+                            ZIndex: =5
+
+                        tb_label_item_code As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_item_code.Width 
+                            X: =tb_layout_item_code.X
+                            Y: =tb_layout_item_code.Y
+                            ZIndex: =6
+
+                        tb_label_data_type As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Data type"
+                            Visible: =Parent.Visible
+                            Width: =If(DealDetailTab = 1, 0, 199)
+                            X: =tb_layout_data_type.X
+                            Y: =tb_layout_item_code.Y
+                            ZIndex: =7
+
+                        tb_label_item_vi As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item name VI"
+                            Visible: =Parent.Visible
+                            Width: =199
+                            X: =tb_layout_item_vi.X
+                            Y: =tb_layout_item_vi.Y
+                            ZIndex: =8
+
+                        tb_layout_item_en As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =300
+                            X: =tb_layout_item_vi.X + tb_layout_item_vi.Width
+                            Y: =tb_layout_data_type.Y
+                            ZIndex: =9
+
+                        tb_label_item_en As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item name EN"
+                            Visible: =Parent.Visible
+                            Width: =199
+                            X: =tb_layout_item_en.X
+                            Y: =tb_layout_item_en.Y
+                            ZIndex: =10
+
+                        tb_layout_note As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =400
+                            X: =tb_layout_item_en.X + tb_layout_item_en.Width
+                            Y: =tb_layout_data_type.Y
+                            ZIndex: =11
+
+                        tb_label_item_note As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Note"
+                            Tooltip: ="Item code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_note.Width 
+                            X: =tb_layout_note.X
+                            Y: =tb_layout_note.Y
+                            ZIndex: =12
+
+            Container16_ToAdd As groupContainer.horizontalAutoLayoutContainer:
+                BorderColor: =RGBA(192, 192, 192, 1)
+                DropShadow: =DropShadow.None
+                Height: =If(Gallery8_4.AllItemsCount = 0, 0, Gallery8_4.Height + If(Gallery8_4.AllItemsCount = 0, 100, 70))
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =ListEncryptionWhiteBackground_2.Width - If(App.Width > 800, 50, 90)
+                X: =label_data_type.X
+                Y: =TextInput2_4.Y + TextInput2_4.Height + If(!isValidItemToAdd, 50, 10)
+                ZIndex: =20
+
+                Container17_2 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =Gallery8_4.Width
+                    ZIndex: =1
+
+                    "Gallery8_4 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        Height: =Min(Self.AllItemsCount, 5) * Self.TemplateHeight
+                        Items: =listItemUnitToCreate
+                        Layout: =Layout.Vertical
+                        TemplatePadding: =0
+                        TemplateSize: =If(App.Width > 600, 50, 70)
+                        Visible: =Parent.Visible
+                        Width: =tb_layout_note_1.X + tb_layout_note_1.Width + 15 - If(DealDetailTab = 1, Self.X, 0)
+                        Y: =tb_layout_company_type_2.Y + tb_layout_company_type_2.Height
+                        ZIndex: =7
+
+                        layout_issuer_8 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_company_type_2.Width
+                            ZIndex: =1
+
+                        layout_short_8 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.item_code), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_item_code_1.Width
+                            X: =layout_issuer_8.X + layout_issuer_8.Width
+                            Y: =layout_issuer_8.Y
+                            ZIndex: =2
+
+                        layout_issuer_Name_7 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.data_type), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_data_type_2.Width
+                            X: =layout_short_8.X + layout_short_8.Width
+                            Y: =layout_short_8.Y
+                            ZIndex: =3
+
+                        layout_sector_7 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.item_name_vi) && IsBlank(ThisItem.item_name_en), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_item_vi_1.Width 
+                            X: =layout_issuer_Name_7.X + layout_issuer_Name_7.Width
+                            Y: =layout_issuer_Name_7.Y
+                            ZIndex: =4
+
+                        label_issuer_8 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.company_type
+                            Width: =layout_issuer_8.Width
+                            X: =layout_issuer_8.X
+                            Y: =layout_issuer_8.Y
+                            ZIndex: =5
+
+                        label_short_8 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_code
+                            Width: =layout_short_8.Width
+                            X: =layout_short_8.X
+                            Y: =layout_short_8.Y
+                            ZIndex: =6
+
+                        label_issuer_name_7 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =If(IsBlank(First(Filter(dataTypeItems, value = ThisItem.data_type)).text), ThisItem.data_type, First(Filter(dataTypeItems, value = ThisItem.data_type)).text)
+                            Width: =layout_issuer_Name_7.Width
+                            X: =layout_issuer_Name_7.X
+                            Y: =layout_issuer_Name_7.Y
+                            ZIndex: =7
+
+                        label_sector_7 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_name_vi
+                            Width: =layout_sector_7.Width
+                            X: =layout_sector_7.X
+                            Y: =layout_sector_7.Y
+                            ZIndex: =8
+
+                        layout_sector_8 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.item_name_vi) && IsBlank(ThisItem.item_name_en), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_item_vi_1.Width 
+                            X: =layout_sector_7.X + layout_sector_7.Width
+                            Y: =layout_issuer_Name_7.Y
+                            ZIndex: =9
+
+                        label_sector_8 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.item_name_en
+                            Width: =layout_sector_8.Width
+                            X: =layout_sector_8.X
+                            ZIndex: =10
+
+                        layout_sector_9 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_4.TemplateHeight
+                            Width: =tb_layout_note_1.Width
+                            X: =layout_sector_8.X + layout_sector_8.Width
+                            Y: =layout_issuer_Name_7.Y
+                            ZIndex: =11
+
+                        label_sector_9 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_4.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.note  
+                            Width: =layout_sector_9.Width
+                            X: =layout_sector_9.X
+                            ZIndex: =12
+
+                    Label4_2 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: =Gallery8_4.AllItemsCount = 0
+                        Width: =tb_label_item_note_1.X + tb_label_item_note_1.Width - Self.X
+                        Y: =44
+                        ZIndex: =8
+
+                    AddItemHeader_Group_2 As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =14
+
+                        tb_layout_company_type_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            ZIndex: =1
+
+                        tb_layout_item_code_1 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_company_type_2.X + tb_layout_company_type_2.Width
+                            Y: =tb_layout_company_type_2.Y
+                            ZIndex: =2
+
+                        tb_layout_data_type_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_item_code_1.X + tb_layout_item_code_1.Width
+                            Y: =tb_layout_item_code_1.Y
+                            ZIndex: =3
+
+                        tb_layout_item_vi_1 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =300
+                            X: =tb_layout_data_type_2.X + tb_layout_data_type_2.Width
+                            Y: =tb_layout_data_type_2.Y
+                            ZIndex: =4
+
+                        tb_layout_item_en_1 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =300
+                            X: =tb_layout_item_vi_1.X + tb_layout_item_vi_1.Width
+                            Y: =tb_layout_data_type_2.Y
+                            ZIndex: =5
+
+                        tb_layout_note_1 As rectangle:
+                            BorderColor: =RGBA(191, 191, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            Width: =400
+                            X: =tb_layout_item_en_1.X + tb_layout_item_en_1.Width
+                            Y: =tb_layout_data_type_2.Y
+                            ZIndex: =6
+
+                        tb_label_company_type_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Company type"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_company_type_2.Width 
+                            X: =tb_layout_company_type_2.X
+                            Y: =tb_layout_company_type_2.Y
+                            ZIndex: =9
+
+                        tb_label_item_code_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_item_code_1.Width 
+                            X: =tb_layout_item_code_1.X
+                            Y: =tb_layout_item_code_1.Y
+                            ZIndex: =10
+
+                        tb_label_data_type_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Data type"
+                            Visible: =Parent.Visible
+                            Width: =If(DealDetailTab = 1, 0, tb_layout_data_type_2.Width)
+                            X: =tb_layout_data_type_2.X
+                            Y: =tb_layout_item_code_1.Y
+                            ZIndex: =11
+
+                        tb_label_item_vi_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item name VI"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_item_vi_1.Width 
+                            X: =tb_layout_item_vi_1.X
+                            Y: =tb_layout_item_vi_1.Y
+                            ZIndex: =12
+
+                        tb_label_item_en_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Item name EN"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_item_en_1.Width
+                            X: =tb_layout_item_en_1.X
+                            Y: =tb_layout_item_en_1.Y
+                            ZIndex: =13
+
+                        tb_label_item_note_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Note"
+                            Tooltip: ="Item code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_note_1.Width
+                            X: =tb_layout_note_1.X
+                            Y: =tb_layout_note_1.Y
+                            ZIndex: =14
+
+            Container16_2 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =Gallery8_3.Height + If(Gallery8_3.AllItemsCount = 0, 100, 70)
+                LayoutMode: =LayoutMode.Auto
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Visible: =DealDetailTab = 3
+                Width: =ListEncryptionWhiteBackground_2.Width - 50
+                X: =label_data_type.X
+                Y: =InputDateHere_Label_2.Y + InputDateHere_Label_2.Height + 20
+                ZIndex: =21
+
+                Container17_3 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    ZIndex: =1
+
+                    "Gallery8_3 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        Height: =Min(Self.AllItemsCount, 5) * Self.TemplateHeight
+                        Items: =Filter(listUnit, searchInput in ThisRecord.unit_code || searchInput in ThisRecord.unit_name)
+                        Layout: =Layout.Vertical
+                        TemplatePadding: =0
+                        TemplateSize: =If(App.Width > 600, 50, 70)
+                        Visible: =Parent.Visible
+                        Width: =layout_issuer_Name_6.X + layout_issuer_Name_6.Width - layout_issuer_7.X + 15 
+                        Y: =tb_layout_company_type_1.Y + tb_layout_company_type_1.Height
+                        ZIndex: =13
+
+                        layout_issuer_7 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_3.TemplateHeight
+                            Width: =tb_layout_company_type_1.Width
+                            ZIndex: =1
+
+                        layout_issuer_Name_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_3.TemplateHeight
+                            Width: =tb_label_data_type_1.Width
+                            X: =layout_issuer_7.X + layout_issuer_7.Width
+                            Y: =layout_issuer_7.Y
+                            ZIndex: =3
+
+                        label_issuer_7 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_3.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.unit_code 
+                            Width: =layout_issuer_7.Width
+                            X: =layout_issuer_7.X
+                            Y: =layout_issuer_7.Y
+                            ZIndex: =5
+
+                        label_issuer_name_6 As label:
+                            Color: =RGBA(82, 82, 82, 1)
+                            Font: =Font.Arial
+                            Height: =Gallery8_3.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.unit_name
+                            Width: =layout_issuer_Name_6.Width
+                            X: =layout_issuer_Name_6.X
+                            Y: =layout_issuer_Name_6.Y
+                            ZIndex: =7
+
+                    Label4_1 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: =Gallery8_3.AllItemsCount = 0
+                        Width: =tb_layout_data_type_1.X + tb_layout_data_type_1.Width - Self.X
+                        Y: =44
+                        ZIndex: =14
+
+                    AddItemHeader_Group_1 As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =14
+
+                        tb_layout_company_type_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            ZIndex: =1
+
+                        tb_layout_data_type_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_company_type_1.X + tb_layout_company_type_1.Width
+                            Y: =tb_layout_company_type_1.Y
+                            ZIndex: =3
+
+                        tb_label_company_type_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Unit code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_company_type_1.Width 
+                            X: =tb_layout_company_type_1.X
+                            Y: =tb_layout_company_type_1.Y
+                            ZIndex: =5
+
+                        tb_label_data_type_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Unit"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_data_type_1.Width 
+                            X: =tb_layout_data_type_1.X
+                            Y: =tb_layout_data_type_1.Y
+                            ZIndex: =7
+
+            Container16_1_ToAdd As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =If(Gallery8_5.AllItemsCount = 0, 0, Gallery8_5.Height + If(Gallery8_5.AllItemsCount = 0, 100, 70))
+                LayoutMode: =LayoutMode.Auto
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =ListEncryptionWhiteBackground_2.Width - 50
+                X: =label_data_type.X
+                Y: =TextInput2_5.Y + TextInput2_5.Height + If(!isValidUnitToAdd, 60, 20)
+                ZIndex: =22
+
+                Container17_4 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    ZIndex: =1
+
+                    "Gallery8_5 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        Height: =Min(Self.AllItemsCount, 5) * Self.TemplateHeight
+                        Items: =listUnitToCreate
+                        Layout: =Layout.Vertical
+                        TemplatePadding: =0
+                        TemplateSize: =If(App.Width > 600, 50, 70)
+                        Visible: =Parent.Visible
+                        Width: =layout_issuer_Name_8.X + layout_issuer_Name_8.Width - layout_issuer_9.X + 15 
+                        Y: =tb_layout_company_type_3.Y + tb_layout_company_type_3.Height
+                        ZIndex: =13
+
+                        layout_issuer_9 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.unit_code), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_5.TemplateHeight
+                            Width: =tb_layout_company_type_3.Width
+                            ZIndex: =1
+
+                        layout_issuer_Name_8 As rectangle:
+                            BorderColor: =If(IsBlank(ThisItem.unit_name), Color.Red, RGBA(191, 191, 192, 1))
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =Gallery8_5.TemplateHeight
+                            Width: =tb_label_data_type_3.Width
+                            X: =layout_issuer_9.X + layout_issuer_9.Width
+                            Y: =layout_issuer_9.Y
+                            ZIndex: =3
+
+                        label_issuer_9 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_5.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.unit_code 
+                            Width: =layout_issuer_9.Width
+                            X: =layout_issuer_9.X
+                            Y: =layout_issuer_9.Y
+                            ZIndex: =5
+
+                        label_issuer_name_8 As label:
+                            Font: =Font.Arial
+                            Height: =Gallery8_5.TemplateHeight
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: =ThisItem.unit_name
+                            Width: =layout_issuer_Name_8.Width
+                            X: =layout_issuer_Name_8.X
+                            Y: =layout_issuer_Name_8.Y
+                            ZIndex: =7
+
+                    Label4_3 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: =Gallery8_5.AllItemsCount = 0
+                        Width: =tb_layout_data_type_3.X + tb_layout_data_type_3.Width - Self.X
+                        Y: =44
+                        ZIndex: =14
+
+                    AddItemHeader_Group_3 As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =14
+
+                        tb_layout_company_type_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            ZIndex: =1
+
+                        tb_layout_data_type_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Visible: =Parent.Visible
+                            X: =tb_layout_company_type_3.X + tb_layout_company_type_3.Width
+                            Y: =tb_layout_company_type_3.Y
+                            ZIndex: =3
+
+                        tb_label_company_type_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Unit code"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_company_type_3.Width 
+                            X: =tb_layout_company_type_3.X
+                            Y: =tb_layout_company_type_3.Y
+                            ZIndex: =5
+
+                        tb_label_data_type_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            Height: =44
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =If(App.Width > 600, 10.5, 9)
+                            Text: ="Unit"
+                            Visible: =Parent.Visible
+                            Width: =tb_layout_data_type_3.Width 
+                            X: =tb_layout_data_type_3.X
+                            Y: =tb_layout_data_type_3.Y
+                            ZIndex: =7
+
+            ButtonAddItem_1 As button:
+                BorderStyle: =BorderStyle.None
+                Fill: =RGBA(17, 79, 144, 1)
+                Font: =Font.Arial
+                Height: =30
+                OnSelect: =Set(isAddUnit, true);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Text: =""
+                Visible: =DealDetailTab = 1 && !isAddUnit
+                Width: =30
+                X: =InputDateHere_Label_2.X + InputDateHere_Label_2.Width + 16
+                Y: =InputDateHere_Label_2.Y + 6
+                ZIndex: =23
+
+            icon_ButtonAddItem_1 As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""display:flex ;align-items:center; justify-content: center;width: 30px;height: 30px;cursor:pointer;""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                      <path d=""M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"" fill=""#FEFEFE""/>
+                    </svg></div>"
+                OnSelect: =Set(isAddUnit, true);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Visible: =DealDetailTab = 1 && !isAddUnit
+                Width: =30
+                X: =ButtonAddItem_1.X
+                Y: =ButtonAddItem_1.Y
+                ZIndex: =24
+
+            "Gl_drop_data_type As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =0.5
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+                Items: =dataTypeItems
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =reportTypeShowDropdown
+                Width: =drop_data_type.Width
+                X: =drop_data_type.X
+                Y: =drop_data_type.Y + 50
+                ZIndex: =25
+
+                Button6_34 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =If(reportTypeValue = ThisItem.value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: |-
+                        =Set(reportTypeValue, ThisItem.value);
+                        Set(reportTypeShowDropdown, false);
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10.5
+                    Text: =ThisItem.text
+                    Width: =Parent.Width
+                    X: =0.00
+                    ZIndex: =1
+
+            input_item_search As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HintText: ="Search ..."
+                HoverFill: =RGBA(255, 255, 255, 1)
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 3
+                Width: =If(App.Width > 800, 400, ListEncryptionWhiteBackground_2.Width - 150)
+                X: =title_ITem.X
+                Y: =QT2Tabs_7.Y + 60
+                ZIndex: =26
+
+            InputDateHere_Label_3 As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =42
+                Size: =10.5
+                Text: ="Input data here"
+                Visible: =DealDetailTab = 2
+                Width: =120
+                X: =title_ITem.X
+                Y: =title_ITem.Y + title_ITem.Height + 10
+                ZIndex: =27
+
+            TextInput2_4 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =42
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Mode: =TextMode.MultiLine
+                OnChange: |
+                    =Set(inputChanged, false);
+                    Set(showRefreshButton, true);
+                    UpdateContext({ShowNotification: false});
+                    Set(splitIssuer,Filter(Substitute(Split(Self.Text,Char(10)),Char(9),"~"), Len(Value) > 0));
+                    ClearCollect(listItemUnitTemp, []);
+                    Set(isValidItemToAdd, true);
+                    ClearCollect(invalidItemRows, []);
+                    ForAll(splitIssuer As data,
+                        Collect(listItemUnitTemp,
+                            {
+                                company_type: First(Split(data.Value,"~")).Value,
+                                item_code: If(CountRows(Split(data.Value,"~")) >= 2, Last(FirstN((Split(data.Value,"~")),2)).Value, ""),
+                                data_type: If(CountRows(Split(data.Value,"~")) >= 3, Last(FirstN((Split(data.Value,"~")),3)).Value, ""),
+                                item_name_vi: If(CountRows(Split(data.Value,"~")) >= 4, Last(FirstN((Split(data.Value,"~")),4)).Value, ""),
+                                item_name_en: If(CountRows(Split(data.Value,"~")) >= 5, Last(FirstN((Split(data.Value,"~")),5)).Value, ""),
+                                note:If(CountRows(Split(data.Value,"~")) >= 6, Last(FirstN((Split(data.Value,"~")),6)).Value, "")
+                            }
+                        );
+                        If( IsBlank(If(CountRows(Split(data.Value,"~")) >= 2, Last(FirstN((Split(data.Value,"~")),2)).Value, Blank())) ||
+                            IsBlank(If(CountRows(Split(data.Value,"~")) >= 3, Last(FirstN((Split(data.Value,"~")),3)).Value, Blank())) ||
+                            (IsBlank(If(CountRows(Split(data.Value,"~")) >= 4, Last(FirstN((Split(data.Value,"~")),4)).Value, Blank())) && IsBlank(If(CountRows(Split(data.Value,"~")) >= 5, Last(FirstN((Split(data.Value,"~")),5)).Value, Blank()))),
+                        Collect(invalidItemRows, {isValid: false}));
+                    );
+                    If(!IsEmpty(listItemUnitTemp) && !IsBlank(Trim(Self.Text)), Set(inputChanged, true); Set(isValidItemToAdd, CountRows(invalidItemRows) = 0));
+                    ClearCollect(listItemUnitToCreate,listItemUnitTemp);
+                    Clear(listIssuerData);
+                    Reset(Self);
+                    // If(!isValidItemToAdd, Set(IsError, true); Set(NoticationText,"Invalid item input datas!"); UpdateContext({ShowNotification: true}));
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 2
+                Width: =input_item_search.X + input_item_search.Width - Self.X + If(App.Width > 800, 0, 30)
+                X: =InputDateHere_Label_3.X + InputDateHere_Label_3.Width
+                Y: =InputDateHere_Label_3.Y
+                ZIndex: =28
+
+            InputDateHere_Label_4 As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                Height: =44
+                Size: =10.5
+                Text: =If(DealDetailTab = 1, "Unit", "Input data here")
+                Visible: =DealDetailTab <> 3
+                Width: =If(DealDetailTab = 1, 0, 120 )
+                X: =title_ITem.X
+                Y: =InputDateHere_Label_2.Y + InputDateHere_Label_2.Height + 10
+                ZIndex: =29
+
+            TextInput2_5 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =42
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Mode: =TextMode.MultiLine
+                OnChange: |
+                    =Set(inputChanged, false);
+                    Set(showRefreshButton, true);
+                    UpdateContext({ShowNotification: false});
+                    Set(splitIssuer, Filter(Substitute(Split(Self.Text,Char(10)),Char(9),"~"), Len(Value) > 0));
+                    Set(isValidUnitToAdd, true);
+                    ClearCollect(invalidUnitRows, []);
+                    ClearCollect(existedUnitRows, []);
+                    ClearCollect(listUnitTemp, []);
+                    ForAll(splitIssuer As data,
+                        Collect(listUnitTemp,
+                            {
+                                unit_code: First(Split(data.Value,"~")).Value,
+                                unit_name: If(CountRows(Split(data.Value,"~")) >= 2, Last(FirstN((Split(data.Value,"~")),2)).Value, Blank())
+                            }
+                        );
+                        If( IsBlank(First(Split(data.Value,"~")).Value) ||
+                            IsBlank(If(CountRows(Split(data.Value,"~")) >= 2, Last(FirstN((Split(data.Value,"~")),2)).Value, Blank())),
+                        Collect(invalidUnitRows, {isValid: false}));
+                        // If(Trim(If(CountRows(Split(data.Value,"~")) >= 2, Last(FirstN((Split(data.Value,"~")),2)).Value, Blank())) in listUnit.unit_name, Collect(existedUnitRows, {isValid: false}));
+                    );
+                    If(!IsEmpty(listUnitTemp) && !IsBlank(Trim(Self.Text)), Set(inputChanged, true));
+                    ClearCollect(listUnitToCreate,listUnitTemp);
+                    Clear(listIssuerData);
+                    Reset(Self);
+                    
+                    Set(isValidUnitToAdd, CountRows(invalidUnitRows) = 0 && CountRows(existedUnitRows) = 0);
+                    // If(CountRows(invalidUnitRows) <> 0, Set(IsError, true); Set(NoticationText,"Invalid data, please check the data again."); UpdateContext({ShowNotification: true}));
+                    // If(CountRows(existedUnitRows) <> 0, Set(IsError, true); Set(NoticationText,"Unit already exists. Please check again."); UpdateContext({ShowNotification: true}));
+                Size: =If(App.Width > 600, 10.5, 12)
+                Visible: =DealDetailTab = 2
+                Width: =input_item_search.X + input_item_search.Width - Self.X + If(App.Width > 800, 0, 20)
+                X: =InputDateHere_Label_3.X + InputDateHere_Label_3.Width
+                Y: =InputDateHere_Label_4.Y
+                ZIndex: =30
+
+            btnRefresh_10 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: =Select(RefreshItemsIcon)
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =RefreshItemsIcon.Visible
+                Width: =44
+                X: =RefreshItemsIcon.X - 11
+                Y: =RefreshItemsIcon.Y - 12
+                ZIndex: =31
+
+            RefreshItemsIcon As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Clear(listItemUnitToCreate);
+                    Set(isValidItemToAdd, true);
+                Tooltip: ="Click here to clear datas"
+                Visible: =TextInput2_4.Visible && !IsEmpty(listItemUnitToCreate)
+                Width: =20
+                X: =TextInput2_4.X + TextInput2_4.Width + 20
+                Y: =TextInput2_4.Y + 11
+                ZIndex: =32
+
+            btnRefresh_11 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: =Select(RefreshUnitsIcon)
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =RefreshUnitsIcon.Visible
+                Width: =44
+                X: =RefreshUnitsIcon.X - 11
+                Y: =RefreshUnitsIcon.Y - 12
+                ZIndex: =33
+
+            RefreshUnitsIcon As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Clear(listUnitToCreate);
+                    Clear(existedUnitRows);
+                    Clear(invalidUnitRows);
+                    Set(isValidUnitToAdd, true);
+                Tooltip: ="Click here to clear datas"
+                Visible: =TextInput2_5.Visible && !IsEmpty(listUnitToCreate)
+                Width: =20
+                X: =TextInput2_5.X + TextInput2_5.Width + 20
+                Y: =TextInput2_5.Y + 11
+                ZIndex: =34
+
+            SearchAUMButton_6 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: =Set(searchInput, Trim(input_item_search.Text));
+                PaddingBottom: =10
+                PaddingLeft: =40
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Visible: =input_item_search.Visible
+                Width: =44
+                X: =input_item_search.X + input_item_search.Width + 10
+                Y: =input_item_search.Y
+                ZIndex: =35
+
+            SearchAUMIcon_8 As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                      <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                    </svg><div>"
+                OnSelect: =Select(SearchAUMButton_6)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Visible: =input_item_search.Visible
+                Width: =30
+                X: =SearchAUMButton_6.X + 5
+                Y: =SearchAUMButton_6.Y + 6
+                ZIndex: =36
+
+            btnRefresh_12 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: =Select(RefreshSearch)
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =RefreshSearch.Visible
+                Width: =44
+                X: =RefreshSearch.X - 11
+                Y: =RefreshSearch.Y - 12
+                ZIndex: =37
+
+            RefreshSearch As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Reset(input_item_search);
+                    Set(searchInput, Trim(input_item_search.Text));
+                Tooltip: ="Click here to clear filter"
+                Visible: =input_item_search.Visible && !IsBlank(input_item_search.Text)
+                Width: =20
+                X: =input_item_search.X + input_item_search.Width + 70
+                Y: =input_item_search.Y + 11
+                ZIndex: =38
+
+            InputDateHere_Label_5 As label:
+                Color: =RGBA(237, 76, 76, 1)
+                Font: =Font.Arial
+                Height: =42
+                Size: =10.5
+                Text: ="Invalid item input datas!"
+                Visible: =DealDetailTab = 2 && !isValidItemToAdd
+                Width: =300
+                X: =title_ITem.X
+                Y: =InputDateHere_Label_3.Y + InputDateHere_Label_3.Height
+                ZIndex: =39
+
+            InputDateHere_Label_6 As label:
+                Color: =RGBA(237, 76, 76, 1)
+                Font: =Font.Arial
+                Height: =42
+                Size: =10.5
+                Text: =If(CountRows(invalidUnitRows) <> 0, "Invalid unit input datas!", "Unit already exists. Please check again.")
+                Visible: =DealDetailTab = 2 && (CountRows(invalidUnitRows) <> 0 || CountRows(existedUnitRows) <> 0)
+                Width: =300
+                X: =title_ITem.X
+                Y: =InputDateHere_Label_4.Y + InputDateHere_Label_4.Height
+                ZIndex: =40
+
+    HeaderQT2List_7 As Header_3:
+        ZIndex: =8
+
+    MenuItemsSideBar_22 As MenuItemsSideBar_21:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_22.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_22.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_22.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_22.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_22.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_22.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_22.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_22.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_22.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_22.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_22.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_22.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_22.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_22.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_22.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_22.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Y: =56
+        ZIndex: =9
+
+    MenuItemsSideBar_Small_19 As MenuItemsSideBar_Small_18:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_19.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_19.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_19.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_19.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_19.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_19.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_19.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_19.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_19.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_19.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_19.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_19.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =10
+
+    SubHeaderGroup_4 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =16
+
+        SubHeaderBg_5 As rectangle:
+            BorderColor: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =56
+            OnSelect: =true 
+            Width: =Parent.Width - If(Parent.Width > 800, If(MobileShowMenu, 240, 50), 0)
+            X: =If(App.Width > 800, If(MobileShowMenu, 240, 50), 0)
+            Y: =56
+            ZIndex: =3
+
+        IconBack_5 As icon.ArrowLeft:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =If(App.Width > 600, 25, 15)
+            Icon: =If(App.Width > 600, Icon.ArrowLeft, Icon.ChevronLeft)
+            OnSelect: |-
+                =//Reset Field
+                Navigate(Dashboard, ScreenTransition.Fade);
+            Visible: =false
+            Width: =If(App.Width > 600, 25, 25)
+            X: =SubHeaderBg_5.X + If(App.Width > 800, 5, 0)
+            Y: =SubHeaderBg_5.Y + If(App.Width > 600, 16, 20)
+            ZIndex: =4
+
+        SubHeaderHr_6 As rectangle:
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =IconBack_5.Height + 10
+            Visible: =false
+            Width: =0.5
+            X: =IconBack_5.X + IconBack_5.Width + 5
+            Y: =IconBack_5.Y - 5
+            ZIndex: =5
+
+        BackMobile_Label_4 As label:
+            Font: =Font.Arial
+            Height: =30
+            OnSelect: =Navigate(TableProposalQT2, ScreenTransition.Fade)
+            Size: =10.5
+            Text: ="Back"
+            Visible: =App.Width < 600
+            Width: =0
+            X: =IconBack_5.X + IconBack_5.Width
+            Y: =IconBack_5.Y - 7
+            ZIndex: =6
+
+        SaveButton_5 As htmlViewer:
+            BorderStyle: =BorderStyle.Solid
+            Font: =Font.Arial
+            Height: =50
+            HtmlText: |-
+                ="<div style=""width: 40px; height: 38px; display: flex; justify-content: center; align-items: center; border: 1px solid black; border-radius: 5px; cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                  <path d=""M21 7V19C21 19.55 20.804 20.021 20.412 20.413C20.02 20.805 19.5493 21.0007 19 21H5C4.45 21 3.979 20.804 3.587 20.412C3.195 20.02 2.99934 19.5493 3 19V5C3 4.45 3.196 3.979 3.588 3.587C3.98 3.195 4.45067 2.99934 5 3H17L21 7ZM19 7.85L16.15 5H5V19H19V7.85ZM12 18C12.8333 18 13.5417 17.7083 14.125 17.125C14.7083 16.5417 15 15.8333 15 15C15 14.1667 14.7083 13.4583 14.125 12.875C13.5417 12.2917 12.8333 12 12 12C11.1667 12 10.4583 12.2917 9.875 12.875C9.29167 13.4583 9 14.1667 9 15C9 15.8333 9.29167 16.5417 9.875 17.125C10.4583 17.7083 11.1667 18 12 18ZM6 10H15V6H6V10ZM5 7.85V19V5V7.85Z"" fill=""#525252""/>
+                </svg></div>"
+            OnSelect: |-
+                =UpdateContext({ShowNotification: false});
+                Set(isSubmitAddItemUnitTab1, false);
+                If(IsBlank(reportTypeValue) && IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text) && IsBlank(input_item_note.Text), Set(isAddItemValid, false));
+                If(IsBlank(TextInput2_3.Text), Set(isAddUnitValid, false));
+                Set(validItem,
+                    isAddItemValid &&
+                    (
+                        !IsBlank(reportTypeValue) &&
+                        (!IsBlank(input_item_name_vi.Text) || !IsBlank(input_item_name_en.Text)) &&
+                        !IsBlank(input_item_note.Text)
+                    )
+                );
+                If(DealDetailTab = 1,
+                    Set(isSubmitAddItemUnitTab1, true);
+                    Set(jsonToSend, {
+                        list_items: If(isAddItem, [
+                            {company_type: "", data_type: reportTypeValue, item_name_vi: input_item_name_vi.Text, item_name_en: input_item_name_en.Text, note: input_item_note.Text, item_code: "TVS_RTD" & Value(Concat(Split(itemLastest, ""), If(IsMatch(Value, "([0-9])"), Value)) + 1)}
+                        ], []),
+                        list_unit: If(isAddUnit, [
+                        {unit_code: "TVS_U" & Value(Concat(Split(unitLastest, ""), If(IsMatch(Value, "([0-9])"), Value)) + 1), unit_name: TextInput2_3.Text}
+                        ], [])
+                    });
+                    If(
+                        !isAddItem && !isAddUnit, Set(IsError, true); Set(NoticationText,"Item and Unit are required!"); UpdateContext({ShowNotification: true});,
+                        isAddItem && !validItem && IsBlank(reportTypeValue), Set(IsError, true); Set(NoticationText,"Data type is required!"); UpdateContext({ShowNotification: true});,
+                        isAddItem && !validItem && IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text), Set(IsError, true); Set(NoticationText,"Name VI/EN is required!"); UpdateContext({ShowNotification: true});,
+                        isAddUnit && IsBlank(TextInput2_3.Text), Set(IsError, true); Set(NoticationText,"Unit is required!"); UpdateContext({ShowNotification: true});,
+                        isAddUnit && Trim(TextInput2_3.Text) in listUnit.unit_name, Set(IsError, true); Set(NoticationText,"Unit already exists. Please check again.!"); UpdateContext({ShowNotification: true});,
+                        Set(isShowPopupDelete, true);
+                    );,
+                
+                    Set(isShowPopupDelete, true);
+                );
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Visible: =If(DealDetailTab = 1, isAddItem || isAddUnit, DealDetailTab = 2, (!IsEmpty(listUnitToCreate) || !IsEmpty(listItemUnitToCreate)) && isValidUnitToAdd && isValidItemToAdd, false)
+            Width: =43
+            X: =SubHeaderBg_3.X + SubHeaderBg_3.Width - If(App.Width > 800, 65, 55)
+            Y: =btnReject.Y
+            ZIndex: =7
+
+    Timer1_21 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_21); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =1175
+        Y: =632
+        ZIndex: =18
+
+    NotificationBox_21 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_21.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =65
+        ZIndex: =19
+
+    CloseNotiIcon_21 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_21); Set(IsError, false);
+        Visible: =NotificationBox_21.Visible
+        Width: =15
+        X: =NotificationBox_21.X + NotificationBox_21.Width - 25
+        Y: =NotificationBox_21.Y + 17.5
+        ZIndex: =20
+
+    NotificationScreen_15 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =21
+
+    AddItemUnitConfirm As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =21
+
+        RejectPopupBack_10 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =11
+
+        DeleteConfirmBg_8 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 200, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_8.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =12
+
+        CancelResearchOpinionButton_6 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(149, 149, 149, 1)
+            DisabledBorderColor: =RGBA(202, 202, 202, 1)
+            DisabledColor: =RGBA(202, 202, 202, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(202, 202, 202, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(202, 202, 202, 1)
+            PressedColor: =RGBA(202, 202, 202, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteResearchOpinionButton_6.X - Self.Width - 10
+            Y: =DeleteResearchOpinionButton_6.Y
+            ZIndex: =13
+
+        DeleteResearchOpinionButton_6 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(17, 79, 144, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(17, 79, 144, 1)
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =UpdateContext({ShowNotification: false});
+                Set(isSubmitAddItemUnitTab1, false);
+                If(IsBlank(reportTypeValue) && IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text) && IsBlank(input_item_note.Text), Set(isAddItemValid, false));
+                If(IsBlank(TextInput2_3.Text), Set(isAddUnitValid, false));
+                Set(validItem,
+                    isAddItemValid &&
+                    (
+                        !IsBlank(reportTypeValue) &&
+                        (!IsBlank(input_item_name_vi.Text) || !IsBlank(input_item_name_en.Text)) &&
+                        !IsBlank(input_item_note.Text)
+                    )
+                );
+                Set(isLoading, true);
+                If(DealDetailTab = 1,
+                    Set(isSubmitAddItemUnitTab1, true);
+                    Set(jsonToSend, {
+                        list_items: If(isAddItem, [
+                            {company_type: "", data_type: reportTypeValue, item_name_vi: input_item_name_vi.Text, item_name_en: input_item_name_en.Text, note: input_item_note.Text, item_code: "TVS_RTD" & Value(Concat(Split(itemLastest, ""), If(IsMatch(Value, "([0-9])"), Value)) + 1)}
+                        ], []),
+                        list_unit: If(isAddUnit, [
+                        {unit_code: "TVS_U" & Value(Concat(Split(unitLastest, ""), If(IsMatch(Value, "([0-9])"), Value)) + 1), unit_name: TextInput2_3.Text}
+                        ], [])
+                    });
+                    If(
+                        !isAddItem && !isAddUnit, Set(IsError, true); Set(NoticationText,"Item and Unit are required!"); UpdateContext({ShowNotification: true});,
+                        isAddItem && !validItem && IsBlank(reportTypeValue), Set(IsError, true); Set(NoticationText,"Data type is required!"); UpdateContext({ShowNotification: true});,
+                        isAddItem && !validItem && IsBlank(input_item_name_vi.Text) && IsBlank(input_item_name_en.Text), Set(IsError, true); Set(NoticationText,"Name VI/EN is required!"); UpdateContext({ShowNotification: true});,
+                        isAddUnit && IsBlank(TextInput2_3.Text), Set(IsError, true); Set(NoticationText,"Unit is required!"); UpdateContext({ShowNotification: true});,
+                        isAddUnit && Trim(TextInput2_3.Text) in listUnit.unit_name, Set(IsError, true); Set(NoticationText,"Unit already exists. Please check again.!"); UpdateContext({ShowNotification: true});,
+                        Set(createUnitRes, 'TVS->CreateUpdateItemList-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, currenUserV2.id, JSON(jsonToSend, JSONFormat.IndentFour), envDEV,envTEST, envUAT1, envUAT2));
+                        Set(reportTypeValue, "numeric"); Reset(input_item_name_vi); Reset(input_item_name_en); Reset(input_item_note); Reset(TextInput2_3);
+                        If(createUnitRes.status = "200",
+                            Set(isSubmitAddItemUnitTab1, false);
+                            Set(unitItemRes, 'TVS->FindAllItemAndUnit-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2));
+                            ClearCollect(listItemUnit, unitItemRes.listItem);
+                            ClearCollect(listUnit, unitItemRes.listUnit);
+                            Set(itemLastest, unitItemRes.itemLastest);
+                            Set(unitLastest, unitItemRes.unitLastest);
+                            Set(IsError, false); Set(NoticationText,"Added successfully!"); UpdateContext({ShowNotification: true});,
+                            Set(IsError, true); Set(NoticationText,"Added failed!"); UpdateContext({ShowNotification: true});
+                            Set(isAddItem, false);
+                            Set(isAddUnit, false);
+                        );
+                    );,
+                
+                    
+                    Set(jsonToSend, {
+                        list_items: listItemUnitToCreate,
+                        list_unit: listUnitToCreate
+                    });
+                    Set(createUnitRes, 'TVS->CreateUpdateItemList-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, currenUserV2.id, JSON(jsonToSend, JSONFormat.IndentFour), envDEV,envTEST, envUAT1, envUAT2));
+                        Set(reportTypeValue, "numeric"); Reset(input_item_name_vi); Reset(input_item_name_en); Reset(input_item_note);
+                        If(createUnitRes.status = "200",
+                            Set(isSubmitAddItemUnitTab1, false);
+                            Set(unitItemRes, 'TVS->FindAllItemAndUnit-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2));
+                            ClearCollect(listItemUnit, unitItemRes.listItem);
+                            ClearCollect(listUnit, unitItemRes.listUnit);
+                            Set(itemLastest, unitItemRes.itemLastest);
+                            Set(unitLastest, unitItemRes.unitLastest);
+                            Set(IsError, false); Set(NoticationText,"Added successfully!"); UpdateContext({ShowNotification: true});,
+                            Set(IsError, true); Set(NoticationText,"Added failed!"); UpdateContext({ShowNotification: true});
+                    );
+                    Clear(listItemUnitToCreate);
+                    Clear(listUnitToCreate);
+                );
+                Set(isShowPopupDelete, false);
+                Set(isLoading, false);
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(17, 79, 144, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_8.X + DeleteConfirmBg_8.Width - Self.Width - 30
+            Y: =DeleteConfirmBg_8.Y + DeleteConfirmBg_8.Height - Self.Height - 30
+            ZIndex: =14
+
+        DeleteConfirmCloseIcon_9 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_8. X + DeleteConfirmBg_8.Width -50
+            Y: =DeleteConfirmBg_8.Y + 20
+            ZIndex: =15
+
+        DeleteConfirmLabel_9 As label:
+            Font: =Font.Arial
+            Size: =10.5
+            Text: ="Are you sure to add this item/unit?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_8.Width - 100 - DeleteConfirmCloseIcon_9.Width
+            X: =Label2_6.X
+            Y: =Label2_6.Y + Label2_6.Height
+            ZIndex: =16
+
+        Label2_6 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =12
+            Text: ="Add Item/Unit"
+            Visible: =isShowPopupDelete
+            X: =DeleteConfirmBg_8.X + 30
+            Y: =DeleteConfirmBg_8.Y + 10
+            ZIndex: =17
+
+    LoadingQT2List_15 As LoadingComponent_6:
+        Visible: =isLoading
+        ZIndex: =22
+

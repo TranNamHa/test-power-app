@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "caafd0f6-d41b-40dd-8c5e-7ca72780bbbc",
+    "Name": "TVS->GetLookUpDivisionFilter",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "24b42c72-c0a4-ee11-be37-6045bd58b6cb"
+  }
+]

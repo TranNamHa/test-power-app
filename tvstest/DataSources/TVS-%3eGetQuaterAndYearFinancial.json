@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "97fbfa0e-5a28-48f2-bdab-a0a3c8542c05",
+    "Name": "TVS->GetQuaterAndYearFinancial",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "3fe63f6c-feb1-ee11-a568-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "eb1864ea-c689-4f43-97dd-12bfc5c20c63",
+    "Name": "TVS->UpdateNotification-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "b9d03c9e-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

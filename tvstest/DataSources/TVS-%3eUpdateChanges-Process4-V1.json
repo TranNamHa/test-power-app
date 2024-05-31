@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "a4d62dea-66b2-499e-a162-20164b9454b5",
+    "Name": "TVS->UpdateChanges-Process4-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "7f144424-e1b8-ee11-9078-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "32408c7e-4bfb-48f8-af64-2b0c4e6cf2a3",
+    "Name": "TVS->FindAllFilterPagegingPVEC-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "6fd9c1f4-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "96a883d4-d0b0-4fa8-9f04-6f4d717ad0e5",
+    "Name": "TVS->GetAllDepartmentTest-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "26ea3cfb-dca2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "f342eb34-3512-4e05-8685-d997603a5577",
+    "Name": "TVS->GetAllMeetingType-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "25ea3cfb-dca2-ee11-be37-6045bd58b6cb"
+  }
+]

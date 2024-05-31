@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "0e1cde80-1a56-4b5b-b428-b3184ca567dc",
+    "Name": "TVS->GetFileAndInvestmentBoard-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "478ada6d-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

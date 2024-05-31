@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "50804c11-7b79-410c-857e-030b6cd80eea",
+    "Name": "TVS->GetAllFilterPagingUserApi-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "497e7a17-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "5cfdf634-c281-402c-8b0c-3ce1d541f984",
+    "Name": "TVS->getAllinternalEmail-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "43d23c9e-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

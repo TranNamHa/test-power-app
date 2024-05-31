@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "e092d4c8-76a8-4b39-834e-bcae7ce726aa",
+    "Name": "TVS->GetAllEmployeesNoPaging",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "e4c61bd1-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

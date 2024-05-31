@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "4e0ecccc-36fa-40b9-8fb9-1a94ea7cb369",
+    "Name": "TVS->CreatedInvestmentPortfolio",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "bc9fefd5-36bb-ee11-9078-6045bd58b6cb"
+  }
+]

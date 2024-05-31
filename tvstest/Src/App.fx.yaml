@@ -1,0 +1,1371 @@
+App As appinfo:
+    BackEnabled: =true
+    ConfirmExit: =true
+    Formulas: =
+    OnError: =Set(ggg, Now() + 50)
+    OnStart: |-
+        =Set(startMATimer, false);
+        Set(isLoading, true);
+        Set(varfirstRun,true);
+        Set(isLoadingOnStart, true);
+        Set(ShowNotificationPopup, false);
+        Set(isDotFormat, Text(1.1) = "1.1");
+        Set(env, "TEST");Set(envDEV, false);Set(envTEST, true);Set(envUAT1, false);Set(envUAT2, false);
+        Set(maxSizeFile, 100);
+        Set(PageSizeNotification, 10);
+        Set(linkToApp, "https://apps.powerapps.com/play/e/default-7a3fda5d-74e0-432a-b4ff-61e6f9620f52/a/90af589d-9653-4f11-bebb-a880b6d38eb0?tenantId=7a3fda5d-74e0-432a-b4ff-61e6f9620f52&hint=f73ab95b-999e-44ea-9021-60046ba828ab&sourcetime=1706845001668");
+        
+        
+        Set(resKeyOpenAll, 'TVS->GetOpenAndCloseFinal-V1'.Run(envDEV,envTEST, envUAT1, envUAT2));
+        Set(envoiroment,"default-7a3fda5d-74e0-432a-b4ff-61e6f9620f52");
+        //Set(resKeyOpenAll, {open: "OPEN SYMMETRIC KEY ""AESKeyName061123-01"" DECRYPTION BY PASSWORD = 'Bmbsoft@2023' OPEN SYMMETRIC KEY ""AESKeyName061123-02"" DECRYPTION BY PASSWORD = 'Bmbsoft@2023'", close: "CLOSE SYMMETRIC KEY ""AESKeyName061123-01"" CLOSE SYMMETRIC KEY ""AESKeyName061123-02"""});
+        
+        // constants
+        Set(mailUser,User().Email);
+        Set(nowV1,Text(Now(), "yyyy-mm-dd hh:mm:ss"));
+        Set(nowV2,Text(Now(), "ddmmyyyy_hhmmss_"));
+        If(App.Width > 800, Set(MobileShowMenu, true));
+        
+        //ConfigSendPushAppNoti
+        Set(emailFromConfix, "viet.nguyen@Nitecovietnam.onmicrosoft.com");
+        Set(appProperty,JSON(
+            {appIdentifier:"90af589d-9653-4f11-bebb-a880b6d38eb0",
+            displayName:"TVS Development Center",
+            type:"CanvasApp"},JSONFormat.IndentFour));
+        
+        //FixIncomeEnvConfig
+        Set(bucketFixInAttach,"220124process3");
+        Set(urlUploadFixInHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process3/");
+        Set(urlUploadFixInTail,"?sp=r&st=2024-01-22T03:51:12Z&se=2030-05-15T11:51:12Z&sv=2022-11-02&sr=c&sig=r1ERaYGMkNvs4aLl9DsaNQFUbdEkbhLwUq%2FMKlVrdFw%3D");
+        
+        //FixInvesmentReseach
+        Set(bucketRSAttach,"220124process1-3");
+        Set(urlUploadRSHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process1-3/");
+        Set(urlUploadRSTail,"?sp=r&st=2024-01-22T03:52:16Z&se=2030-04-11T11:52:16Z&sv=2022-11-02&sr=c&sig=IVqbpUhEhwhRKuBn%2BY63o5YojttFqyR%2B3FxmTOtIMR0%3D");
+        
+        //ConmunicationRecord
+        Set(bucketCRAttach,"220124process1-1");
+        Set(urlUploadCRHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process1-1/");
+        Set(urlUploadCRTail,"?sp=r&st=2024-01-22T03:53:58Z&se=2030-01-22T11:53:58Z&sv=2022-11-02&sr=c&sig=gbJ%2BfjzpkfXBvYvjI%2FLwdpg8qeBUCVsU0b4RuP7Whcc%3D");
+        
+        //MA
+        Set(bucketMAAttach,"220124process2");
+        Set(urlUploadMAHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process2/");
+        Set(urlUploadMATail,"?sp=r&st=2024-01-22T03:54:54Z&se=2030-01-22T11:54:54Z&sv=2022-11-02&sr=c&sig=7M2%2BMZhQ%2Fq578%2FREdDc%2F%2F0szUqvgjUQZAc7Pikrznp0%3D");
+        
+        //PEVC
+        Set(bucketPEVCAttach,"220124process5");
+        Set(urlUploadPEVCHead,"https://tvsstorageaccount2012.blob.core.windows.net/261023process5/");
+        Set(urlUploadPEVCTail,"?sp=r&st=2024-01-03T09:27:49Z&se=2029-01-03T17:27:49Z&sv=2022-11-02&sr=c&sig=Yo5i%2BvoJJQpFPypTBOWnMfZ%2FZM19VFfocODvzSJgaFk%3D");
+        
+        //Process1.2EnvConfig
+        Set(bucketNLAttach,"220124process1-2");
+        Set(urlUploadNLHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process1-2/");
+        Set(urlUploadNLTail,"?sp=r&st=2024-01-22T03:55:35Z&se=2030-01-22T11:55:35Z&sv=2022-11-02&sr=c&sig=Z8PBlpkN8hF4lBUkx0Y4js4rzdmbwRrDXLnMh9mqY04%3D");
+        
+        //MarginConfig 
+        Set(bucketMargin,"220124process4");
+        Set(urlUploadMarginHead,"https://tvsstorageaccount2024.blob.core.windows.net/220124process4/");
+        Set(urlUploadMarginTail,"?sp=r&st=2024-01-22T03:57:25Z&se=2030-01-22T11:57:25Z&sv=2022-11-02&sr=c&sig=qUf56ep4kXGxeouMHFQ9GzW7jlZzlbQmTiTAgQHfm00%3D");
+        
+        // Setup global color
+        Set(globalVariables,
+        {
+            button: {
+        		blueFill: RGBA(17, 79, 144, 1),
+        		redFill: RGBA(214, 27, 27, 1),
+        		greyFill: RGBA(166, 166, 166, 1),
+                blackColor: RGBA(0, 0, 0, 1),
+        		greyBorder: RGBA(139, 139, 139, 1),
+        		blueColor: RGBA(14, 63, 115, 1),
+        		greyColor: RGBA(176, 176, 176, 1),
+        		blueButtonHoverFill: RGBA(1, 60, 154, 1),
+                redButtonHoverFill: RGBA(245, 13, 13, 1),
+        		greyButtonHoverFill: RGBA(158, 158, 158, 1)
+            },
+            status: {
+        		red: RGBA(214, 27, 27, 1),
+        		green: RGBA(11, 201, 75, 1),
+        		darkyellow: RGBA(181, 184, 24, 1),
+        		grey: RGBA(98,95,95,1),
+        		blue: RGBA(22, 63, 130, 1)
+        	},
+        	others: {}
+        });
+        
+        //ClearCollect(currentUserV2Res, 'TVS->GetCurrentUser-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, "bmbtest06@nitecovietnam.onmicrosoft.com", envDEV,envTEST, envUAT1, envUAT2)));
+        Set(isEmployee, 'TVS->CheckIsEmployee'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email).isemployee);
+        If(isEmployee <> "True", Navigate(NotHavePermissonScreen),
+        Concurrent(
+            ClearCollect(currentUserV2Res, 'TVS->GetCurrentUser-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email, envDEV,envTEST, envUAT1, envUAT2)),
+            //ClearCollect(currentUserV2Res, 'TVS->GetCurrentUser-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, "bmbtest04@nitecovietnam.onmicrosoft.com", envDEV,envTEST, envUAT1, envUAT2)),
+            ClearCollect(colAllNotification, 'TVS->GetAllNotification-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email, "10", envDEV,envTEST, envUAT1, envUAT2)),
+            Set(countNotify, 'TVS->CountNotifyByCurrentUser-V1'.Run(User().Email, envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open, resKeyOpenAll.close)),
+            ClearCollect(getAllCompanies, 'TVS->GetAllCompany-V1'.Run(envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(getAllHasTag, 'TVS->GetAllHashtagConfig'.Run("--", "--", envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(meetingType, 'TVS->GetAllMeetingType-V1'.Run(env)),
+            ClearCollect(allEmployeesNoPaging, 'TVS->GetAllEmployeesNoPaging'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(listCompany,'TVS->GetAllCompany-V1'.Run(envDEV,envTEST, envUAT1, envUAT2)),
+            ClearCollect(listDepartment,AddColumns('TVS->GetAllDepartment-V1'.Run(envDEV,envTEST, envUAT1, envUAT2), external, false)),
+            ClearCollect(employeeByDepartment, 'TVS->GetEmployeeByDepartment'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(RoleNoPage,'TVS->GetAllRoleNoPage-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2)),
+            ClearCollect(RoleNoPageCheck,'TVS->GetAllRoleNoPageCheck-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2)),
+            ClearCollect(apiDbGetAll,'TVS->GetAllApi-V1'.Run(envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open,resKeyOpenAll.close)),
+            ClearCollect(issuersList,'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2).list_issuer,
+            ClearCollect(listDepartmentItems,'TVS->GetAllDepartment-V1'.Run(envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(recorDivision,'TVS-Record_Division_V1'.Run(User().Email,envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open,resKeyOpenAll.close)),
+            Set(ListItemUnitConfig, 'TVS->GetAllItemUnitConfig'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2)),
+            ClearCollect(NonListPartyExternal, AddColumns('TVS->GetAllCompanyInformation'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2), type, "company")),
+            Set(materDataNonList, 'TVS->GetAllMaterDataNonListCompany-V1'.Run()),
+            ClearCollect(masterdatas, 'TVS->GetMasterData-V1'.Run())
+        ),
+        Set(ListProgress,
+            Table(
+                {
+                    Text: "Create new proposal",Code: "1",level: "0",currentStatus: ["DRAFT"],
+                    activeArray: ["PENDING_REVIEW_BY_HEAD_OF_DIVISION","PENDING_REVIEW_BY_RISK_MANAGEMENT","PENDING_REVIEW_BY_CIO","PENDING_REVIEW_BY_CEO","PENDING_REVIEW_BY_INVESTMENT_COMMITEE","APPROVED","APPROVE","REJECTED","PARTIALLY_REJECTED"]
+                },
+                {
+                    Text: "Review by Head of Division",Code: "2",level: "1",currentStatus: ["PENDING_REVIEW_BY_HEAD_OF_DIVISION"],
+                    activeArray: ["PENDING_REVIEW_BY_RISK_MANAGEMENT","PENDING_REVIEW_BY_CIO","PENDING_REVIEW_BY_CEO","PENDING_REVIEW_BY_INVESTMENT_COMMITEE","APPROVED","APPROVE"]
+                },
+                {
+                    Text: "Review by Risk Management",Code: "3",level: "2",currentStatus: ["PENDING_REVIEW_BY_RISK_MANAGEMENT"],
+                    activeArray: ["PENDING_REVIEW_BY_CIO","PENDING_REVIEW_BY_CEO","PENDING_REVIEW_BY_INVESTMENT_COMMITEE","APPROVED","APPROVE"]
+                },
+                {
+                    Text: "Review by CIO",Code: "4",level: "3",currentStatus: ["PENDING_REVIEW_BY_CIO"],
+                    activeArray: ["PENDING_REVIEW_BY_CEO","PENDING_REVIEW_BY_INVESTMENT_COMMITEE","APPROVED","APPROVE"]
+                },
+                {
+                    Text: "Approve proposal",Code: "5",level: "6",currentStatus: ["PENDING_REVIEW_BY_INVESTMENT_COMMITEE", "PENDING_REVIEW_BY_CEO"],
+                    activeArray: ["APPROVED","APPROVE"]
+                },
+                {
+                    Text: "CEO",Code: "4",level: "4",currentStatus: [],
+                    activeArray: ["PENDING_REVIEW_BY_INVESTMENT_COMMITEE","APPROVED","APPROVE"]
+                }
+            ))
+        );
+        
+        ClearCollect(listDepartment, AddColumns(listDepartmentItems, external, false));
+        ClearCollect(listCompany, getAllCompanies);
+        
+        // list process margin
+        Set(marginLimitOneClientProgress,
+                Table(
+                    {
+                        Text: "Brokerage's Proposal",level: "0",
+                        currentStatus: ["DRAFT", ""], filterLogStatus: ["SUBMIT", "DRAFT"],
+                        activeArray: ["PENDING_RISK_MANAGERMENTS_OPINION", "PENDING_VICE_MANAGER",  "APPROVED", "PENDING_RM&IC-SC", "PENDING_CEO", "PENDING_RESEARCHS_OPINION", "REVISED", "PENDING_UPDATE_CHANGES"], 
+                        showBy: "BKR"
+                    },
+                    {
+                        Text: "Risk Management’s Opinion",level: "2",
+                        currentStatus: ["PENDING_RISK_MANAGERMENTS_OPINION", "REVISED"], filterLogStatus: ["PENDING_RISK_MANAGERMENTS_OPINION"],
+                        activeArray: ["PENDING_VICE_MANAGER",  "APPROVED", "PENDING_RM&IC-SC", "PENDING_CEO", "PENDING_UPDATE_CHANGES"], 
+                        showBy: "RM"
+                    },
+                    {
+                        Text: "Approve the proposal",level: "3",
+                        currentStatus: ["PENDING_RM&IC-SC", "PENDING_CEO", "PENDING_VICE_MANAGER"],
+                        filterLogStatus: [""],
+                        activeArray: ["APPROVED", "PENDING_UPDATE_CHANGES"],
+                        showBy: "AR"
+                    }
+                )
+        );
+        Set(marginLimitOneStockProgress,
+                Table(
+                    {
+                        Text: "Brokerage's Proposal",level: "0",
+                        currentStatus: ["DRAFT", ""], filterLogStatus: ["SUBMIT", "DRAFT"],
+                        activeArray: ["PENDING_RESEARCHS_OPINION", "PENDING_RISK_MANAGERMENTS_OPINION", "PENDING_RM&IC-SC", "PENDING_CEO", "APPROVED", "REJECTED", "REVISED", "PENDING_INVESTMENT_COMMITEE", "PENDING_UPDATE_CHANGES"],
+                        showBy: "BKR"
+                    },
+                    {
+                        Text: "Research’s Opinion",level: "1",
+                        currentStatus: ["PENDING_RESEARCHS_OPINION"], filterLogStatus: ["PENDING_RESEARCHS_OPINION"],
+                        activeArray: ["PENDING_RISK_MANAGERMENTS_OPINION", "PENDING_RM&IC-SC", "PENDING_CEO", "APPROVED", "REJECTED", "REVISED", "PENDING_INVESTMENT_COMMITEE", "PENDING_UPDATE_CHANGES"],
+                        showBy: "RS"
+                    },
+                    {
+                        Text: "Risk Management’s Opinion",level: "2",
+                        currentStatus: ["PENDING_RISK_MANAGERMENTS_OPINION", "REVISED"], filterLogStatus: ["PENDING_RISK_MANAGERMENTS_OPINION"],
+                        activeArray: ["PENDING_RM&IC-SC", "PENDING_CEO", "APPROVED", "REJECTED", "PENDING_INVESTMENT_COMMITEE", "PENDING_UPDATE_CHANGES"],
+                        showBy: "RM"
+                    },
+                    {
+                        Text: "Approve the proposal",level: "3",
+                        currentStatus: ["PENDING_RM&IC-SC", "PENDING_CEO", "PENDING_INVESTMENT_COMMITEE"],
+                        filterLogStatus: [""],
+                        activeArray: ["APPROVED", "PENDING_UPDATE_CHANGES"],
+                        showBy: "AR"
+                    }
+                )
+        );
+        // end list process margin
+        
+        //------
+        If(!IsBlank(Param("proposalId")), Set(proposalInfoEdit, 'TVS->FindByIdProposal_Process3-V1'.Run(Param("proposalId"), resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2)));
+        
+        
+        If(!IsBlank(proposalInfoEdit), Set(fileAndlistIC,'TVS->GetFileAndInvestmentBoard-V1'.Run(proposalInfoEdit.id,resKeyOpenAll.open,resKeyOpenAll.close,proposalInfoEdit.principal,proposalInfoEdit.limit_on_aum,envDEV,envTEST, envUAT1, envUAT2));
+        Set(MenuSelect,"Business process");
+        Set(MenuSelect2,"Fix income investment process");
+        Set(HeaderText,If(IsError(proposalInfoEdit) || IsBlank(proposalInfoEdit),"Create proposal",
+            (proposalInfoEdit.proposal_status = "DRAFT" || proposalInfoEdit.proposal_status = "PARTIALLY_REJECTED") && "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action),
+            "Update","View ")
+        );
+        Set(principalValue,Text(Value(Substitute(Substitute(proposalInfoEdit.principal,".",""),",","")),"[$-en-GB]#,###"));
+        
+        ClearCollect(proposalDetailLogs,'TVS->FindByProposalIdComment-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,proposalInfoEdit.id, envDEV,envTEST, envUAT1, envUAT2));
+        
+        Set(isInactiveProposal, If(IsBlank(proposalInfoEdit), false, proposalInfoEdit.status = "INACTIVE"));
+        Set(isDisable,!(IsBlank(proposalInfoEdit) || (proposalInfoEdit.proposal_status in ["DRAFT","PARTIALLY_REJECTED"])) || isInactiveProposal));
+        //----
+        
+        ClearCollect(listAttachFileRes,fileAndlistIC.listAttach);
+        ForAll(listAttachFileRes,Collect(listAttachFile,{Id:ThisRecord.id, Name:ThisRecord.file_name, Date:ThisRecord.created_date, By:ThisRecord.name_employee}));
+        
+        Clear(permissionLst);
+        ForAll(currentUserV2Res,Collect(permissionLst,{
+            process_code:ThisRecord.process_code,
+            role:Distinct(Split(ThisRecord.role,"#"),Value),
+            company:Distinct(Split(ThisRecord.company,"#"),Value),
+            division:Distinct(Split(ThisRecord.division,"#"),Value),
+            action:Distinct(Split(ThisRecord.action,"#"),Value),
+            name_team:Distinct(Split(ThisRecord.name_team,"#"),Value),
+            division_id:Distinct(Split(ThisRecord.division_id,","),Value)
+        }));
+        Set(currenUserV2,{
+            id:First(currentUserV2Res).id,
+            name:First(currentUserV2Res).name,
+            email:First(currentUserV2Res).email,
+            internal_email:First(currentUserV2Res).internal_email,
+            phone_number:First(currentUserV2Res).phone_number,
+            permissionList:permissionLst,
+            status:First(currentUserV2Res).status
+        });
+        
+        // Go Investment Research by link
+        If(!IsBlank(Param("ir_id")),
+            Set(investmentDetail, 'TVS->GetByIdInvestmentResearch-V1'.Run(Param("ir_id"), resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2));
+            Set(irDetail, investmentDetail);
+            Reset(ReportName_Input);
+            Reset(Note_Input);
+            Set(reportTypeValue, investmentDetail.report_type);
+            Set(reportQuarterValue, investmentDetail.quarterly_report);
+            Set(reportMonthValue, investmentDetail.monthly_report);
+            Set(reportYearValue, investmentDetail.annaul_report);
+            Set(reportPrivacyValue, Proper(investmentDetail.allow_access));
+            Set(MenuSelect,"Portal");
+            Set(MenuSelect2,"Investment research");
+            Set(HeaderText, If(IsError(investmentDetail) || IsBlank(investmentDetail),"Create",
+                (investmentDetail.status = "DRAFT" || investmentDetail.status = "REVISED") && "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action),
+                "Update","View "
+            ));
+            Set(isDisable, !(IsBlank(investmentDetail) || (investmentDetail.status in ["DRAFT", "REVISED"] && investmentDetail.created_id = currenUserV2.id && "EDIT" in LookUp(currenUserV2.permissionList,process_code = "Process1.3",action))));
+            ClearCollect(listReportAttachFile, AddColumns(Filter(investmentDetail.listAttach, type = "RP"), IsDeleted, false));
+            ClearCollect(listOthersAttachFile, AddColumns(Filter(investmentDetail.listAttach, type = "ORP"), IsDeleted, false));
+            ClearCollect(listReportAttachFileVn, AddColumns(Filter(irDetail.listAttach, type = "RPVN"), IsDeleted, false));
+            ClearCollect(listOthersAttachFileVn, AddColumns(Filter(irDetail.listAttach, type = "ORPVN"), IsDeleted, false));
+        );
+        // END Go Investment Research by link
+        // Go Investment Research by link
+        If(!IsBlank(Param("cr_id")),
+            Set(isDisable, true);
+            Set(recordItemSelected,'TVS->FindCommunicationRecordsByIdExternal'.Run(resKeyOpenAll.open, resKeyOpenAll.close, Param("cr_id"), envDEV, envTEST, envUAT1, envUAT2));
+            //Check division
+            If("Research" in LookUp(currenUserV2.permissionList,process_code = "Process1.1", division), 
+                Set(TypeDivison, "Research"),
+                Set(TypeDivison, "IBPE")
+            );
+            If(recordItemSelected.meeting_nature = "EXTERNAL", Set(TypeNature, "External"), Set(TypeNature, "Internal"));
+            If(Upper(LookUp(listDepartment, id = recordItemSelected.division).name) = "RESEARCH", Set(TypeInformationNonList, "Research"));
+            Set(DivisionSelected, LookUp(listDepartment, id = recordItemSelected.division));
+            // ------
+            If(TypeNature = "External",
+                Set(childRecordSelected, recordItemSelected);
+                ClearCollect(HasTags, childRecordSelected.has_tag);
+                ClearCollect(ShareTo, childRecordSelected.share_to);
+                ClearCollect(colExternalFiles, RenameColumns(RenameColumns(RenameColumns(RenameColumns(childRecordSelected.attachment, created_date, Date), file_name, Name), created_by, By), id, Id));
+                UpdateIf(colExternalFiles As f, true, {By: LookUp(allEmployeesNoPaging, id = f.By).name});
+                // Reset(AttachFile_3);
+                Set(DivisionSelected, LookUp(listDepartment, id = recordItemSelected.division));
+        
+                ////dynamic table
+                Set(splitIssuer, RenameColumns(childRecordSelected.dynamic_table, col, Value));
+                Set(header, Split(First(splitIssuer).Value, "<"));
+                ClearCollect(splitIssuerNotFirst, Filter(splitIssuer, Value <> First(splitIssuer).Value));
+                ClearCollect(Quaters, RenameColumns(Filter(header, Upper(Value) <> "ITEM" && Upper(Value) <> "UNIT"), Value, value));
+                Clear(Values);
+                ForAll(splitIssuerNotFirst As item, 
+                RemoveIf(firstSlash, true);
+                RemoveIf(secondSlash, true);
+                    Collect(firstSlash, {value: Find("<", item.Value)});
+                    Collect(secondSlash, {value: (Find("<", item.Value, First(firstSlash).value + 1))});
+                    Collect(Values, {items: Split(Mid(item.Value, First(secondSlash).value + 1, Len(item.Value) - First(secondSlash).value), "<")})
+                );
+                
+                ClearCollect(ListPartyExternal, ShowColumns(RenameColumns(GroupBy(childRecordSelected.party, id, party_name, party_value, _data), party_value, value), id, party_name, value));
+                UpdateIf(ListPartyExternal As item, true, {
+                    markId: GUID(),
+                    partyMembers: AddColumns(RenameColumns(
+                        ShowColumns(GroupBy(Filter(childRecordSelected.party, id = item.id && member_id <> Blank()), member_value, member_id, party_value, _data), member_value, member_id, party_value), member_value, email), id, GUID(), internal_email, "", name, "")
+                });
+                RenameColumns(ShowColumns(childRecordSelected.party, member_value), member_value, email);
+                Clear(attachments);
+                ForAll(Filter(GroupBy(childRecordSelected.party, file_id, file_name, id, _data), !IsBlank(file_id)) As p, Collect(attachments, {id: p.file_id, name: p.file_name, markId: LookUp(ListPartyExternal, id = p.id).markId}))
+            );
+            //Set dataCommon
+            If(!IsBlank(recordItemSelected),Set(meetingTypeValue, recordItemSelected.meeting_type));
+            ClearCollect(colInternalFiles, RenameColumns(RenameColumns(RenameColumns(recordInternalSelected.attachments, file_name, Name), created_date, Date), created_by, By));
+            UpdateIf(colInternalFiles As f, true, {By: LookUp(allEmployeesNoPaging, id = f.By).name});
+            Set(isLoading, false);
+            //Concurrent(
+            //    ClearCollect(NonListPartyExternal, AddColumns('TVS->GetAllCompanyInformation'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2), "type", "company")),
+        
+            //    Set(ListItemUnitConfig, 'TVS->GetAllItemUnitConfig'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2))
+            //);
+        
+            Set(isOwner, IsBlank(recordItemSelected) || recordItemSelected.created_by_id = currenUserV2.id);
+            Set(isCreateUser, "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process1.1", action));
+            Set(isApproveUser, "APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process1.1", action));
+            Set(isSameDivision, If(IsBlank(recordItemSelected), true, First(Filter(listDepartment, id = recordItemSelected.division)).company_department in recorDivision.division));
+            Set(isDisableProjectTab, !(TypeNature = "Internal" || (TypeNature = "External" && (TypeDivison <> "Research" || IsEmpty(splitIssuerNotFirst)))) && recordItemSelected.status in ["APPROVED"]);
+        
+            If(TypeNature = "Internal" || (TypeNature = "External" && (TypeDivison <> "Research" || IsEmpty(splitIssuerNotFirst))),
+                // Internal và External division # RS || empty data project
+                Set(isEnabled,
+                    If(IsBlank(recordItemSelected) || recordItemSelected.status in ["DRAFT"], If(isCreateUser && isApproveUser, isOwner, isApproveUser, false, isOwner),
+                    recordItemSelected.status in ["SUBMITTED"], false,
+                    recordItemSelected.status in ["APPROVED"], If(isCreateUser && isApproveUser, isOwner, isApproveUser, false, isOwner),false)
+                );,
+                // External divistion = RS và data k empty
+                Set(isEnabled,
+                    If(IsBlank(recordItemSelected) || recordItemSelected.status in ["DRAFT"], If(isCreateUser && isApproveUser, isOwner, isApproveUser, false, isOwner),
+                    recordItemSelected.status in ["SUBMITTED"], If(isCreateUser && isApproveUser, true, isApproveUser, true, false),
+                    recordItemSelected.status in ["APPROVED"],If(isCreateUser && isApproveUser, true, isApproveUser, true, isOwner), false)
+                );
+            );
+            Set(isDisable, !(isEnabled && isSameDivision));
+            Set(goFromLink, true);
+        );
+        // END Go Investment Research by link
+        
+        // Go M&A by link
+        If(!IsBlank(Param("maId")),
+            Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false); Set(isSummitedPopup, false);
+            ClearCollect(dealSelected1, 'TVS->FindByIDDeal'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Param("maId")));
+            Set(dealSelected, First(dealSelected1));
+            ClearCollect(listDealSupport,'TVS->GetEmployeeDeall'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Param("maId"),"DEV"));
+            Concurrent(
+                Set(reasonOfDeal,
+                    AddColumns('TVS->getReasonOfDeal'.Run(Param("maId"),resKeyOpenAll.open,resKeyOpenAll.close),step,
+                    Switch(status, "PENDING_SERVICE_CONTRACT", 4.1, "PENDING_REVIEW_DEAL_OWNER", 4.2, "PENDING_REVIEW_HEAD_DIVISION", 4.3, "PENDING_APPROVE_CEO", 4.4, "PENDING_CONTRACT_DATE", 4.5))),
+                ClearCollect(noteOfDeal,'TVS->GetNoteByDealID-DEV'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Param("maId"))),
+                ClearCollect(listFile,'TVS->GetFileByIDDeal'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Param("maId")))
+            );
+            ClearCollect(reasonOfOwner,Filter(reasonOfDeal, status="PENDING_REVIEW_DEAL_OWNER"));
+            ClearCollect(reasonOfCEO,Filter(reasonOfDeal, status="PENDING_APPROVE_CEO"));
+            ClearCollect(reasonOfDealForLogs, If(dealSelected.is_request_edit || IsBlank(dealSelected.close_date),
+                reasonOfDeal,
+                Filter(reasonOfDeal, DateTimeValue(created_date) < DateTimeValue(DateAdd(dealSelected.close_date, 0, TimeUnit.Hours))));
+            );
+            Set(startMATimer, true);
+        );
+        // END Go M&A by link
+        
+        // Start Non-list by link
+        If(!IsBlank(Param("nl_id")),
+            Set(companyDetailById, 'TVS->GetByIdCompanyInformation-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, Param("nl_id"),envDEV,envTEST,envUAT1,envUAT2));
+            ClearCollect(attachInsertRes, AddColumns(companyDetailById.listAttach, Name, file_name, By, created_by));
+            Set(companyEdit, companyDetailById);
+            Set(DealDetailTab, 1);
+            Set(subTabFinacical, 1);
+            Set(isUpdateTableFinancial, false);
+            Set(TableHistory, true);
+            Set(TableCreate, false);
+            Set(TableHistoryFundra, true);
+            Set(TableCreateFundra, false);
+            Set(inputChangeKey, false);
+            Set(inputChangeKeyHis, true);
+        
+            ClearCollect(DataContact, companyDetailById.listContact);
+            ClearCollect(DataFounder, companyDetailById.listFounder);
+            ClearCollect(DataFounderOther, companyDetailById.listShareholder);
+            Clear(ListKeyMilestonesNew);
+        
+            ForAll(companyDetailById.listKeyMilestones As item, Collect(ListKeyMilestonesNew, {Id: item.id, Date: item.date, Note: item.note, Event: item.event}));
+        
+            If(!IsEmpty(ListKeyMilestonesNew),
+            ClearCollect(ListKeyMilestonesHistory, []);
+            ForAll(companyDetailById.listKeyMilestones As data,
+                Collect(ListKeyMilestonesHistory, {
+                    Date: data.date,
+                    Id: data.id,
+                    MarkId: GUID(),
+                    Note: data.note,
+                    Event: data.event
+                });
+            ));
+        
+            UpdateIf(DataContact, true, {guid: GUID()});
+            UpdateIf(DataFounder, true, {guid: GUID()});
+            UpdateIf(DataFounderOther, true, {guid: GUID()});
+            //UpdateIf(ListKeyMilestones, true, {MarkId: GUID()});
+        
+            Set(
+                splitIssuerFinancialInfo,
+                RenameColumns(companyDetailById.financialInfo, col, Value)
+            );
+            Set(headerFinancialInfo, Split(First(splitIssuerFinancialInfo).Value, "<"));
+            ClearCollect(splitIssuerNotFirstFinancialInfoNl, Filter(splitIssuerFinancialInfo, Value <> First(splitIssuerFinancialInfo).Value));
+            Set(headerFinancialInfoHistory, headerFinancialInfo);
+            ClearCollect(splitIssuerNotFirstFinancialInfoNlHistory, splitIssuerNotFirstFinancialInfoNl);
+        
+            ClearCollect(splitIssuerFundraisingHistory,RenameColumns(companyDetailById.fundraisingHistory, col, Value));
+            Set(headerFundraisingHistory, Split(First(splitIssuerFundraisingHistory).Value, "<"));
+            ClearCollect(splitIssuerNotFirstFundraisingHistory, Filter(splitIssuerFundraisingHistory, Value <> First(splitIssuerFundraisingHistory).Value));
+            Set(headerFundraisingHistoryApi, headerFundraisingHistory);
+            ClearCollect(splitIssuerNotFirstFundraisingHistoryApi, splitIssuerNotFirstFundraisingHistory);
+        );
+        
+        // End Non-list by link
+        
+        // Go ML by link
+        If(!IsBlank(Param("ml_id")),
+            Set(submitEvent, 0);
+            Set(saveEvent, 0);
+            Set(marginDetail1, Blank());
+            Set(marginDetail1,'TVS->FindByIdProposalONSProcess4'.Run(resKeyOpenAll.open,resKeyOpenAll.close, Param("ml_id"),envDEV,envTEST,envUAT1,envUAT2));
+            Set(marginDetail, First(marginDetail1.proposal));
+            Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+            Set(DealDetailTab, 1);
+            Set(proposalNameInput, marginDetail.proposal_name);
+            Clear(brokerageListDetail);
+            Clear(marginDetailAttachment);
+            Clear(listAttachFile);
+            Reset(Cmt_Input);
+            Reset(PIR_Input);
+            Reset(PML_Input);
+            ForAll(marginDetail1.brokerage,Collect(brokerageListDetail,{
+                guid:GUID(),
+                id:ThisRecord.id,
+                ticket:ThisRecord.ticker,
+                CP_max_margin_ratio:ThisRecord.max_margin_ratio_cp,
+                CP_max_margined_amt_per_client:ThisRecord.max_margined_amt_per_client_cp,
+                CP_max_margined_amt_all_client:ThisRecord.max_margined_amt_all_client_cp,
+                BP_proposed_margin_ratio:ThisRecord.proposed_margin_ratio,
+                BP_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client,
+                BP_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client,
+                RO_research_opinion:ThisRecord.research_opinion,
+                RO_proposed_margin_ratio:ThisRecord.proposed_margin_ratio_re,
+                RO_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client_re,
+                RO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_re,
+                RMO_risk_management_opinion: ThisRecord.risk_management_opinion,
+                RMO_proposed_margin_ratio: ThisRecord.proposed_margin_ratio_rm,
+                RMO_proposed_margined_amt_per_client: ThisRecord.proposed_margined_loan_amt_per_client_rm,
+                RMO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_rm,
+                RMO_proposed_margined_qty_all_client:ThisRecord.proposed_margined_qty_all_client_rm,
+                RMO_proposed_margined_qty_one_client:ThisRecord.proposed_margined_qty_one_client_rm,
+                RMO_comment:ThisRecord.comment_rm,
+                RMO_proposed_interest_rate_rm: ThisRecord.proposed_interest_rate_rm,
+                record_status:"UPDATE"
+            }));
+            ClearCollect(MarginLimitPolicyList,brokerageListDetail);
+            ForAll(marginDetail1.attachment,Collect(marginDetailAttachment,{
+                id_record:ThisRecord.id,
+                Name:ThisRecord.file_name,
+                By: ThisRecord.created_by
+            }));
+            ClearCollect(listAttachFile,marginDetailAttachment);
+            Set(marginType, First(marginDetail1.proposal).type_of_proposal);
+            Set(marginLimitType, marginType);
+            Navigate(DetailMarginLimit, ScreenTransition.Fade);
+        );
+        // END Go ML by link
+        
+        Set(isLoading,false);Set(ClientData,{});Set(NavbarValue,1);Set(SubMenuAdmin,false);Set(ShowSubMenu,0);Set(ShowMenu,0);
+        Set(MenuItems,
+            Table(
+                {
+                    MenuLabel: "Dashboard", MenuIcon: MenuItemsSideBar_1.IconDasboard, MenuScreenNavigate: Dashboard, MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown, MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    hasPermission: false && currenUserV2.status = "ACTIVE", Submenu: []
+                },
+                {
+                    MenuLabel: "Portal", MenuIcon: MenuItemsSideBar_1.IconPortal, MenuScreenNavigate: Dashboard, MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown, MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    hasPermission: ("VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.3", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.2", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.1", action)) && currenUserV2.status = "ACTIVE",
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Communication Records", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: ListCommunicationRecord,
+                            MenuID: 2.1, hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.1", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Information of non-listed company", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: TableInfomationOfNonLisedCompany,
+                            MenuID: 2.2, hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.2", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Investment Research", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: TableInvestmentResearch,
+                            MenuID: 2.3, hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process1.3", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Item Dictionary", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: AddItemUnit,
+                            MenuID: 2.4, hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Item_Dictionary", action) && currenUserV2.status = "ACTIVE"
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",MenuIcon: MenuItemsSideBar_1.IconFile,MenuScreenNavigate: Dashboard,MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    hasPermission: ("VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process3", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) ||  "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process4", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process5", action)) && currenUserV2.status = "ACTIVE",
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A/Capital Raising and Restructuring Services", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: MA, MenuID: 3.1,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment Process", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: TableProposalQT2, MenuID: 3.2,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process3", action) && currenUserV2.status = "ACTIVE"
+                        },
+                                        {
+                            MenuLabel: "Margin Limit Approval Process",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: TableMarginLimit,
+                            MenuID: 3.3,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process4", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Process of Private Equity Investment",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: TablePEVC,
+                            MenuID: 3.4,
+                            hasPermission: false && "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process5", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Process of Private Equity Investment",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: TablePEVC,
+                            MenuID: 3.5,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Process5", action) && currenUserV2.status = "ACTIVE"
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",MenuIcon: MenuItemsSideBar_1.IconSettings,MenuScreenNavigate: Dashboard,MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    hasPermission: ("VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin", action) || ("VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin1", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin2", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin3", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin5", action)) && currenUserV2.status = "ACTIVE"),
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authorization", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: ListDecentralization, MenuID: 4.1,
+                            hasPermission: ("VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin1", action) || "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin", action)) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Decentralization", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: Decentralization, MenuID: 4.2,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin2", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "List of Encryption", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: ListOfEncryption, MenuID: 4.3,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin3", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Config Key", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: ConfigKey, MenuID: 4.4,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action) && currenUserV2.status = "ACTIVE"
+                        },
+                        {
+                            MenuLabel: "Change Keys", MenuIcon: MenuItemsSideBar_1.IconFile, MenuScreenNavigate: ChangeKeys, MenuID: 4.5,
+                            hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "Admin5", action) && currenUserV2.status = "ACTIVE"
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "List API", MenuIcon: MenuItemsSideBar_1.IconDasboard, MenuScreenNavigate: ListApi, MenuID: 5,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown, MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    hasPermission: "VIEW" in LookUp(currenUserV2.permissionList, process_code = "List_API", action) && currenUserV2.status = "ACTIVE", Submenu: []
+                }
+            )
+        );
+        
+        // Config
+        Concurrent(
+        ClearCollect(ProcessAction,
+            Table(
+                {No: 1,Name: "Search",code: "SEARCH"},
+                {No: 2,Name: "Upload file",code: "UPLOADFILE"},
+                {No: 3,Name: "Edit",code: "EDIT"},
+                {No: 4,Name: "Review",code: "REVIEW"},
+                {No: 5,Name: "Reject",code: "REJECT"},
+                {No: 6,Name: "Create",code: "CREATE"},
+                {No: 7,Name: "View",code: "VIEW"},
+                {No: 8,Name: "Delete",code: "DELETE"},
+                {No: 9,Name: "Approve",code: "APPROVE"}
+        
+        )),
+        
+        ClearCollect(ProcessActionItemDictionary,Table({No: 1,Name: "View",code: "VIEW"},{No: 2,Name: "Edit",code: "EDIT"})),
+        
+        ClearCollect(ProcessActionMargin,
+            Table(
+                {No: 1,Name: "View",code: "VIEW"},
+                {No: 2,Name: "Create",code: "BROKER_CREATE"},
+                {No: 3,Name: "RM review",code: "RISK_MANAGER_CREATE"},
+                {No: 4,Name: "Research review",code: "RESEARCH_CREATE"},
+                {No: 5,Name: "D.CEO approve",code: "VICE_MANAGER_APPROVE"},
+                {No: 6,Name: "CEO approve",code: "CEO_APPROVE"},
+                {No: 7,Name: "Update change",code: "RISK_MANAGER_SENIOR"},
+                {No: 8,Name: "Download file",code: "DOWNLOADFILE"}
+        )),
+        
+        ClearCollect(ProcessActionAPI,
+            Table(
+                {No: 1,Name: "View",code: "VIEW"},
+                {No: 2,Name: "Add API",code: "CREATE"},
+                {No: 3,Name: "Delete",code: "DELETE"}
+        )),
+        
+        ClearCollect(ProcessActionMA,
+            Table(
+                {No: 1,Name: "View",code: "VIEW"},
+                {No: 2,Name: "Create",code: "CREATE"},
+                {No: 3,Name: "CEO Approve",code: "CEO_APPROVE"},
+                {No: 4,Name: "IB Director Approve",code: "IB_DIRECTOR_APPROVE"},
+                {No: 5,Name: "Download file",code: "DOWNLOADFILE"}
+        )),
+        
+        ClearCollect(ProcessActionComunicationRecord,
+            Table(
+                {No: 1,Name: "View",code: "VIEW"},
+                {No: 2,Name: "Create",code: "CREATE"},
+                {No: 3,Name: "Approve",code: "APPROVE"},
+                {No: 4,Name: "Download file",code: "DOWNLOADFILE"}
+        )),
+        
+        ClearCollect(ProcessActionNonListCompany,
+            Table(
+                {No: 1,Name: "View",code: "VIEW"},
+                {No: 2,Name: "Create",code: "CREATE"},
+                {No: 3,Name: "Approve",code: "APPROVE"},
+                {No: 4,Name: "Download file",code: "DOWNLOADFILE"},
+                {No: 5,Name: "View all",code: "VIEWALL"}
+        )),
+        
+        ClearCollect(ProcessActionFixIncome,
+            Table({No: 1,Name: "Create",code: "CREATE"},
+                {No: 2,Name: "View",code: "VIEW"},
+                {No: 3,Name: "HD Approve",code: "HD_APPROVE"},
+                {No: 4,Name: "RM Approve",code: "RM_APPROVE"},
+                {No: 5,Name: "CIO Approve",code: "CIO_APPROVE"},
+                {No: 6,Name: "CEO Approve",code: "CEO_APPROVE"},
+                {No: 7,Name: "Download file",code: "DOWNLOADFILE"}
+        )),
+        
+        ClearCollect(ProcessActionInvestmentResearch,
+            Table({No: 1,Name: "Create",code: "CREATE"},
+                {No: 2,Name: "View",code: "VIEW"},
+                {No: 3,Name: "Edit",code: "EDIT"},
+                {No: 4,Name: "Approve",code: "APPROVE"},
+                {No: 5,Name: "D.CEO Approve",code: "DCEO_APPROVE"},
+                {No: 6,Name: "Delete",code: "DELETE"},
+                {No: 7,Name: "Download file",code: "DOWNLOADFILE"}
+        )),
+        
+        
+        ClearCollect(ProcessPEVC,
+            Table({No: 1,Name: "Create",code: "CREATE"},
+                {No: 2,Name: "View",code: "VIEW"},
+                {No: 3,Name: "Edit",code: "EDIT"},
+                {No: 4,Name: "PE Director approve",code: "PE_DIRECTOR_APPROVE"},
+                {No: 5,Name: "Delete",code: "DELETE"},
+                {No: 6,Name: "Download file",code: "DOWNLOADFILE"},
+                {No: 7,Name: "CEO Approve",code: "CEO_APPROVE"}
+        )),
+        
+        ClearCollect(ProcessActionAdmin,Table({No: 1,Name: "Create",code: "CREATE"},{No: 2,Name: "View",code: "VIEW"},{No: 3,Name: "Edit",code: "EDIT"},{No: 4,Name: "Delete",code: "DELETE"})),
+        ClearCollect(ProcessActionAdminViewAndEdit,Table({No: 1,Name: "View",code: "VIEW"},{No: 2,Name: "Edit",code: "EDIT"})),
+        ClearCollect(ProcessActionAdminNotHaveDelete,Table({No: 1,Name: "Create",code: "CREATE"},{No: 2,Name: "View",code: "VIEW"},{No: 3,Name: "Edit",code: "EDIT"})));
+        
+        Concurrent(
+        ClearCollect(ProcessManagement,
+            Table(
+                //process 1
+                {No: 1, Name: "Comunication  Records (Minutes of meeting)", Code: "Process1.1", Type: "TVS protal", Action: ProcessActionComunicationRecord},
+                {No: 2, Name: "Information of non-listed company", Code: "Process1.2", Type: "TVS protal", Action: ProcessActionNonListCompany},        
+                {No: 3, Name: "Investment Research ", Code: "Process1.3", Type: "TVS protal", Action: ProcessActionInvestmentResearch},
+                {No: 4, Name: "M&A", Code: "Process2", Type: "Business process", Action: ProcessActionMA},
+                {No: 5, Name: "Fixed Income Investment Process", Code: "Process3", Type: "Business process", Action: ProcessActionFixIncome},
+                {No: 6, Name: "Margin limit approval process", Code: "Process4", Type: "Business process", Action: ProcessActionMargin},
+                {No: 7, Name: "PEVC", Code: "Process5", Type: "Business process", Action: ProcessPEVC},
+                {No: 8, Name: "Manager Authorization", Code: "Admin", Type: "Admin", Action: ProcessActionAdminNotHaveDelete},
+                {No: 9, Name: "Decentralization", Code: "Admin2", Type: "Admin", Action: ProcessActionAdminNotHaveDelete},
+                {No: 10, Name: "List of Encryption", Code: "Admin3", Type: "Admin", Action: ProcessActionAdmin},
+                {No: 11, Name: "Config key", Code: "Admin4", Type: "Admin", Action: ProcessActionAdmin},
+                {No: 12, Name: "Change keys", Code: "Admin5", Type: "Admin", Action: ProcessActionAdminViewAndEdit},
+                {No: 13, Name: "List API", Code: "List_API", Type: "Admin", Action: ProcessActionAPI},
+                {No: 14, Name: "Item dictionary", Code: "Item_Dictionary", Type: "TVS protal", Action: ProcessActionItemDictionary})
+        ),
+        
+        ClearCollect(
+            GroupsManagement,
+            Table(
+                { No: 1,Name: "RM&IC-SC",Code: "RM&IC-SC",Type: "TVS protal" },
+                { No: 2,Name: "ISC-PE",Code: "ISC-PE",Type: "TVS protal" },
+                { No: 3,Name: "IC",Code: "IC",Type: "TVS protal" },
+                { No: 4,Name: "ISC-VC",Code: "ISC-VC",Type: "TVS protal" }
+            )
+        ));
+        Set(TextRequired,"This is field required.");
+        Set(TextRequiredEmail,"Please enter the correct format!");
+        Set(TextExistsEmail,"Email already exists in the system");
+        Set(TextExistsUsername,"Username already exists in the system");
+        //Encrypt the table according to the proccess
+        Concurrent(
+        ClearCollect(
+            TableDirectEncryption,
+            Table(
+                //process 1 - 1.1 - record
+                {Name: "communication_records",ProcessCode: "Process1.1"},
+                {Name: "communication_records_attachment",ProcessCode: "Process1.1"},
+                {Name: "communication_records_comment",ProcessCode: "Process1.1"},
+                {Name: "communication_records_hashtag",ProcessCode: "Process1.1"},
+                {Name: "communication_records_participating_party",ProcessCode: "Process1.1"},
+                {Name: "communication_records_party_file",ProcessCode: "Process1.1"},
+                {Name: "communication_records_party_member",ProcessCode: "Process1.1"},
+                {Name: "communication_records_period",ProcessCode: "Process1.1"},
+                {Name: "communication_records_period_value",ProcessCode: "Process1.1"},
+                {Name: "communication_records_projected_financial_criteria",ProcessCode: "Process1.1"},
+                {Name: "communication_records_share_to",ProcessCode: "Process1.1"},
+                //process 1 - 1.2 - company
+                {Name: "company_attachment",ProcessCode: "Process1.2"},
+                {Name: "company_information",ProcessCode: "Process1.2"},
+                {Name: "company_comment",ProcessCode: "Process1.2"},
+                {Name: "company_contact",ProcessCode: "Process1.2"},
+                {Name: "company_financial_fundraising_criteria",ProcessCode: "Process1.2"},
+                {Name: "company_financial_fundraising_period",ProcessCode: "Process1.2"},
+                {Name: "company_financial_fundraising_period_value",ProcessCode: "Process1.2"},
+                {Name: "company_financial_information",ProcessCode: "Process1.2"},
+                {Name: "company_founder",ProcessCode: "Process1.2"},
+                {Name: "company_shareholder",ProcessCode: "Process1.2"},
+                {Name: "key_milestones",ProcessCode: "Process1.2"},
+                {Name: "company_fundraising_history",ProcessCode: "Process1.2"},
+                //process 1 - 1.3 - investment 
+                //{Name: "investment_attachment",ProcessCode: "Process1.3"},
+                //{Name: "investment_comment",ProcessCode: "Process1.3"},
+                //{Name: "investment_research",ProcessCode: "Process1.3"},
+                //process 2
+                {Name: "deal_employee_information",ProcessCode: "Process2"},
+                {Name: "deal_information",ProcessCode: "Process2"},
+                {Name: "deal_information_attachment",ProcessCode: "Process2"},
+                {Name: "deal_information_note",ProcessCode: "Process2"},
+                {Name: "deal_information_note_version",ProcessCode: "Process2"},
+                {Name: "deal_reason",ProcessCode: "Process2"},
+                //process 3
+                {Name: "comment",ProcessCode: "Process3"},
+                {Name: "investment_board_logs",ProcessCode: "Process3"},
+                {Name: "list_issuer",ProcessCode: "Process3"},
+                {Name: "proposal_attachment",ProcessCode: "Process3"},
+                {Name: "proposal_information",ProcessCode: "Process3"},
+                //process 4
+                {Name: "approval_margin_log",ProcessCode: "Process4"},
+                {Name: "brokerage_proposal",ProcessCode: "Process4"},
+                {Name: "current_policy",ProcessCode: "Process4"},
+                {Name: "proposal_margin_attachment",ProcessCode: "Process4"},
+                // {Name: "proposal_margin_comment",ProcessCode: "Process4"},
+                {Name: "proposal_margin_information",ProcessCode: "Process4"},
+                {Name: "tvs_equity",ProcessCode: "Process4"},
+                {Name: "un_margin_trading_stock",ProcessCode: "Process4"},
+                //process 5
+                {Name: "investment_portfolio",ProcessCode: "Process5"},
+                {Name: "pevc_approval_log",ProcessCode: "Process5"},
+                {Name: "pevc_attachment",ProcessCode: "Process5"},
+                {Name: "pevc_deal_employee",ProcessCode: "Process5"},
+                {Name: "pevc_deal_information",ProcessCode: "Process5"},
+                {Name: "pevc_divestment_information",ProcessCode: "Process5"},
+                {Name: "pevc_note",ProcessCode: "Process5"},
+                {Name: "pevc_note_version",ProcessCode: "Process5"}
+            )
+        ),
+        //Encrypt the table according to further information      
+        ClearCollect(
+            TableOtherEncryption,
+            Table(
+                {Name: "data_logs",ProcessCode: "Other"},
+                {Name: "role",ProcessCode: "Other"},
+                {Name: "role_claim",ProcessCode: "Other"},
+                {Name: "employee",ProcessCode: "Other"},
+                {Name: "notification",ProcessCode: "Other"},
+                {Name: "api",ProcessCode: "Other"}
+            )
+        ));
+        
+        ClearCollect(reportTypeFromDB, []);
+        ForAll(Sort(Filter(masterdatas, type = "1.3-REPORT_TYPE"), order_num),
+            Collect(reportTypeFromDB, {value: code, en: First(Split(value, "#")).Value, vn: Last(Split(value, "#")).Value}));
+        
+        Set(reportTypeArray, reportTypeFromDB);
+        Set(frequencyArray, [
+            {vn: "Hàng ngày", en: "Daily", value: "DAILY"},
+            {vn: "Hàng tuần", en: "Weekly", value: "WEEKLY"},
+            {vn: "Hàng tháng", en: "Monthly", value: "MONTHLY"},
+            {vn: "Hàng quý", en: "Quarterly", value: "QUARTERLY"},
+            {vn: "Hàng năm", en: "Yearly", value: "YEARLY"},
+            {vn: "Khác", en: "Others", value: "OTHERS"}
+        ]);
+        Set(reportTypeShowDropdown, false);
+        Set(reportYearArray, [{value: Text(Year(Now()) + 15)}, {value: Text(Year(Now()) + 14)}, {value: Text(Year(Now()) + 13)}, {value: Text(Year(Now()) + 12)}, {value: Text(Year(Now()) + 11)}, {value: Text(Year(Now()) + 10)}, {value: Text(Year(Now()) + 9)}, {value: Text(Year(Now()) + 8)}, {value: Text(Year(Now()) + 7)}, {value: Text(Year(Now()) + 6)}, {value: Text(Year(Now()) + 5)}, {value: Text(Year(Now()) + 4)}, {value: Text(Year(Now()) + 3)}, {value: Text(Year(Now()) + 2)}, {value: Text(Year(Now()) + 1)}, {value: Text(Year(Now()) + 1)}, {value: Text(Year(Now()))}, {value: Text(Year(Now()) - 1)}, {value: Text(Year(Now()) - 2)}, {value: Text(Year(Now()) - 3)}, {value: Text(Year(Now()) - 4)}, {value: Text(Year(Now()) - 5)}, {value: Text(Year(Now()) - 6)}, {value: Text(Year(Now()) - 7)}, {value: Text(Year(Now()) - 8)}, {value: Text(Year(Now()) - 9)}, {value: Text(Year(Now()) - 10)}, {value: Text(Year(Now()) - 11)}, {value: Text(Year(Now()) - 12)}, {value: Text(Year(Now()) - 13)}, {value: Text(Year(Now()) - 14)}, {value: Text(Year(Now()) - 15)}]);
+        // create year and quater
+        ClearCollect(listYear, Sequence(10, Year(Now())-10), Sequence(10, Year(Now())));
+        Clear(quaterAndYearTemp);
+        Clear(quaterAndYear);
+        ForAll(listYear, Collect(quaterAndYearTemp, {Year: Text(ThisRecord.Value), Quarters: ["Q1", "Q2", "Q3", "Q4"]}));
+        ForAll(quaterAndYearTemp As item, ForAll(item.Quarters As item2, Collect(quaterAndYear, {Year: item.Year, Quater: item2.Value})));
+        Clear(yearTemp);
+        ForAll(listYear, Collect(yearTemp, {Value: Text(ThisRecord.Value)}));
+        Set(listYearNew, AddColumns(yearTemp, Quater, "-", Year, "-"));
+        Set(listQuaterNew, AddColumns(quaterAndYear, Value, Year & "_" & Quater));
+        
+        Set(reportYearShowDropdown, false);
+        Set(reportQuarterArray, [{value: "1"}, {value: "2"}, {value: "3"}, {value: "4"}]);
+        Set(reportQuarterShowDropdown, false);
+        Set(reportMonthArray, [{value: "1"}, {value: "2"}, {value: "3"}, {value: "4"}, {value: "5"}, {value: "6"}, {value: "7"}, {value: "8"}, {value: "9"}, {value: "10"}, {value: "11"}, {value: "12"}]);
+        Set(reportMonthShowDropdown, false);
+        Set(reportWeekArray, [{value: "1"}, {value: "2"}, {value: "3"}, {value: "4"}, {value: "5"}, {value: "6"}, {value: "7"}, {value: "8"}, {value: "9"}, {value: "10"}, {value: "11"}, {value: "12"}, {value: "13"}, {value: "14"}, {value: "15"}, {value: "16"}, {value: "17"}, {value: "18"}, {value: "19"}, {value: "20"}, {value: "21"}, {value: "22"}, {value: "23"}, {value: "24"}, {value: "25"}, {value: "26"}, {value: "27"}, {value: "28"}, {value: "29"}, {value: "30"}, {value: "31"}, {value: "32"}, {value: "33"}, {value: "34"}, {value: "35"}, {value: "36"}, {value: "37"}, {value: "38"}, {value: "39"}, {value: "40"}, {value: "41"}, {value: "42"}, {value: "43"}, {value: "44"}, {value: "45"}, {value: "46"}, {value: "47"}, {value: "48"}, {value: "49"}, {value: "50"}, {value: "51"}, {value: "52"}]);
+        Set(reportPrivacyArray, [{value: "PUBLIC", en: "Public", vn: "Công khai"}, {value: "PRIVATE", en: "Private", vn: "Tuyệt mật"}]);
+        
+        ClearCollect(listDepartment, AddColumns(listDepartmentItems, company_department, ""));
+        UpdateIf(listDepartment, true, {company_department: company_name & " - " & name});
+        Set(charUpcaseExternal, ["A", "B", "C", "D", "E", "F"]);
+        
+        If( Param("screen") = "detail-proposal" && Param("action") = "approve-proposal", Navigate(DetailProposal),
+            Param("screen") = "detail-ir" && Param("action") = "approve-ir", Navigate(DetailInvestmentResearch),
+            Param("screen") = "detail-cr" && Param("action") = "approve-cr", Navigate(DetailCommunicationRecords),
+            Param("screen") = "detail-ma" && Param("action") = "approve-ma", Navigate(DetailQT1),
+            Param("screen") = "detail-nl" && Param("action") = "approve-nl", Navigate(DetailNonListedCompany),
+            Param("screen") = "detail-ml" && Param("action") = "approve-ml", Navigate(DetailMarginLimit),
+            Navigate(WelcomePage));
+        
+        Set(isLoading, false);
+        Set(isLoadingOnStart, false);
+        
+        // PEVC
+        Set(listProgessPEVC,
+            Table(
+                    {
+                        Text: "New Lead Creation",
+                        level: "0",
+                        clickScreen: "NEW_LEAD_CREATION_NEW",
+                        currentStatus: ["NEW_LEAD_CREATION_NEW", "BLANK"],
+                        activeArray: [""], shortStatus: "NEW_LEAD_CREATION",
+                        statusLogFilter:[""],
+                        Code: ""
+                    },
+                    {
+                        Text: "NDA Approval",
+                        level: "1",
+                        clickScreen: "NEW_LEAD_CREATION_DONE",
+                        currentStatus: ["NEW_LEAD_CREATION_DONE","NDA_APPROVAL_PENDING_MANAGER","NDA_APPROVAL_PENDING_CEO","NDA_APPROVAL_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "NDA_APPROVAL",
+                        statusLogFilter:["NDA_APPROVAL_PENDING_MANAGER","NDA_APPROVAL_PENDING_CEO"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Complete Discussion Paper",
+                        level: "2",
+                        clickScreen: "NDA_APPROVAL_DONE",
+                        currentStatus: ["NDA_APPROVAL_DONE","COMPLETE_DISCUSSION_PAPER_PENDING_MANAGER","COMPLETE_DISCUSSION_PAPER_PENDING_ISCVC","COMPLETE_DISCUSSION_PAPER_PENDING_ISCPE","COMPLETE_DISCUSSION_PAPER_PENDING_IC"],
+                        activeArray: [""], shortStatus: "COMPLETE_DISCUSSION_PAPER",
+                        statusLogFilter:["COMPLETE_DISCUSSION_PAPER_PENDING_MANAGER","COMPLETE_DISCUSSION_PAPER_PENDING_ISCVC","COMPLETE_DISCUSSION_PAPER_PENDING_ISCPE","COMPLETE_DISCUSSION_PAPER_PENDING_IC"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Investment Memo",
+                        level: "3",
+                        clickScreen: "COMPLETE_DISCUSSION_PAPER_DONE",
+                        currentStatus: ["COMPLETE_DISCUSSION_PAPER_DONE","INVESTMENT_MEMO_PENDING_MANAGER","INVESTMENT_MEMO_PENDING_ISCVC","INVESTMENT_MEMO_PENDING_ISCPE","INVESTMENT_MEMO_PENDING_IC"],
+                        activeArray: [""], shortStatus: "INVESTMENT_MEMO",
+                        statusLogFilter:["INVESTMENT_MEMO_PENDING_MANAGER","INVESTMENT_MEMO_PENDING_ISCVC","INVESTMENT_MEMO_PENDING_ISCPE","INVESTMENT_MEMO_PENDING_IC"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Complete Term Sheet",
+                        level: "4",
+                        clickScreen: "INVESTMENT_MEMO_DONE",
+                        currentStatus: ["INVESTMENT_MEMO_DONE"],
+                        activeArray: [""], shortStatus: "INVESTMENT_MEMO",
+                        statusLogFilter:[""],
+                        Code: ""
+                    },
+                    {
+                        Text: "DD Contract",
+                        level: "5",
+                        clickScreen: "COMPLETE_TERM_SHEET_DONE",
+                        currentStatus: ["COMPLETE_TERM_SHEET_DONE","DD_CONTRACT_PENDING_MANAGER","DD_CONTRACT_PENDING_CEO","DD_CONTRACT_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "DD_CONTRACT",
+                        statusLogFilter:["DD_CONTRACT_PENDING_MANAGER","DD_CONTRACT_PENDING_CEO"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Investment Memo (adjusted)",
+                        level: "6",
+                        clickScreen: "DD_CONTRACT_DONE",
+                        currentStatus: ["DD_CONTRACT_DONE","INVESTMENT_MEMO_ADJUSTED_PENDING_MANAGER","INVESTMENT_MEMO_ADJUSTED_PENDING_ISCVC","INVESTMENT_MEMO_ADJUSTED_PENDING_ISCPE","INVESTMENT_MEMO_ADJUSTED_PENDING_IC"],
+                        activeArray: [""], shortStatus: "INVESTMENT_MEMO_ADJUSTED",
+                        statusLogFilter:["INVESTMENT_MEMO_ADJUSTED_PENDING_MANAGER","INVESTMENT_MEMO_ADJUSTED_PENDING_ISCVC","INVESTMENT_MEMO_ADJUSTED_PENDING_ISCPE",
+        "INVESTMENT_MEMO_ADJUSTED_PENDING_IC"],
+                        Code: ""
+                    },          
+                     {
+                        Text: "Approve resolution",
+                        level: "7",
+                        clickScreen: "INVESTMENT_MEMO_ADJUSTED_DONE",
+                        currentStatus: ["INVESTMENT_MEMO_ADJUSTED_DONE","APPROVE_RESOLUTION_PENDING_MANAGER","APPROVE_RESOLUTION_PENDING_ISCVC","APPROVE_RESOLUTION_PENDING_ISCPE","APPROVE_RESOLUTION_PENDING_IC", "APPROVE_RESOLUTION_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "APPROVE_RESOLUTION",
+                        statusLogFilter:["APPROVE_RESOLUTION_PENDING_MANAGER","APPROVE_RESOLUTION_PENDING_ISCVC","APPROVE_RESOLUTION_PENDING_ISCPE","APPROVE_RESOLUTION_PENDING_IC"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Legal contract",
+                        level: "8",
+                        clickScreen: "APPROVE_RESOLUTION_DONE",
+                        currentStatus: ["APPROVE_RESOLUTION_DONE","LEGAL_CONTRACT_PENDING_MANAGER","LEGAL_CONTRACT_PENDING_CEO","LEGAL_CONTRACT_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "LEGAL_CONTRACT",
+                        statusLogFilter:["LEGAL_CONTRACT_PENDING_MANAGER","LEGAL_CONTRACT_PENDING_CEO"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Investment contract",
+                        level: "9",
+                        clickScreen: "LEGAL_CONTRACT_PENDING_DONE",
+                        currentStatus: ["LEGAL_CONTRACT_PENDING_DONE","INVESTMENT_CONTRACT_PENDING_MANAGER","INVESTMENT_CONTRACT_PENDING_CEO","INVESTMENT_CONTRACT_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "INVESTMENT_CONTRACT",
+                        statusLogFilter:["INVESTMENT_CONTRACT_PENDING_MANAGER","INVESTMENT_CONTRACT_PENDING_CEO"],
+                        Code: ""
+                    },
+                    {
+                        Text: "Complete disbursement",
+                        level: "10",
+                        clickScreen: "INVESTMENT_CONTRACT_DONE",
+                        currentStatus: ["INVESTMENT_CONTRACT_DONE","COMPLETE_DISBURSEMENT_PENDING_MANAGER","COMPLETE_DISBURSEMENT_PENDING_CEO","COMPLETE_DISBURSEMENT_ATTACH_FILE"],
+                        activeArray: [""], shortStatus: "COMPLETE_DISBURSEMENT",
+                        statusLogFilter:["COMPLETE_DISBURSEMENT_PENDING_MANAGER","COMPLETE_DISBURSEMENT_PENDING_CEO"],
+                        Code: ""
+                    }
+            );
+        );
+        
+        Set(listProgessDivestmentPEVC,
+            Table(
+                {
+                    Text: "Proposed divestment", Code: "1", level: "0",
+                    clickScreen: "PROPOSED_DIVESTMENT_NEW",
+                    currentStatus: ["BLANK", "PROPOSED_DIVESTMENT_NEW", "PROPOSED_DIVESTMENT_PENDING_MANAGER", "PROPOSED_DIVESTMENT_PENDING_ISC_PE", "PROPOSED_DIVESTMENT_PENDING_ISC_VC", "PROPOSED_DIVESTMENT_PENDING_IC"],
+                    activeArray: [""], shortStatus: "PROPOSED_DIVESTMENT",
+                    statusLogFilter:["PROPOSED_DIVESTMENT_PENDING_MANAGER", "PROPOSED_DIVESTMENT_PENDING_ISC_PE", "PROPOSED_DIVESTMENT_PENDING_ISC_VC", "PROPOSED_DIVESTMENT_PENDING_IC"]
+                },
+                {
+                    Text: "Approve resolutions", Code: "2", level: "1",
+                    clickScreen: "PROPOSED_DIVESTMENT_DONE",
+                    currentStatus: ["PROPOSED_DIVESTMENT_DONE", "APPROVE_RESOLUTION_PENDING_MANAGER", "APPROVE_RESOLUTION_PENDING_ISC_PE", "APPROVE_RESOLUTION_PENDING_ISC_VC", "APPROVE_RESOLUTION_PENDING_IC","APPROVE_RESOLUTION_ATTACH_FILE"],
+                    activeArray: [""], shortStatus: "APPROVE_RESOLUTION",
+                    statusLogFilter:["APPROVE_RESOLUTION_PENDING_MANAGER", "APPROVE_RESOLUTION_PENDING_ISC_PE", "APPROVE_RESOLUTION_PENDING_ISC_VC", "APPROVE_RESOLUTION_PENDING_IC", "APPROVE_RESOLUTION_ATTACH_FILE"]
+                },
+                {
+                    Text: "Legal contracts", Code: "3", level: "2",
+                    clickScreen: "APPROVE_RESOLUTION_DONE",
+                    currentStatus: ["APPROVE_RESOLUTION_DONE", "LEGAL_CONTRACT_PENDING_MANAGER", "LEGAL_CONTRACT_PENDING_CEO", "LEGAL_CONTRACT_PENDING_PE", "LEGAL_CONTRACT_PENDING_ISC_VC", "LEGAL_CONTRACT_PENDING_IC", "LEGAL_CONTRACT_ATTACH_FILE"],
+                    activeArray: [""], shortStatus: "LEGAL_CONTRACT",
+                    statusLogFilter:["LEGAL_CONTRACT_PENDING_MANAGER", "LEGAL_CONTRACT_PENDING_PE", "LEGAL_CONTRACT_PENDING_CEO", "LEGAL_CONTRACT_PENDING_ISC_VC", "LEGAL_CONTRACT_PENDING_IC", "LEGAL_CONTRACT_ATTACH_FILE"]
+                },
+                {
+                    Text: "Approve the divestment contract", Code: "4", level: "3",
+                    clickScreen: "LEGAL_CONTRACT_DONE",
+                    currentStatus: ["LEGAL_CONTRACT_DONE", "APPROVE_DIVESTMENT_CONTRACT_PENDING_MANAGER", "APPROVE_DIVESTMENT_CONTRACT_PENDING_CEO", "APPROVE_DIVESTMENT_CONTRACT_ATTACH_FILE"],
+                    activeArray: [""], shortStatus: "APPROVE_DIVESTMENT_CONTRACT",
+                    statusLogFilter:["APPROVE_DIVESTMENT_CONTRACT_PENDING_MANAGER", "APPROVE_DIVESTMENT_CONTRACT_PENDING_CEO", "APPROVE_DIVESTMENT_CONTRACT_ATTACH_FILE"]
+                },
+                {
+                    Text: "Completed divestment", Code: "5", level: "4",
+                    clickScreen: "APPROVE_DIVESTMENT_CONTRACT_DONE",
+                    currentStatus: ["APPROVE_DIVESTMENT_CONTRACT_DONE", "COMPLETE_DIVESTMENT_PENDING_MANAGER", "COMPLETE_DIVESTMENT_PENDING_CEO", "COMPLETE_DIVESTMENT_ATTACH_FILE"],
+                    activeArray: [""], shortStatus: "COMPLETE_DIVESTMENT",
+                    statusLogFilter:[""]
+                }
+        ));
+        
+        // Go PEVC by link
+        If(!IsBlank(Param("pevc_id")),
+            Set(isDivestment, "D" in Param("pevc_id"));
+            Set(pevcId, Left(Param("pevc_id"), Len(Param("pevc_id")) - 1));
+            Set(oldDealDetailTab, 1);
+            Set(ShowHideButton, false);
+            Set(DealDetailTab, 1);
+            Set(detailPEVCById, Blank());
+            Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+        
+        
+            If(App.Width <= 600, Set(isLoading, true));
+            Concurrent(
+                ClearCollect(listUserAsignPEVC,'TVS->GetByRoleEmployeeDealPEVC-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close));,
+                ClearCollect(investmentPortfolioList, 'TVS->FindAlllInvestmentPortfolio'.Run(resKeyOpenAll.open,resKeyOpenAll.close).listItem);
+            );
+            If(isDivestment,
+                Concurrent(
+                    Set(pevcNoteFileLog, 'TVS->GetNoteFileLogDivestment-Process5-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                    Set(detailPEVCById, 'TVS->FindByIdPEVCDivestmentProcess5'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                    ClearCollect(listDealPEVC,'TVS->GetDealEmployeeDivestment-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,pevcId));
+                );,
+                Concurrent(
+                    Set(pevcNoteFileLog, 'TVS->GetNoteFileLog-Process5-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                    Set(detailPEVCById, 'TVS->FindByIdPEVCPreProcess5'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId, envDEV, envTEST, envUAT1, envUAT2)),
+                    ClearCollect(listDealPEVC,'TVS->GetDealEmployee-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,pevcId))
+                );
+            );
+            Set(prePEVCInfoEdit, detailPEVCById);
+            Set(isLoading, false);
+            Set(ShowHideButton, true);
+            Set(calledFindByID, true);
+            Set(PEVCgroups, pevcNoteFileLog.group);
+            Set(PEVClogs, pevcNoteFileLog.log);
+        
+            ClearCollect(voteLogs, Sort(PEVClogs, created_date, SortOrder.Descending));
+            ClearCollect(voteResult, []);
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_ISCVC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_ISCPE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_IC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_ISCVC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_ISCPE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_IC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_ISCVC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_ISCPE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_IC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISCVC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISCPE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_IC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_ISC_PE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_ISC_VC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_IC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISC_PE")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISC_VC")));
+            Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_IC")));
+            Set(estimatedLegalFeeValue, Text(Value(Substitute(If(isDivestment, detailPEVCById.estimated_legal_fee, detailPEVCById.dd_legal_fee), ",","")), "[$-en-GB]#,###"));
+            Set(estimatedDDFeeValue, Text(Value(Substitute(detailPEVCById.estimate_dd_fee, ",","")), "[$-en-GB]#,###"));
+        
+            Set(CompanyNameSelectedValue, detailPEVCById.company_id);
+            Set(dealTypeSelectedValue, detailPEVCById.deal_type);
+            ClearCollect(levelOfApprovalList, If(IsBlank(detailPEVCById.level_of_approval), [], Split(detailPEVCById.level_of_approval, "#")));
+            Set(roleDealUserCurrent,First(Filter(listDealPEVC,id=currenUserV2.id)).type);
+        
+            // Convert notes
+            Set(noteListValue, Blank());
+            ClearCollect(pevcListDeleteFiles, []);
+            ClearCollect(noteOfPEVC, pevcNoteFileLog.note);
+        
+            // Setup tracking progress JSON for Son.Nguyen component
+            ClearCollect(groupIC, Filter(PEVCgroups, group_team = "IC"));
+            ClearCollect(groupISCVC, Filter(PEVCgroups, group_team = "ISC-VC"));
+            ClearCollect(groupISCPE, Filter(PEVCgroups, group_team = "ISC-PE"));
+            ClearCollect(PEVCGroupsObject, []);
+            ClearCollect(listProgessPEVCForTracking, []);
+            Set(action, If(IsEmpty(Filter(PEVClogs, status in ["COMPLETE_DISCUSSION_PAPER_PENDING_IC"] && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+            First(Filter(PEVClogs, status in ["COMPLETE_DISCUSSION_PAPER_PENDING_IC"] && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group));
+            If(prePEVCInfoEdit.status = "APPROVED",
+                Set(CurrentLevel, Last(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC)).level),
+                Set(CurrentLevel, First(Filter(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC), prePEVCInfoEdit.status in currentStatus)).level);
+            );
+        
+            ForAll(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC) As progress,
+                Collect(listProgessPEVCForTracking,
+                {
+                    Text: progress.Text,
+                    Code: progress.Code,
+                    level: progress.level,
+                    subTitle: {
+                        name: If(
+                        !("_IC" in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                        !(If(isDivestment, "_ISC_VC", "_ISCVC") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                        !(If(isDivestment, "_ISC_PE", "_ISCPE") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status),
+                        Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).name_employee,
+                        !(progress.shortStatus&"_PENDING_IC" in progress.currentStatus),
+                        Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).name_employee,
+                        If( !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-VC, ISC-PE, IC",
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "REJECTED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-PE, IC",
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "REJECTED",
+                            "ISC-VC, IC",
+                            IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-VC, ISC-PE",
+                            IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "REJECTED",
+                            "ISC-VC",
+                            IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "REJECTED" &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-PE",
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-PE, IC",
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                            "ISC-VC, IC",
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                            "IC",
+                            IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                            "ISC-VC",
+                            IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                            IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                            !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                            First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                            "ISC-PE",
+                            ""
+                        )),
+                        action: If(!(progress.shortStatus&"_PENDING_IC" in progress.currentStatus),
+                        Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).action,
+                        !("_IC" in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                        !(If(isDivestment, "_ISC_VC", "_ISCVC") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                        !(If(isDivestment, "_ISC_PE", "_ISCPE") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status),
+                        Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).action,
+                        If(IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status && IsBlank(is_not_action))),
+                            If(Value(CurrentLevel) > Value(progress.level), "APPROVE", ""),
+                            First(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status && IsBlank(is_not_action))).action
+                        )),
+                        time: Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).created_date), "dd/mm/yyyy")
+                    },
+                    actionLogs: Filter(Sort(PEVClogs, created_date), status in progress.currentStatus),
+                    clickScreen: progress.clickScreen,
+                    currentStatus: progress.currentStatus,
+                    activeArray: progress.activeArray,
+                    statusLogFilter: progress.statusLogFilter,
+                    Groups: [
+                        {
+                            groupName: "ISC-VC",
+                            showGroup: "ISC-VC" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"] && If(Switch(
+                                    If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "",
+                                    First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "", !("ISC-VC" in detailPEVCById.group_rejected), true),
+                            subTitle: {
+                                action: Switch(
+                                    If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "",
+                                    First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_VC", "_ISCVC") in status)).created_date), "",
+                                Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_VC", "_ISCVC") in status)).created_date), "dd/mm/yyyy"))
+                            },
+                            children:
+                            If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                                AddColumns(Filter(PEVCgroups, group_team = "ISC-VC") As gr,
+                                    name, gr.name_user,
+                                    action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                        logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_VC", "_ISCVC") in logs.status)).action),
+                                    time, Text(DateTimeValue(
+                                        Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                            logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_VC", "_ISCVC") in logs.status
+                                        )).created_date), "dd/mm/yyyy")
+                                ),
+                                AddColumns(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status),
+                                    name, name_employee,
+                                    time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                )
+                            )
+                        },
+                        {
+                            groupName: "ISC-PE",
+                            showGroup: "ISC-PE" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"] && If(Switch(
+                                    If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+                                    First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "", !("ISC-PE" in detailPEVCById.group_rejected), true),
+                            subTitle: {
+                                action: Switch(
+                                    If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+                                    First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_PE", "_ISCPE") in status)).created_date), "",
+                                Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_PE", "_ISCPE") in status)).created_date), "dd/mm/yyyy"))
+                            },
+                            children:
+                            If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                            AddColumns(Filter(PEVCgroups, group_team = "ISC-PE") As gr,
+                                name, gr.name_user,
+                                action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                    logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_PE", "_ISCPE") in logs.status)).action),
+                                time, Text(DateTimeValue(
+                                            Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_PE", "_ISCPE") in logs.status
+                                            )).created_date), "dd/mm/yyyy")
+                            ),
+                                AddColumns(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status),
+                                    name, name_employee,
+                                    time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                )
+                            )
+                        },
+                        {
+                            groupName: "IC",
+                            showGroup: "IC" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"],
+                            subTitle: {
+                                action: Switch(
+                                    If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)), "",
+                                    First(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), "IC" in status)).created_date), "",
+                                Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), "IC" in status)).created_date), "dd/mm/yyyy"))
+                            },
+                            children:
+                            If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)).status_group),
+                                "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                            AddColumns(Filter(PEVCgroups, group_team = "IC") As gr,
+                                name, gr.name_user,
+                                action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                    logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && "_IC" in logs.status)).action),
+                                time, Text(DateTimeValue(
+                                            Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && "_IC" in logs.status
+                                            )).created_date), "dd/mm/yyyy")
+                            ),
+                                AddColumns(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status),
+                                    name, name_employee,
+                                    time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                )
+                            )
+                        }
+                    ]
+                }
+                );
+            );
+        
+            Set(dealTypeSelectedValue, detailPEVCById.deal_type);
+        
+            ClearCollect(note_APPROVE_RESOLUTION,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_RESOLUTION" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_APPROVE_RESOLUTION), ClearCollect(note_APPROVE_RESOLUTION, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_RESOLUTION", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_NEW_LEAD_CREATION,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "NEW_LEAD_CREATION" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_NEW_LEAD_CREATION), ClearCollect(note_NEW_LEAD_CREATION, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NEW_LEAD_CREATION", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_NEW_LEAD_CREATION_PENDING,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "NEW_LEAD_CREATION_PENDING" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_NEW_LEAD_CREATION_PENDING), ClearCollect(note_NEW_LEAD_CREATION_PENDING, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NEW_LEAD_CREATION_PENDING", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_NDA_APPROVAL,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "NDA_APPROVAL" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_NDA_APPROVAL), ClearCollect(note_NDA_APPROVAL, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NDA_APPROVAL", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_COMPLETE_DISCUSSION_PAPER,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_DISCUSSION_PAPER" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_COMPLETE_DISCUSSION_PAPER), ClearCollect(note_COMPLETE_DISCUSSION_PAPER, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_DISCUSSION_PAPER", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_INVESTMENT_MEMO_PENDING,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_MEMO_PENDING" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_INVESTMENT_MEMO_PENDING), ClearCollect(note_INVESTMENT_MEMO_PENDING, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_MEMO_PENDING", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_COMPLETE_TERM_SHEET,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_TERM_SHEET" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_COMPLETE_TERM_SHEET), ClearCollect(note_COMPLETE_TERM_SHEET, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_TERM_SHEET", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_INVESTMENT_MEMO,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_MEMO" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_INVESTMENT_MEMO), ClearCollect(note_INVESTMENT_MEMO, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_MEMO", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_DD_CONTRACT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "DD_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_DD_CONTRACT), ClearCollect(note_DD_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "DD_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_LEGAL_CONTRACT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "LEGAL_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_LEGAL_CONTRACT), ClearCollect(note_LEGAL_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "LEGAL_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_INVESTMENT_CONTRACT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_INVESTMENT_CONTRACT), ClearCollect(note_INVESTMENT_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_COMPLETE_DISBURSEMENT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_DISBURSEMENT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_COMPLETE_DISBURSEMENT), ClearCollect(note_COMPLETE_DISBURSEMENT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_DISBURSEMENT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_APPROVE_RESOLUTIONS,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_RESOLUTIONS" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_APPROVE_RESOLUTIONS), ClearCollect(note_APPROVE_RESOLUTIONS, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_RESOLUTIONS", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_LEGAL_CONTRACTS,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "LEGAL_CONTRACTS" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_LEGAL_CONTRACTS), ClearCollect(note_LEGAL_CONTRACTS, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "LEGAL_CONTRACTS", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_APPROVE_THE_DIVESTMENT_CONTRACT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_THE_DIVESTMENT_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_APPROVE_THE_DIVESTMENT_CONTRACT), ClearCollect(note_APPROVE_THE_DIVESTMENT_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_THE_DIVESTMENT_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+            ClearCollect(note_COMPLETED_DIVESTMENT,
+                Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETED_DIVESTMENT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+            );
+            If(IsEmpty(note_COMPLETED_DIVESTMENT), ClearCollect(note_COMPLETED_DIVESTMENT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETED_DIVESTMENT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+        
+            If(!IsBlank(prePEVCInfoEdit),
+                Set(currentStatus, If(prePEVCInfoEdit.status = "APPROVED",
+                    If(isDivestment, "PROPOSED_DIVESTMENT_NEW", "NEW_LEAD_CREATION_NEW"), prePEVCInfoEdit.status)); Set(PEVCCurrentStatus, prePEVCInfoEdit.status);,
+                Set(currentStatus, "BLANK"); Set(PEVCCurrentStatus, "BLANK");
+            ); 
+            Set(isShowSubmit, PEVCCurrentStatus in ["BLANK", "NEW_LEAD_CREATION_NEW", "NEW_LEAD_CREATION_DONE", "NDA_APPROVAL_ATTACH_FILE", "NDA_APPROVAL_DONE", "COMPLETE_DISCUSSION_PAPER_DONE", "INVESTMENT_MEMO_DONE", "COMPLETE_TERM_SHEET_DONE", "INVESTMENT_MEMO_ADJUSTED_DONE", "DD_CONTRACT_ATTACH_FILE", "DD_CONTRACT_DONE", "LEGAL_CONTRACT_PENDING_DONE", "INVESTMENT_CONTRACT_ATTACH_FILE", "INVESTMENT_CONTRACT_DONE", "COMPLETE_DISBURSEMENT_ATTACH_FILE"]);
+        
+            Set(companyPEVC, 'TVS->FindAllCompanyPEVC-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2));
+            If(!IsBlank(CompanyNameSelectedValue),
+                Set(PEVCFouderSharehoderData, 'TVS->FindByIdPVECLeadCreationFounderAndShareHolder-V1'.Run(CompanyNameSelectedValue,resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2));
+                ClearCollect(PEVC_founderData, AddColumns(PEVCFouderSharehoderData.listFounder, isTotal, false));
+                Collect(PEVC_founderData, {id: "", name: "Total", isTotal: true, ownership: Text(Sum(PEVC_founderData, ownership))});
+                ClearCollect(PEVC_shareholderData, AddColumns(PEVCFouderSharehoderData.listShareholder, isTotal, false));
+                Collect(PEVC_shareholderData, {id: "", name: "Total", isTotal: true, ownership: Text(Sum(PEVC_shareholderData, ownership))});
+            );
+            Set(isShowSubmitButton, false);
+            Set(isShowSaveButton, false);
+            Set(isShowApproveButton, false);
+            Set(isShowReviseButton, false);
+            Set(isShowRejectButton, false);
+            Navigate(DetailPEVC, ScreenTransition.Fade);
+        );
+        
+        //END Go PEVC by link
+        );
+    StartScreen: =
+    Theme: =PowerAppsTheme
+
+    Host As hostControl.DefaultHostControlVariant:
+        OnCancel: =false
+        OnEdit: =false
+        OnNew: =false
+        OnSave: =false
+        OnView: =false
+

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "7fe30bf3-a36e-443a-851d-f92b6f6419ee",
+    "Name": "TVS->SendNotiEmail-Process4-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "5bac7c64-e1b8-ee11-9078-6045bd58b6cb"
+  }
+]

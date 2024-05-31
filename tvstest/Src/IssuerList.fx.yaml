@@ -1,0 +1,2134 @@
+IssuerList As screen:
+    Fill: =RGBA(248, 248, 249, 1)
+    OnHidden: |-
+        =ClearCollect(
+            issuersList,
+            'TVS->GetIssuerListCurrent-V1'.Run(
+                resKeyOpenAll.open,
+                resKeyOpenAll.close, 
+                envDEV,envTEST, envUAT1, envUAT2
+            ).list_issuer
+        );
+    OnVisible: |-
+        =Set(DealDetailTab, 1);
+        Set(inputChanged, false);
+        Set(showRefreshButton, false);
+        Set(ShowNotification,false);
+        Set(MenuSelect,"Business process");
+        Set(MenuSelect2,"Fix income investment process");
+        Set(HeaderText,"Issuer list");
+        Set(issuerListSearchValue, "");
+        Set(isLoading, true);
+        Set(GetIssuerListCurrent, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,  envDEV,envTEST, envUAT1, envUAT2));
+        Set(isLoading, false);
+        ClearCollect(issuersList, GetIssuerListCurrent.list_issuer);
+        ClearCollect(issuersFiles, GetIssuerListCurrent.attach_file);
+        ClearCollect(listIssuerInput, issuersList);
+        Set(DetailIssuer, Blank());
+        ClearCollect(issuerListDelete, []);
+        Reset(AttachFile_2);
+        Reset(TextInput2);
+
+    Canvas4 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =Parent.Height - Self.Y
+        Width: =Parent.Width
+        Y: =
+        ZIndex: =1
+
+        DataCard4 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+            White_Background_3 As htmlViewer:
+                Font: =Font.Arial
+                Height: =Switch(DealDetailTab, 1, ListFileTab1.Y + ListFileTab1.Height, 3, ListFileTab2.Y + ListFileTab2.Height) - Self.Y + 30
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white;border-radius: 12px;box-shadow: "& If(Parent.Width > 600, "7px 5px 7px 0px rgba(0, 0, 0, 0.10)", "none") & ";
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =14.00
+                Width: =If(App.Width > 800, App.Width - If(MobileShowMenu, MenuItemsSideBar_12.Width, MenuItemsSideBar_Small_2.Width) - 5, App.Width + 10)
+                X: =SubHeaderBg_1.X + If(App.Width > 800, 10, 0)
+                Y: =SubHeaderBg_1.Y + SubHeaderBg_1.Height + 10
+                ZIndex: =1
+
+            White_Background_History As htmlViewer:
+                Font: =Font.Arial
+                Height: =Max(FromListEncryption_2.Y + FromListEncryption_2.Height - Self.Y + 25, 100)
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white;border-radius: 12px;box-shadow: "& If(Parent.Width > 600, "7px 5px 7px 0px rgba(0, 0, 0, 0.10)", "none") & ";
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =14.00
+                Visible: =DealDetailTab = 3
+                Width: =FromListEncryption_2.Width + 45
+                X: =Header_No_1.X - 20
+                Y: =Header_No_1.Y
+                ZIndex: =2
+
+            btnRefresh_IssuerList_Inputdatahere As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =Select(RefreshListIcon)
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =RefreshListIcon.Visible
+                Width: =42
+                X: =TextInput2.X + TextInput2.Width + 8
+                Y: =TextInput2.Y
+                ZIndex: =3
+
+            QT2TabsGroup_2 As group:
+                Height: =5
+                Width: =5
+                X: =-499
+                Y: =-128
+                ZIndex: =4
+
+                HrQT2_2 As rectangle:
+                    BorderColor: =RGBA(176, 176, 176, 1)
+                    Fill: =RGBA(191, 191, 192, 1)
+                    Height: =1
+                    Width: =If(App.Width > 600, layout_sector_1.X + layout_sector_1.Width - Self.X - If(App.Width > 600, 0, 10), QT2Tabs_2.AllItemsCount * QT2Tabs_2.TemplateWidth - 7)
+                    X: =QT2Tabs_2.X + If(App.Width > 600, 0, 5)
+                    Y: =QT2Tabs_2.Y + QT2Tabs_2.Height - 7
+                    ZIndex: =4
+
+                QT2Tabs_2 As gallery.galleryHorizontal:
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =47
+                    Items: |-
+                        =[{text: "Current list of issuers", tab: 1},
+                        {text: "History list of issuers", tab: 3}]
+                    LoadingSpinner: =LoadingSpinner.Data
+                    ShowScrollbar: =false
+                    TemplatePadding: =0
+                    TemplateSize: =180
+                    Width: =If(Parent.Width > 600,White_Background_3.Width - 50, Parent.Width - 30)
+                    X: =White_Background_3.X + If(App.Width > 600, 20, 10)
+                    Y: =White_Background_3.Y + 10
+                    ZIndex: =5
+
+                    Button8_3 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =Self.Fill
+                        OnSelect: |
+                            =Select(Parent);
+                            ClearCollect(listRes, Blank());
+                            Set(DealDetailTab, ThisItem.tab);
+                            Set(HistorySelectedItemSTT, Blank());
+                            If(DealDetailTab=3,
+                            Set(currentPageIndex,0);
+                            Set(PageSizeNumber, 10);
+                            Set(dateFromFilterVar,Blank());
+                            Set(dateToFilterVar,Blank());
+                            Reset(DateFrom_Datepicker_3);
+                            Reset(DateTo_DatePicker_3);
+                            Set(isLoading, true);
+                            ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex,  envDEV,envTEST, envUAT1, envUAT2));
+                            Set(isLoading, false);
+                            ClearCollect(listRes,listItem.listItem);
+                            Set(
+                                pageCount,
+                                First(listItem.pageCount).pageCount
+                            );
+                            
+                            
+                            //pageIndex
+                            Set(
+                                maxList,
+                                [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                    
+                                ]
+                            );
+                            
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            
+                            ForAll(
+                                maxList,
+                                If(
+                                        Last(listPageIndex).Value + 1 < pageCount
+                                    ,
+                                    Collect(
+                                        listPageIndex,
+                                        Last(listPageIndex).Value + 1
+                                    );
+                                    
+                                );
+                            )
+                            ,DealDetailTab=1,
+                            Reset(AttachFile_2);
+                            Reset(TextInput2);
+                            Set(isLoading, true);
+                            Set(issuersListRes, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2));
+                            Set(isLoading, false);
+                            ClearCollect(issuersList, issuersListRes.list_issuer);
+                            ClearCollect(issuersFiles, issuersListRes.attach_file);
+                            ClearCollect(listIssuerInput, issuersList);
+                            Set(DetailIssuer, Blank())
+                            
+                            );
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 12, 10.5)
+                        Text: =ThisItem.text
+                        Tooltip: =ThisItem.text
+                        Width: =180
+                        Y: =5
+                        ZIndex: =1
+
+                    BottomBorder1_10 As rectangle:
+                        BorderColor: =If(DealDetailTab = ThisItem.tab, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = ThisItem.tab, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(ThisItem.tab = DealDetailTab, 2, 0)
+                        Width: =178
+                        Y: =40
+                        ZIndex: =2
+
+            Image2 As image:
+                Height: =AttachFile_2.Height
+                Image: =First(AttachFile_2.Attachments).Value
+                Visible: =false
+                Width: =AttachFile_2.Height
+                X: =AttachFile_2.X + AttachFile_2.Width
+                Y: =AttachFile_2.Y
+                ZIndex: =44
+
+            "ListFileTab2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                DelayItemLoading: =true
+                Height: =Self.AllItemsCount * Self.TemplateHeight
+                Items: =DetailIssuer.attach_file
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =DealDetailTab = 3
+                Width: =layout_short_7.X + layout_short_7.Width - Self.X
+                X: =IssuersListAttachment_Label_1.X
+                Y: =IssuersListAttachment_Label_1.Y + IssuersListAttachment_Label_1.Height
+                ZIndex: =45
+
+                Button1_1 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(56, 96, 178, 1)
+                    HoverFill: =
+                    OnSelect: =Download(urlUploadFixInHead & EncodeUrl(ThisItem.file_name) & urlUploadFixInTail);
+                    PaddingLeft: =0
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    Size: =10.5
+                    Text: =ThisItem.file_name
+                    Width: =Parent.Width - 30
+                    X: =30
+                    ZIndex: =2
+
+                HtmlText7_1 As htmlViewer:
+                    Font: =Font.Arial
+                    HtmlText: |-
+                        ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""16"" height=""20"" viewBox=""0 0 16 20"" fill=""none"">
+                          <path d=""M10.7503 2.66732H2.50033V17.334H13.5003V5.41732H10.7503V2.66732ZM2.50033 0.833984H11.667L15.3337 4.50065V17.334C15.3337 17.8202 15.1405 18.2865 14.7967 18.6303C14.4529 18.9742 13.9866 19.1673 13.5003 19.1673H2.50033C2.0141 19.1673 1.54778 18.9742 1.20396 18.6303C0.860146 18.2865 0.666992 17.8202 0.666992 17.334V2.66732C0.666992 2.18109 0.860146 1.71477 1.20396 1.37096C1.54778 1.02714 2.0141 0.833984 2.50033 0.833984ZM4.33366 9.08398H11.667V10.9173H4.33366V9.08398ZM4.33366 12.7507H11.667V14.584H4.33366V12.7507Z"" fill=""#114F90""/>
+                        </svg>"
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingRight: =0
+                    PaddingTop: =10
+                    Width: =30
+                    ZIndex: =3
+
+            "ListFileTab1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                DelayItemLoading: =true
+                Height: =Self.AllItemsCount * Self.TemplateHeight
+                Items: =Filter(issuersFiles, !(ThisRecord in issuerListDelete))
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =DealDetailTab = 1 && !inputChanged
+                Width: =layout_sector_1.X + layout_sector_1.Width - Self.X
+                X: =AttachFile_2.X
+                Y: =AttachFile_2.Y + AttachFile_2.Height
+                ZIndex: =46
+
+                Button1 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(56, 96, 178, 1)
+                    HoverFill: =
+                    OnSelect: =Download(urlUploadFixInHead & ThisItem.file_name & urlUploadFixInTail);
+                    PaddingLeft: =0
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    Size: =10.5
+                    Text: =ThisItem.file_name
+                    Width: =Parent.Width - 70
+                    X: =30
+                    ZIndex: =2
+
+                HtmlText7_2 As htmlViewer:
+                    Font: =Font.Arial
+                    HtmlText: |-
+                        ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""16"" height=""20"" viewBox=""0 0 16 20"" fill=""none"">
+                          <path d=""M10.7503 2.66732H2.50033V17.334H13.5003V5.41732H10.7503V2.66732ZM2.50033 0.833984H11.667L15.3337 4.50065V17.334C15.3337 17.8202 15.1405 18.2865 14.7967 18.6303C14.4529 18.9742 13.9866 19.1673 13.5003 19.1673H2.50033C2.0141 19.1673 1.54778 18.9742 1.20396 18.6303C0.860146 18.2865 0.666992 17.8202 0.666992 17.334V2.66732C0.666992 2.18109 0.860146 1.71477 1.20396 1.37096C1.54778 1.02714 2.0141 0.833984 2.50033 0.833984ZM4.33366 9.08398H11.667V10.9173H4.33366V9.08398ZM4.33366 12.7507H11.667V14.584H4.33366V12.7507Z"" fill=""#114F90""/>
+                        </svg>"
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingRight: =0
+                    PaddingTop: =10
+                    Width: =30
+                    ZIndex: =3
+
+                Icon4 As icon.Cancel:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =20
+                    Icon: =Icon.Cancel
+                    OnSelect: =Collect(issuerListDelete, ThisItem);
+                    Width: =20
+                    X: =Parent.Width - Self.Width - 10 
+                    Y: =10
+                    ZIndex: =4
+
+            ClearFormDateQT2_1 As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: |
+                    =Reset(DateFrom_Datepicker_3);
+                    Set(isLoading, true);
+                    Set(
+                        dateFromFilterVar,
+                        DateFrom_Datepicker_3.SelectedDate
+                    );
+                    Set(
+                        dateToFilterVar,
+                        DateTo_DatePicker_3.SelectedDate
+                    );
+                    Set(
+                        currentPageIndex,
+                        0
+                    );
+                    Set(
+                        PageSizeNumber,
+                        5
+                    );
+                    ClearCollect(
+                        listItem,
+                        'TVS->FindAllIssuer-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            Text(
+                                dateFromFilterVar,
+                                "yyyy-mm-dd hh:mm:ss"
+                            ),
+                            Text(
+                                dateToFilterVar,
+                                "yyyy-mm-dd hh:mm:ss"
+                            ),
+                            PageSizeNumber,
+                            currentPageIndex,
+                            envDEV,envTEST, envUAT1, envUAT2
+                        )
+                    );
+                    ClearCollect(
+                        listRes,
+                        listItem.listItem
+                    );
+                    Set(
+                        pageCount,
+                        First(listItem.pageCount).pageCount
+                    );
+                    Set(
+                        pageIndexFirst,
+                        5 * RoundDown(
+                            currentPageIndex / 5,
+                            0
+                        )
+                    );
+                    ClearCollect(
+                        listPageIndex,
+                        pageIndexFirst
+                    );
+                    ForAll(
+                        maxList,
+                        If(
+                            Last(listPageIndex).Value + 1 < pageCount,
+                            Collect(
+                                listPageIndex,
+                                Last(listPageIndex).Value + 1
+                            );
+                        );
+                        
+                    );
+                    Set(
+                        isLoading,
+                        false
+                    );
+                Visible: =!IsBlank(DateFrom_Datepicker_3.SelectedDate) && DealDetailTab = 3
+                Width: =15
+                X: =DateFrom_Datepicker_3.X + DateFrom_Datepicker_3.Width - 50
+                Y: =DateFrom_Datepicker_3.Y + 10
+                ZIndex: =47
+
+            ClearFormDateQT2_2 As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =Reset(DateTo_DatePicker_3);
+                    Set(isLoading, true);
+                    Set(
+                        dateFromFilterVar,
+                        DateFrom_Datepicker_3.SelectedDate
+                    );
+                    Set(
+                        dateToFilterVar,
+                        DateTo_DatePicker_3.SelectedDate
+                    );
+                    Set(
+                        currentPageIndex,
+                        0
+                    );
+                    Set(
+                        PageSizeNumber,
+                        5
+                    );
+                    ClearCollect(
+                        listItem,
+                        'TVS->FindAllIssuer-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            Text(
+                                dateFromFilterVar,
+                                "yyyy-mm-dd hh:mm:ss"
+                            ),
+                            Text(
+                                dateToFilterVar,
+                                "yyyy-mm-dd hh:mm:ss"
+                            ),
+                            PageSizeNumber,
+                            currentPageIndex,
+                            envDEV,envTEST, envUAT1, envUAT2
+                        )
+                    );
+                    ClearCollect(
+                        listRes,
+                        listItem.listItem
+                    );
+                    Set(
+                        pageCount,
+                        First(listItem.pageCount).pageCount
+                    );
+                    Set(
+                        pageIndexFirst,
+                        5 * RoundDown(
+                            currentPageIndex / 5,
+                            0
+                        )
+                    );
+                    ClearCollect(
+                        listPageIndex,
+                        pageIndexFirst
+                    );
+                    ForAll(
+                        maxList,
+                        If(
+                            Last(listPageIndex).Value + 1 < pageCount,
+                            Collect(
+                                listPageIndex,
+                                Last(listPageIndex).Value + 1
+                            );
+                        );
+                        
+                    );
+                    Set(
+                        isLoading,
+                        false
+                    );
+                Visible: =!IsBlank(DateTo_DatePicker_3.SelectedDate) && DealDetailTab = 3
+                Width: =15
+                X: =DateTo_DatePicker_3.X + DateTo_DatePicker_3.Width - 50
+                Y: =DateTo_DatePicker_3.Y + 10
+                ZIndex: =48
+
+            RefreshListIcon As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Set(isLoading, true);
+                    Set(inputChanged, false);
+                    Reset(AttachFile_2);
+                    Reset(TextInput2);
+                    ClearCollect(issuersList, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,envDEV,envTEST, envUAT1, envUAT2).list_issuer);
+                    ClearCollect(issuersFiles, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,envDEV,envTEST, envUAT1, envUAT2).attach_file);
+                    Clear(issuerListDelete);
+                    ClearCollect(listIssuerInput, issuersList);
+                    Set(DetailIssuer, Blank());
+                    Set(showRefreshButton, false);
+                    Set(isLoading, false);
+                Visible: =DealDetailTab = 1 && showRefreshButton
+                Width: =20
+                X: =btnRefresh_IssuerList_Inputdatahere.X + 10
+                Y: =btnRefresh_IssuerList_Inputdatahere.Y + 12
+                ZIndex: =49
+
+            EmptyData_Label As label:
+                Align: =Align.Center
+                Font: =Font.Arial
+                Size: =10.5
+                Text: ="Empty data."
+                Visible: =IsEmpty(First(listRes).listItem) && DealDetailTab = 3
+                Width: =HrQT2_Table.Width
+                X: =HrQT2_Table.X
+                Y: =HrQT2_Table.Y + 5
+                ZIndex: =50
+
+            IssuersList_Tab1Group As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =50
+
+                InputDateHere_Label As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =42
+                    Size: =10.5
+                    Text: ="Input data here"
+                    Visible: =DealDetailTab = 1
+                    Width: =120
+                    X: =HrQT2_2.X - If(App.Width > 600, 0, -5)
+                    Y: =IssuerList_SearchInput.Y + IssuerList_SearchInput.Height + 15
+                    ZIndex: =6
+
+                layout_issuer_1 As rectangle:
+                    BorderColor: =RGBA(192, 192, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =42
+                    Visible: =DealDetailTab = 1
+                    Width: =If(Parent.Width > 900, White_Background_3.Width / 9, White_Background_3.Width / 7 + 10)
+                    X: =InputDateHere_Label.X
+                    Y: =TextInput2.Y + TextInput2.Height + 15
+                    ZIndex: =7
+
+                layout_short As rectangle:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =42
+                    Visible: =DealDetailTab = 1
+                    Width: =If(Parent.Width > 900, White_Background_3.Width / 6, White_Background_3.Width / 5 + 25)
+                    X: =layout_issuer_1.X + layout_issuer_1.Width
+                    Y: =layout_issuer_1.Y
+                    ZIndex: =8
+
+                layout_issuer_Name As rectangle:
+                    BorderColor: =RGBA(192, 192, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =42
+                    Visible: =DealDetailTab = 1
+                    Width: =White_Background_3.Width * 2 / 5 - If(App.Width > 900, 0, 40)
+                    X: =layout_short.X + layout_short.Width
+                    Y: =layout_short.Y
+                    ZIndex: =9
+
+                layout_sector_1 As rectangle:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =42
+                    Visible: =DealDetailTab = 1
+                    Width: =White_Background_3.Width / 6
+                    X: =layout_issuer_Name.X + layout_issuer_Name.Width
+                    Y: =layout_issuer_Name.Y
+                    ZIndex: =10
+
+                label_issuer_1 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    Height: =42
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Issuer "
+                    Visible: =DealDetailTab = 1
+                    Width: =layout_issuer_1.Width
+                    X: =layout_issuer_1.X
+                    Y: =layout_issuer_1.Y
+                    ZIndex: =11
+
+                label_short As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    Height: =42
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Short name"
+                    Visible: =DealDetailTab = 1
+                    Width: =layout_short.Width
+                    X: =layout_short.X
+                    Y: =layout_short.Y
+                    ZIndex: =12
+
+                label_issuer_name As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    Height: =42
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Issuer's name"
+                    Visible: =DealDetailTab = 1
+                    Width: =layout_issuer_Name.Width
+                    X: =layout_issuer_Name.X
+                    Y: =layout_short.Y
+                    ZIndex: =13
+
+                label_sector_1 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    Height: =42
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Sector"
+                    Visible: =DealDetailTab = 1
+                    Width: =layout_sector_1.Width
+                    X: =layout_sector_1.X
+                    Y: =layout_sector_1.Y
+                    ZIndex: =14
+
+                "Gallery8 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    Height: =Max(If(Self.AllItemsCount * Self.TemplateHeight > (Self.TemplateHeight * If(App.Width > 600, 8, 6)), (Self.TemplateHeight * If(App.Width > 600, 8, 6)), Self.AllItemsCount * Self.TemplateHeight), 40)
+                    Items: =Filter(listIssuerInput, issuerListSearchValue in issuer || issuerListSearchValue in short_name || issuerListSearchValue in issuer_name || issuerListSearchValue in sector)
+                    Layout: =Layout.Vertical
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 600, 50, 70)
+                    Visible: =DealDetailTab = 1
+                    Width: =layout_sector_1.X + layout_sector_1.Width - Self.X + 12.7
+                    X: =layout_issuer_1.X  - 1
+                    Y: =layout_issuer_1.Y + layout_issuer_1.Height
+                    ZIndex: =15
+
+                    layout_issuer_2 As rectangle:
+                        BorderColor: =RGBA(192, 192, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8.TemplateHeight
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_issuer_1.Width + 1
+                        ZIndex: =1
+
+                    layout_short_2 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8.TemplateHeight
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_short.Width
+                        X: =layout_issuer_2.X + layout_issuer_2.Width
+                        Y: =layout_issuer_2.Y
+                        ZIndex: =2
+
+                    layout_issuer_Name_1 As rectangle:
+                        BorderColor: =RGBA(192, 192, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8.TemplateHeight
+                        Visible: =DealDetailTab = 1
+                        Width: =label_issuer_name.Width
+                        X: =layout_short_2.X + layout_short_2.Width
+                        Y: =layout_short_2.Y
+                        ZIndex: =3
+
+                    layout_sector_3 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8.TemplateHeight
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_sector_1.Width 
+                        X: =layout_issuer_Name_1.X + layout_issuer_Name_1.Width
+                        Y: =layout_issuer_Name_1.Y
+                        ZIndex: =4
+
+                    label_issuer_2 As label:
+                        Font: =Font.Arial
+                        Height: =Gallery8.TemplateHeight
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.issuer
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_issuer_2.Width
+                        X: =layout_issuer_2.X
+                        Y: =layout_issuer_2.Y
+                        ZIndex: =5
+
+                    label_short_2 As label:
+                        Font: =Font.Arial
+                        Height: =Gallery8.TemplateHeight
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.short_name
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_short_2.Width
+                        X: =layout_short_2.X
+                        Y: =layout_short_2.Y
+                        ZIndex: =6
+
+                    label_issuer_name_1 As label:
+                        Font: =Font.Arial
+                        Height: =Gallery8.TemplateHeight
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.issuer_name
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_issuer_Name_1.Width
+                        X: =layout_issuer_Name_1.X
+                        Y: =layout_issuer_Name_1.Y
+                        ZIndex: =7
+
+                    label_sector_3 As label:
+                        Font: =Font.Arial
+                        Height: =Gallery8.TemplateHeight
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.sector
+                        Visible: =DealDetailTab = 1
+                        Width: =layout_sector_3.Width
+                        X: =layout_sector_3.X
+                        Y: =layout_sector_3.Y
+                        ZIndex: =8
+
+                AttachFile_2 As attachments:
+                    AddAttachmentText: ="Click here to attach file"
+                    BorderColor: =
+                    BorderThickness: =0
+                    DisplayMode: =If("RM_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action), DisplayMode.Edit, DisplayMode.Disabled)
+                    DropTargetBorderThickness: =0
+                    Fill: =RGBA(0, 0, 0, 0)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Height: =If(("RM_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action)), 85 + Max(If(CountRows(Self.Attachments) = 1, 0, CountRows(Self.Attachments) * 15)), 0)
+                    IsInDataCard: =true
+                    Items: =
+                    MaxAttachments: =99
+                    MaxAttachmentSize: =maxSizeFile
+                    OnAddFile: |-
+                        =UpdateContext(
+                           {
+                              varJSON: 
+                              JSON(
+                                 Image2.Image,
+                                 JSONFormat.IncludeBinaryData
+                              )
+                           }
+                        )
+                    OnRemoveFile: |-
+                        =UpdateContext(
+                           {
+                              varJSON: 
+                             Blank()
+                           }
+                        )
+                    OnUndoRemoveFile: =Set(varJSON,"")
+                    PaddingBottom: =5
+                    PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                    PaddingRight: =5
+                    PaddingTop: =5
+                    Size: =10.5
+                    Tooltip: =
+                    Visible: =DealDetailTab = 1
+                    Width: =If(App.Width > 900, White_Background_3.Width * 2/5, White_Background_3.Width * 4/5)
+                    X: =Gallery8.X
+                    Y: =IssuersListAttachment_Label.Y + IssuersListAttachment_Label.Height
+                    ZIndex: =16
+
+                TextInput2 As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: =
+                    DisplayMode: =If("RM_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action), DisplayMode.Edit, DisplayMode.Disabled)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    Height: =42
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    Mode: =TextMode.MultiLine
+                    OnChange: |
+                        =Set(inputChanged, false);
+                        Set(showRefreshButton, true);
+                        Set(
+                            splitIssuer,
+                            Substitute(
+                                Split(
+                                    Self.Text,
+                                    Char(10)
+                                ),
+                                Char(9),
+                                "/"
+                            )
+                        );
+                        ForAll(
+                            splitIssuer As data,
+                            Collect(
+                                listIssuerData,
+                                {
+                                    issuer: First(
+                                        Split(
+                                            data.Value,
+                                            "/"
+                                        )
+                                    ).Value,
+                                    short_name: Last(
+                                        FirstN(
+                                            (Split(
+                                                data.Value,
+                                                "/"
+                                            )),
+                                            2
+                                        )
+                                    ).Value,
+                                    issuer_name: Last(
+                                        FirstN(
+                                            (Split(
+                                                data.Value,
+                                                "/"
+                                            )),
+                                            3
+                                        )
+                                    ).Value,
+                                    sector: Last(
+                                        FirstN(
+                                            (Split(
+                                                data.Value,
+                                                "/"
+                                            )),
+                                            4
+                                        )
+                                    ).Value
+                                }
+                            )
+                        );
+                        If(!IsEmpty(listIssuerData) && !IsBlank(Trim(Self.Text)), Set(inputChanged, true));
+                        ClearCollect(
+                            listIssuerInput,
+                            listIssuerData
+                        );
+                        Clear(listIssuerData);
+                        Reset(Self);
+                    Size: =10.5
+                    Visible: =DealDetailTab = 1
+                    Width: =If(Parent.Width > 600, 250, App.Width - InputDateHere_Label.Width - 90)
+                    X: =InputDateHere_Label.X + InputDateHere_Label.Width
+                    Y: =InputDateHere_Label.Y
+                    ZIndex: =36
+
+                IssuersListAttachment_Label As label:
+                    Color: =RGBA(14, 63, 115, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =42
+                    Size: =12
+                    Text: ="Attachment"
+                    Visible: =DealDetailTab = 1
+                    Width: =120
+                    X: =Gallery8.X
+                    Y: =Gallery8.Y + Gallery8.Height
+                    ZIndex: =40
+
+            IssuerList_SearchInput As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =42
+                HintText: ="Search ..."
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Size: =10.5
+                Visible: =layout_issuer_1.Visible
+                Width: =If(App.Width > 600, TextInput2.X + TextInput2.Width - Self.X, TextInput2.X + TextInput2.Width - Self.X - 100)
+                X: =InputDateHere_Label.X
+                Y: =HrQT2_2.Y + 15
+                ZIndex: =51
+
+            HistoryTabGroup As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =51
+
+                DateFrom_InputBack_3 As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    RadiusBottomLeft: =8
+                    RadiusBottomRight: =8
+                    RadiusTopLeft: =8
+                    RadiusTopRight: =8
+                    Size: =13.00
+                    Visible: =DealDetailTab = 3
+                    Width: =If(Parent.Width > 900, 216.00,  Parent.Width > 600, 150, (App.Width - 30) / 2 - 5)
+                    X: =CreateDate_IssuerList_Label.X
+                    Y: =CreateDate_IssuerList_Label.Y + CreateDate_IssuerList_Label.Height
+                    ZIndex: =17
+
+                DateFrom_Datepicker_3 As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =DateFrom_InputBack_3.Height - 6
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("From", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =10.5
+                    Visible: =DealDetailTab = 3
+                    Width: =DateFrom_InputBack_3.Width - 6
+                    X: =DateFrom_InputBack_3.X + 3
+                    Y: =DateFrom_InputBack_3.Y + 3
+                    ZIndex: =18
+
+                DateTo_InputBack_3 As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    RadiusBottomLeft: =8
+                    RadiusBottomRight: =8
+                    RadiusTopLeft: =8
+                    RadiusTopRight: =8
+                    Size: =13.00
+                    Visible: =DealDetailTab = 3
+                    Width: =If(Parent.Width > 900, 216.00,  Parent.Width > 600, 150, (App.Width - 30) / 2 - 5)
+                    X: =DateFrom_InputBack_3.X + DateFrom_InputBack_3.Width + 10
+                    Y: =DateFrom_InputBack_3.Y
+                    ZIndex: =19
+
+                DateTo_DatePicker_3 As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =DateTo_InputBack_3.Height - 6
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("To", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =10.5
+                    StartYear: =If(IsBlank(DateFrom_Datepicker_3.SelectedDate), 1970, Year(DateFrom_Datepicker_3.SelectedDate))
+                    Visible: =DealDetailTab = 3
+                    Width: =DateTo_InputBack_3.Width - 6
+                    X: =DateTo_InputBack_3.X + 3
+                    Y: =DateTo_InputBack_3.Y + 3
+                    ZIndex: =20
+
+                SearchAUMButton_7 As button:
+                    BorderThickness: =0
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    Fill: =RGBA(17, 79, 144, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |-
+                        =Set(isLoading, true);
+                        Set(DetailIssuer, Blank());
+                        If(DateDiff(DateFrom_Datepicker_3.SelectedDate, DateTo_DatePicker_3.SelectedDate) < 0,
+                        
+                        Set(NoticationText, "The from date cannot be greater than the to date!"); Set(IsError, true); UpdateContext({ShowNotification: true}); Set(isLoading, false),
+                        
+                        Set(dateFromFilterVar,DateFrom_Datepicker_3.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker_3.SelectedDate);
+                        Set(currentPageIndex,0);
+                        Set(PageSizeNumber, 5);
+                        ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex, envDEV,envTEST, envUAT1, envUAT2));
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        
+                        
+                        Set(
+                                pageCount,
+                                First(listItem.pageCount).pageCount
+                            );
+                            Set(
+                                pageIndexFirst,
+                                5 * RoundDown(
+                                    currentPageIndex / 5,
+                                    0
+                                )
+                            );
+                            ClearCollect(
+                                listPageIndex,
+                                pageIndexFirst
+                            );
+                            ForAll(
+                                maxList,
+                                If(
+                                    Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(
+                                        listPageIndex,
+                                        Last(listPageIndex).Value + 1
+                                    );
+                                );
+                            );
+                            Set(
+                                isLoading,
+                                false
+                            );
+                        );
+                        Set(isLoading, false);
+                    PaddingBottom: =10
+                    PaddingLeft: =40
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: ="Search"
+                    Visible: =DealDetailTab = 3
+                    Width: =120
+                    X: =If(Parent.Width > 600, DateTo_InputBack_3.X + DateTo_InputBack_3.Width + 10, DateTo_InputBack_3.X + DateTo_InputBack_3.Width - Self.Width)
+                    Y: =If(Parent.Width > 600, DateTo_InputBack_3.Y, DateFrom_InputBack_3.Y + DateFrom_InputBack_3.Height + 10)
+                    ZIndex: =21
+
+                SearchAUMIcon_2 As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =35
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                          <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                        </svg><div>"
+                    OnSelect: |-
+                        =Set(isLoading, true);
+                        Set(DetailIssuer, Blank());
+                        If(DateDiff(DateFrom_Datepicker_3.SelectedDate, DateTo_DatePicker_3.SelectedDate) < 0,
+                        
+                        Set(NoticationText, "The from date cannot be greater than the to date!"); Set(IsError, true); UpdateContext({ShowNotification: true}); Set(isLoading, false),
+                        
+                        Set(dateFromFilterVar,DateFrom_Datepicker_3.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker_3.SelectedDate);
+                        Set(currentPageIndex,0);
+                        Set(PageSizeNumber, 5);
+                        ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex,envDEV,envTEST, envUAT1, envUAT2));
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        
+                        
+                        Set(
+                                pageCount,
+                                First(listItem.pageCount).pageCount
+                            );
+                            Set(
+                                pageIndexFirst,
+                                5 * RoundDown(
+                                    currentPageIndex / 5,
+                                    0
+                                )
+                            );
+                            ClearCollect(
+                                listPageIndex,
+                                pageIndexFirst
+                            );
+                            ForAll(
+                                maxList,
+                                If(
+                                    Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(
+                                        listPageIndex,
+                                        Last(listPageIndex).Value + 1
+                                    );
+                                );
+                            );
+                            Set(
+                                isLoading,
+                                false
+                            );
+                        );
+                        Set(isLoading, false);
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Visible: =DealDetailTab = 3
+                    Width: =30
+                    X: =SearchAUMButton_7.X + 20
+                    Y: =SearchAUMButton_7.Y + 6
+                    ZIndex: =22
+
+                FromListEncryption_2 As gallery.galleryVertical:
+                    '#CopilotOverlayLabel': ="Filtered"
+                    BorderColor: =RGBA(255, 255, 255, 1)
+                    Fill: =RGBA(0,0,0,0)
+                    Height: =Min(FromListEncryption_2.AllItemsCount * Self.TemplateHeight, 10 * Self.TemplateHeight)
+                    Items: =First(listRes).listItem
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    OnSelect: =true
+                    TemplateFill: =//If(Mod(Value(ThisItem.id), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =DealDetailTab = 3 && !IsBlank(listRes)
+                    Width: =SearchAUMButton_7.X + SearchAUMButton_7.Width - Self.X
+                    X: =Header_No_1.X
+                    Y: =Header_No_1.Y + Header_No_1.Height + 5
+                    ZIndex: =23
+
+                    Button_OverLay_3 As button:
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        HoverFill: =Self.Fill
+                        OnSelect: |-
+                            =Set(colEncryption1, ThisItem);
+                            Set(isEditShowPopup, true)
+                        PressedFill: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Text: =""
+                        Visible: =DealDetailTab = 3
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    Label_No_2 As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Fill: =If(!IsBlank(HistorySelectedItemSTT) && ThisItem.stt = HistorySelectedItemSTT, RGBA(209, 221, 255, 0.5), Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                        Font: =Font.Arial
+                        OnSelect: =Select(Parent)
+                        PaddingRight: =5.00
+                        PaddingTop: =5.00
+                        Size: =10.5
+                        Text: =ThisItem.stt
+                        Visible: =DealDetailTab = 3
+                        Width: =Header_No_1.Width
+                        ZIndex: =2
+
+                    Label_Name_2 As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Fill: =If(!IsBlank(HistorySelectedItemSTT) && ThisItem.stt = HistorySelectedItemSTT, RGBA(209, 221, 255, 0.5), Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                        Font: =Font.Arial
+                        OnSelect: =Select(Parent)
+                        PaddingRight: =5.00
+                        PaddingTop: =10
+                        Size: =10.5
+                        Text: |-
+                            =Text(DateTimeValue(ThisItem.created_date), "dd/mm/yyyy hh:mm:ss")
+                        Visible: =DealDetailTab = 3
+                        Width: =Header_CreatedDate.Width
+                        X: =Label_No_2.X + Label_No_2.Width
+                        ZIndex: =3
+
+                    Label_createdBy As label:
+                        BorderColor: =RGBA(89, 0, 0, 1)
+                        Fill: =If(!IsBlank(HistorySelectedItemSTT) && ThisItem.stt = HistorySelectedItemSTT, RGBA(209, 221, 255, 0.5), Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                        Font: =Font.Arial
+                        OnSelect: =Select(Parent)
+                        PaddingRight: =30
+                        PaddingTop: =5.00
+                        Size: =10.5
+                        Text: =ThisItem.created_by
+                        Visible: =DealDetailTab = 3
+                        Width: =Header_CreatedBy.Width
+                        X: =Label_Name_2.X + Label_Name_2.Width
+                        ZIndex: =4
+
+                    SeeIcon As htmlViewer:
+                        Fill: =RGBA(0,0,0,0)
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style=""width:40px; height:38px; display:flex; justify-content:center; align-items:center; cursor:pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""22"" height=""16"" viewBox=""0 0 22 16"" fill=""none"">
+                              <path d=""M11 5C10.2044 5 9.44129 5.31607 8.87868 5.87868C8.31607 6.44129 8 7.20435 8 8C8 8.79565 8.31607 9.55871 8.87868 10.1213C9.44129 10.6839 10.2044 11 11 11C11.7956 11 12.5587 10.6839 13.1213 10.1213C13.6839 9.55871 14 8.79565 14 8C14 7.20435 13.6839 6.44129 13.1213 5.87868C12.5587 5.31607 11.7956 5 11 5ZM11 13C9.67392 13 8.40215 12.4732 7.46447 11.5355C6.52678 10.5979 6 9.32608 6 8C6 6.67392 6.52678 5.40215 7.46447 4.46447C8.40215 3.52678 9.67392 3 11 3C12.3261 3 13.5979 3.52678 14.5355 4.46447C15.4732 5.40215 16 6.67392 16 8C16 9.32608 15.4732 10.5979 14.5355 11.5355C13.5979 12.4732 12.3261 13 11 13ZM11 0.5C6 0.5 1.73 3.61 0 8C1.73 12.39 6 15.5 11 15.5C16 15.5 20.27 12.39 22 8C20.27 3.61 16 0.5 11 0.5Z"" fill=""black""/>
+                            </svg></div>"
+                        OnSelect: |-
+                            =Set(isLoading, true);
+                            Set(HistorySelectedItemSTT, ThisItem.stt);
+                            Set(DetailIssuer,'TVS->DetailListIssuer-V1'.Run(ThisItem.group_issuer,resKeyOpenAll.open,resKeyOpenAll.close,  envDEV,envTEST, envUAT1, envUAT2));
+                            Set(isLoading, false);
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Width: =40
+                        X: =Label_createdBy.X + Label_createdBy.Width - 40
+                        ZIndex: =5
+
+                Header_CreatedDate As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Create date"
+                    Visible: =DealDetailTab = 3
+                    Width: =HrQT2_Table.Width * If(App.Width > 600, 0.5, 0.4)
+                    X: =Header_No_1.X + Header_No_1.Width
+                    Y: =Header_No_1.Y
+                    ZIndex: =24
+
+                Header_No_1 As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="No"
+                    Visible: =DealDetailTab = 3
+                    Width: =HrQT2_Table.Width * 0.1
+                    X: =CreateDate_IssuerList_Label.X
+                    Y: =SearchAUMButton_7.Y + SearchAUMButton_7.Height + 10
+                    ZIndex: =25
+
+                Header_CreatedBy As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    Size: =10.5
+                    Text: |-
+                        ="Create by
+                        "
+                    Visible: =DealDetailTab = 3
+                    Width: =HrQT2_Table.Width * If(App.Width > 600, 0.45, 0.55) - If(App.Width > 600, 30, 15)
+                    X: =Header_CreatedDate.X + Header_CreatedDate.Width
+                    Y: =Header_No_1.Y
+                    ZIndex: =26
+
+                layout_issuer_4 As rectangle:
+                    BorderColor: =RGBA(192, 192, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(237, 237, 237, 1)
+                    Height: =44
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =White_Background_3.Width * 0.15
+                    X: =FromListEncryption_2.X
+                    Y: =FromListEncryption_2.Y + FromListEncryption_2.Height + 60
+                    ZIndex: =27
+
+                layout_short_6 As rectangle:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(237, 237, 237, 1)
+                    Height: =layout_issuer_4.Height
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =White_Background_3.Width * 0.2
+                    X: =layout_issuer_4.X + layout_issuer_4.Width
+                    Y: =layout_issuer_4.Y
+                    ZIndex: =28
+
+                layout_issuer_Name_3 As rectangle:
+                    BorderColor: =RGBA(192, 192, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(237, 237, 237, 1)
+                    Height: =44
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =White_Background_3.Width * 0.4 - If(App.Width > 600, 0, 15)
+                    X: =layout_short_6.X + layout_short_6.Width
+                    Y: =layout_short_6.Y
+                    ZIndex: =29
+
+                layout_short_7 As rectangle:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(237, 237, 237, 1)
+                    Height: =layout_issuer_Name_3.Height
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =White_Background_3.Width * 0.2
+                    X: =layout_issuer_Name_3.X + layout_issuer_Name_3.Width
+                    Y: =layout_issuer_Name_3.Y
+                    ZIndex: =30
+
+                label_issuer_4 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =layout_issuer_4.Height
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Issuer "
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =layout_issuer_4.Width
+                    X: =layout_issuer_4.X
+                    Y: =layout_issuer_4.Y
+                    ZIndex: =31
+
+                label_short_6 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =layout_issuer_4.Height
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Short name"
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =layout_short_6.Width
+                    X: =layout_short_6.X
+                    Y: =layout_short_6.Y
+                    ZIndex: =32
+
+                label_issuer_name_3 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =layout_issuer_Name_3.Height
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Issuer name"
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =layout_issuer_Name_3.Width
+                    X: =layout_issuer_Name_3.X
+                    Y: =layout_issuer_Name_3.Y
+                    ZIndex: =33
+
+                label_short_7 As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =layout_issuer_Name_3.Height
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =If(Parent.Width > 600, 10.5, 9)
+                    Text: ="Sector"
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer)
+                    Width: =layout_short_7.Width
+                    X: =layout_short_7.X
+                    Y: =layout_short_7.Y
+                    ZIndex: =34
+
+                "Gallery8_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =If(Self.AllItemsCount * Self.TemplateHeight > 400, 400, Self.AllItemsCount * Self.TemplateHeight)
+                    Items: =DetailIssuer.list_issuer
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 600, 50, 70)
+                    Visible: =DealDetailTab = 3
+                    Width: =layout_short_7.X + layout_short_7.Width - Self.X + 11.7
+                    X: =layout_issuer_4.X
+                    Y: =layout_issuer_4.Y + layout_issuer_4.Height
+                    ZIndex: =35
+
+                    layout_issuer_3 As rectangle:
+                        BorderColor: =RGBA(192, 192, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8_1.TemplateHeight
+                        OnSelect: =ThisItem.issuer
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_issuer_4.Width
+                        ZIndex: =1
+
+                    layout_short_4 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8_1.TemplateHeight
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_short_6.Width
+                        X: =layout_issuer_3.X + layout_issuer_3.Width
+                        Y: =layout_issuer_3.Y
+                        ZIndex: =2
+
+                    layout_issuer_Name_2 As rectangle:
+                        BorderColor: =RGBA(192, 192, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8_1.TemplateHeight
+                        Visible: =DealDetailTab = 3
+                        Width: =label_issuer_name_3.Width
+                        X: =layout_short_4.X + layout_short_4.Width
+                        Y: =layout_short_4.Y
+                        ZIndex: =3
+
+                    layout_short_5 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        BorderThickness: =0.5
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =Gallery8_1.TemplateHeight
+                        Visible: =DealDetailTab = 3
+                        Width: =White_Background_3.Width * 0.2
+                        X: =layout_issuer_Name_2.X + layout_issuer_Name_2.Width
+                        Y: =layout_issuer_Name_2.Y
+                        ZIndex: =4
+
+                    label_issuer_3 As label:
+                        Font: =Font.Arial
+                        Height: =layout_issuer_3.Height
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.issuer
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_issuer_3.Width
+                        X: =layout_issuer_3.X
+                        Y: =layout_issuer_3.Y
+                        ZIndex: =5
+
+                    label_short_4 As label:
+                        Font: =Font.Arial
+                        Height: =layout_issuer_3.Height
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.short_name
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_short_4.Width
+                        X: =layout_short_4.X
+                        Y: =layout_short_4.Y
+                        ZIndex: =6
+
+                    label_issuer_name_2 As label:
+                        Font: =Font.Arial
+                        Height: =layout_issuer_3.Height
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.issuer_name
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_issuer_Name_2.Width
+                        X: =layout_issuer_Name_2.X
+                        Y: =layout_issuer_Name_2.Y
+                        ZIndex: =7
+
+                    label_short_5 As label:
+                        Font: =Font.Arial
+                        Height: =layout_issuer_3.Height
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Size: =If(Parent.Width > 600, 10.5, 9)
+                        Text: =ThisItem.sector
+                        Visible: =DealDetailTab = 3
+                        Width: =layout_short_5.Width
+                        X: =layout_short_5.X
+                        Y: =layout_short_5.Y
+                        ZIndex: =8
+
+                PreviousIcon_5 As icon.ChevronLeft:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =15
+                    Icon: =Icon.ChevronLeft
+                    OnSelect: |
+                        =Set(isLoading, true);
+                        Set(dateFromFilterVar,DateFrom_Datepicker_3.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker_3.SelectedDate);
+                        Set(currentPageIndex,currentPageIndex-1);
+                        ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex, envDEV,envTEST, envUAT1, envUAT2));
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        
+                        Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                        ClearCollect(listPageIndex, pageIndexFirst);
+                        
+                        ForAll(
+                            maxList,
+                            If(
+                                    Last(listPageIndex).Value + 1 < pageCount
+                                ,
+                                Collect(
+                                    listPageIndex,
+                                    Last(listPageIndex).Value + 1
+                                );
+                                
+                            );
+                        );
+                        Set(isLoading, false);
+                    Tooltip: ="Previous page"
+                    Visible: =DealDetailTab = 3 && currentPageIndex <> 0 && !IsEmpty(First(listRes).listItem)
+                    Width: =15
+                    X: =FromListEncryption_2.X
+                    Y: =White_Background_History.Y + White_Background_History.Height + 5
+                    ZIndex: =37
+
+                NextIcon_1 As icon.ChevronRight:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =15
+                    Icon: =Icon.ChevronRight
+                    OnSelect: |
+                        =Set(isLoading, true);
+                        Set(currentPageIndex,currentPageIndex+1);
+                        Set(dateFromFilterVar,DateFrom_Datepicker_3.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker_3.SelectedDate);
+                        ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex, envDEV,envTEST, envUAT1, envUAT2));
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        
+                        Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                        ClearCollect(listPageIndex, pageIndexFirst);
+                        
+                        ForAll(
+                            maxList,
+                            If(
+                                    Last(listPageIndex).Value + 1 < pageCount
+                                ,
+                                Collect(
+                                    listPageIndex,
+                                    Last(listPageIndex).Value + 1
+                                );
+                                
+                            );
+                        );
+                        Set(isLoading, false);
+                    Tooltip: ="Next page"
+                    Visible: =DealDetailTab = 3 && currentPageIndex < pageCount - 1 && !IsEmpty(First(listRes).listItem)
+                    Width: =15
+                    X: =PageNumbers_5.X + PageNumbers_5.Width
+                    Y: =PreviousIcon_5.Y
+                    ZIndex: =38
+
+                "PageNumbers_5 As gallery.'BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    Height: =44
+                    Items: =listPageIndex
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =DealDetailTab = 3 && !IsEmpty(First(listRes).listItem)
+                    Width: =Self.AllItemsCount * Self.TemplateWidth
+                    X: =PreviousIcon_5.X + PreviousIcon_5.Width
+                    Y: =PreviousIcon_5.Y - 10
+                    ZIndex: =39
+
+                    pageIndex_1 As htmlViewer:
+                        DisplayMode: |
+                            =DisplayMode.Edit
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style='width: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 3px; background-color: transparent; border-radius: 5px; border: " & If(currentPageIndex = ThisItem.Value, "1px solid #1890FF", "none")&";'><font color=" & If(currentPageIndex = ThisItem.Value, "#1890FF", "black")&">" & (ThisItem.Value + 1) & "</font></div>"
+                        OnSelect: |-
+                            =Set(isLoading, true);
+                            Set(currentPageIndex,ThisItem.Value);
+                            Set(dateFromFilterVar,DateFrom_Datepicker_3.SelectedDate);
+                            Set(dateToFilterVar,DateTo_DatePicker_3.SelectedDate);
+                            ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex, envDEV,envTEST, envUAT1, envUAT2));
+                            ClearCollect(
+                                listRes,
+                                listItem.listItem
+                            );
+                            
+                            If(currentPageIndex=ThisItem.Value,Color.Red);
+                            Set(isLoading, false);
+                        PaddingRight: =0
+                        Width: =40
+                        ZIndex: =2
+
+                CreateDate_IssuerList_Label As label:
+                    BorderColor: =RGBA(89, 0, 0, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Bold
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Create date"
+                    Visible: =DealDetailTab = 3
+                    Width: =100
+                    X: =HrQT2_2.X
+                    Y: =HrQT2_2.Y + 10
+                    ZIndex: =41
+
+                HrQT2_Table As rectangle:
+                    BorderColor: =RGBA(176, 176, 176, 1)
+                    BorderThickness: =1
+                    Fill: =RGBA(246, 246, 246, 1)
+                    Height: =0.5
+                    Visible: =DealDetailTab = 3
+                    Width: =FromListEncryption_2.Width
+                    X: =FromListEncryption_2.X
+                    Y: =FromListEncryption_2.Y - 7
+                    ZIndex: =42
+
+                IssuersListAttachment_Label_1 As label:
+                    Color: =RGBA(14, 63, 115, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =44
+                    Size: =12
+                    Text: ="Attachment"
+                    Visible: =DealDetailTab = 3 && !IsBlank(DetailIssuer) && !IsBlank(DetailIssuer.attach_file.file_name)
+                    Width: =120
+                    X: =Gallery8_1.X
+                    Y: =Gallery8_1.Y + Gallery8_1.Height 
+                    ZIndex: =43
+
+            SearchIssuerListButton As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =Set(issuerListSearchValue, Text(IssuerList_SearchInput.Text));
+                PaddingBottom: =10
+                PaddingLeft: =40
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Visible: =layout_issuer_1.Visible
+                Width: =42
+                X: =IssuerList_SearchInput.X + IssuerList_SearchInput.Width + 8
+                Y: =IssuerList_SearchInput.Y
+                ZIndex: =52
+
+            SearchIssuerListIcon As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                      <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                    </svg><div>"
+                OnSelect: =Select(SearchIssuerListButton)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Visible: =layout_issuer_1.Visible
+                Width: =30
+                X: =SearchIssuerListButton.X + 5
+                Y: =SearchIssuerListButton.Y + 5
+                ZIndex: =53
+
+            btnRefresh_IssuerList As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =Set(issuerListSearchValue, ""); Reset(IssuerList_SearchInput);
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =layout_issuer_1.Visible
+                Width: =42
+                X: =SearchIssuerListButton.X + SearchIssuerListButton.Width + 8
+                Y: =SearchIssuerListButton.Y
+                ZIndex: =54
+
+            RefreshListIcon_IssuerList As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: =Select(btnRefresh_IssuerList);
+                Tooltip: ="Click here to clear all filters"
+                Visible: =btnRefresh_IssuerList.Visible
+                Width: =20
+                X: =btnRefresh_IssuerList.X + 11
+                Y: =btnRefresh_IssuerList.Y + 11
+                ZIndex: =55
+
+            EmptyData_Label_5 As label:
+                Align: =Align.Center
+                Font: =Font.Arial
+                Size: =10.5
+                Text: ="Empty data."
+                Visible: =Gallery8.Visible && Gallery8.AllItemsCount = 0
+                Width: =Gallery8.Width
+                X: =Gallery8.X
+                Y: =Gallery8.Y + 5
+                ZIndex: =56
+
+    MenuItemsSideBar_12 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_12.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_12.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_12.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_12.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_12.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_12.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_12.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_12.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_12.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_12.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_12.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_12.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_12.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_12.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_12.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_12.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =7
+
+    MenuItemsSideBar_Small_2 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_2.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_2.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_2.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_2.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_2.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_2.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_2.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_2.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_2.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_2.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_2.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_2.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =8
+
+    Header_1 As Header:
+        ZIndex: =9
+
+    Timer1_12 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_12); UpdateContext({ShowNotification: false});
+        Start: =ShowNotification
+        Visible: =false
+        X: =1135
+        Y: =592
+        ZIndex: =10
+
+    NotificationBox_12 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_12.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =25
+        ZIndex: =11
+
+    CloseNotiIcon_12 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_12)
+        Visible: =NotificationBox_12.Visible
+        Width: =15
+        X: =NotificationBox_12.X + NotificationBox_12.Width - 25
+        Y: =NotificationBox_12.Y + 17.5
+        ZIndex: =12
+
+    NotificationScreen_3 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =13
+
+    LoadingComponent_2 As LoadingComponent:
+        Visible: =isLoading
+        ZIndex: =14
+
+    SubHeaderIssuers As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =14
+
+        SubHeaderBg_1 As rectangle:
+            BorderColor: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =60
+            Width: =Parent.Width - If(Parent.Width > 800, If(MobileShowMenu, 240, 50), 0)
+            X: =If(Parent.Width > 800, If(MobileShowMenu, MenuItemsSideBar_12.X + MenuItemsSideBar_12.Width,  MenuItemsSideBar_Small_2.X + MenuItemsSideBar_Small_2.Width), 0)
+            Y: =56
+            ZIndex: =2
+
+        SaveButton_1 As htmlViewer:
+            BorderStyle: =BorderStyle.Solid
+            Font: =Font.Arial
+            Height: =50
+            HtmlText: |-
+                ="<div style=""width: 40px; height: 38px; display: flex; justify-content: center; align-items: center; border: 1px solid black; border-radius: 5px; cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                  <path d=""M21 7V19C21 19.55 20.804 20.021 20.412 20.413C20.02 20.805 19.5493 21.0007 19 21H5C4.45 21 3.979 20.804 3.587 20.412C3.195 20.02 2.99934 19.5493 3 19V5C3 4.45 3.196 3.979 3.588 3.587C3.98 3.195 4.45067 2.99934 5 3H17L21 7ZM19 7.85L16.15 5H5V19H19V7.85ZM12 18C12.8333 18 13.5417 17.7083 14.125 17.125C14.7083 16.5417 15 15.8333 15 15C15 14.1667 14.7083 13.4583 14.125 12.875C13.5417 12.2917 12.8333 12 12 12C11.1667 12 10.4583 12.2917 9.875 12.875C9.29167 13.4583 9 14.1667 9 15C9 15.8333 9.29167 16.5417 9.875 17.125C10.4583 17.7083 11.1667 18 12 18ZM6 10H15V6H6V10ZM5 7.85V19V5V7.85Z"" fill=""#525252""/>
+                </svg></div>"
+            OnSelect: |-
+                =Set(isLoading, true);
+                Clear(attachIssuer);
+                ForAll(AttachFile_2.Attachments,
+                    Collect(attachIssuer,
+                        {
+                        name:Text(Now(), "ddmmyyyy_hhmmss_") & ThisRecord.Name,
+                        size:"",
+                        created_by:currenUserV2.id,
+                        value:ThisRecord.Value,
+                        FilePath: "",
+                        Container: "",
+                        idGroup:If(IsBlank(issuersList),"",First(issuersList).group_issuer)
+                        }
+                    )
+                );
+                UpdateIf(attachIssuer, true, {FilePath: urlUploadCRHead & name, Container: bucketCRAttach});
+                Set(resCreateIssuer,{
+                      list_issuer:listIssuerInput,
+                      attach_file:attachIssuer,
+                      listAttachmentDelete:issuerListDelete
+                });
+                
+                Set(createdStatus, 'TVS->CreateIssuerList-V1'.Run(JSON(resCreateIssuer,JSONFormat.IndentFour),resKeyOpenAll.open,resKeyOpenAll.close,currenUserV2.id, envDEV,envTEST, envUAT1, !inputChanged).status);
+                ClearCollect(issuersList, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2).list_issuer);
+                ClearCollect(issuersFiles, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2).attach_file);
+                ClearCollect(listIssuerInput, issuersList);
+                
+                ClearCollect(listItem,'TVS->FindAllIssuer-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,Text(DateFrom_Datepicker_3.SelectedDate, "yyyy-mm-dd hh:mm:ss"),Text(DateTo_DatePicker_3.SelectedDate, "yyyy-mm-dd hh:mm:ss"),PageSizeNumber,currentPageIndex, envDEV,envTEST, envUAT1, envUAT2));
+                ClearCollect(listRes,listItem.listItem);
+                
+                ForAll(attachIssuer,AzureBlobStorage.CreateFile(bucketFixInAttach,ThisRecord.name,ThisRecord.value));
+                
+                Reset(TextInput2);
+                Reset(AttachFile_2);
+                Set(NoticationText,"Create successfully!");UpdateContext({ShowNotification: true});
+                Set(inputChanged, false);
+                Set(showRefreshButton, false);
+                Set(isLoading, false);
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Visible: =DealDetailTab = 1 && (inputChanged || !IsEmpty(AttachFile_2.Attachments)) && "RM_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action)
+            Width: =42
+            X: =SubHeaderBg_1.X + SubHeaderBg_1.Width - 80
+            Y: =btnReject.Y
+            ZIndex: =3
+
+        SubHeaderHr_1 As rectangle:
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =IconBack_1.Height + 10
+            Visible: =App.Width > 600
+            Width: =0.5
+            X: =IconBack_1.X + IconBack_1.Width + 5
+            Y: =IconBack_1.Y - 5
+            ZIndex: =4
+
+        IconBack_1 As icon.ArrowLeft:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =If(App.Width > 600, 25, 15)
+            Icon: =If(App.Width > 600, Icon.ArrowLeft, Icon.ChevronLeft)
+            OnSelect: =Navigate(TableProposalQT2, ScreenTransition.Fade)
+            Width: =If(App.Width > 600, 40, 15)
+            X: =SubHeaderBg_1.X + 10
+            Y: =SubHeaderBg_1.Y + If(App.Width > 600, 12, 20)
+            ZIndex: =5
+
+        BackMobile_Label_1 As label:
+            Font: =Font.Arial
+            Height: =30
+            OnSelect: =Navigate(TableProposalQT2, ScreenTransition.Fade)
+            Size: =10.5
+            Text: ="Back"
+            Visible: =App.Width < 600
+            Width: =80
+            X: =IconBack_1.X + IconBack_1.Width
+            Y: =IconBack_1.Y - 7
+            ZIndex: =6
+

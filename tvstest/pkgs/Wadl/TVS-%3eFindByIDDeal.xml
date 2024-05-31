@@ -1,0 +1,141 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://asia-001.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="TVS-&gt;FindByIDDeal" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="TVS-&gt;FindByIDDeal" />
+  <grammars>
+    <jsonTypes targetNamespace="https://asia-001.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <string name="ManualTriggerInput_text_def" />
+      <string name="ManualTriggerInput_text_1_def" />
+      <string name="ManualTriggerInput_text_2_def" />
+      <object name="ManualTriggerInput">
+        <property name="text" type="string" />
+        <property name="text_1" type="string" />
+        <property name="text_2" type="string" />
+      </object>
+      <integer name="ResponseActionOutput_stt_def" />
+      <string name="ResponseActionOutput_deal_name_def" />
+      <string name="ResponseActionOutput_service_code_def" />
+      <string name="ResponseActionOutput_deal_type_1_def" />
+      <string name="ResponseActionOutput_deal_type_2_def" />
+      <string name="ResponseActionOutput_deal_main_procedure_def" />
+      <string name="ResponseActionOutput_engagement_risk_def" />
+      <string name="ResponseActionOutput_ugency_def" />
+      <string name="ResponseActionOutput_importance_def" />
+      <string name="ResponseActionOutput_probability_of_success_def" />
+      <string name="ResponseActionOutput_deal_value_def" />
+      <string name="ResponseActionOutput_approval_on_client_acceptance_def" />
+      <string name="ResponseActionOutput_approval_on_engagement_acceptance_def" />
+      <string name="ResponseActionOutput_transaction_fee_def" />
+      <string name="ResponseActionOutput_percent_success_fee_def" />
+      <string name="ResponseActionOutput_retainer_fee_def" />
+      <string name="ResponseActionOutput_created_date_def" />
+      <string name="ResponseActionOutput_created_by_def" />
+      <string name="ResponseActionOutput_write_date_def" />
+      <string name="ResponseActionOutput_write_by_def" />
+      <string name="ResponseActionOutput_deal_stage_def" />
+      <string name="ResponseActionOutput_deal_status_def" />
+      <string name="ResponseActionOutput_deal_owner_def" />
+      <string name="ResponseActionOutput_mentor_def" />
+      <string name="ResponseActionOutput_observer_def" />
+      <string name="ResponseActionOutput_expected_closing_time_def" />
+      <string name="ResponseActionOutput_contract_date_def" />
+      <string name="ResponseActionOutput_share_def" />
+      <string name="ResponseActionOutput_status_def" />
+      <string name="ResponseActionOutput_deal_type_3_def" />
+      <string name="ResponseActionOutput_state_def" />
+      <string name="ResponseActionOutput_stage_def" />
+      <string name="ResponseActionOutput_name_comment_def" />
+      <string name="ResponseActionOutput_name_deal_owner_def" />
+      <string name="ResponseActionOutput_name_created_by_def" />
+      <string name="ResponseActionOutput_name_write_by_def" />
+      <string name="ResponseActionOutput_created_comment_date_def" />
+      <boolean name="ResponseActionOutput_is_disable_def" />
+      <boolean name="ResponseActionOutput_is_request_edit_def" />
+      <boolean name="ResponseActionOutput_is_revise_def" />
+      <string name="ResponseActionOutput_comment_mandate_def" />
+      <string name="ResponseActionOutput_company_name_def" />
+      <string name="ResponseActionOutput_id_def" />
+      <string name="ResponseActionOutput_company_id_def" />
+      <object name="ResponseActionOutput">
+        <property name="stt" type="integer" />
+        <property name="deal_name" type="string" />
+        <property name="service_code" type="string" />
+        <property name="deal_type_1" type="string" />
+        <property name="deal_type_2" type="string" />
+        <property name="deal_main_procedure" type="string" />
+        <property name="engagement_risk" type="string" />
+        <property name="ugency" type="string" />
+        <property name="importance" type="string" />
+        <property name="probability_of_success" type="string" />
+        <property name="deal_value" type="string" />
+        <property name="approval_on_client_acceptance" type="string" />
+        <property name="approval_on_engagement_acceptance" type="string" />
+        <property name="transaction_fee" type="string" />
+        <property name="percent_success_fee" type="string" />
+        <property name="retainer_fee" type="string" />
+        <property name="created_date" type="string" />
+        <property name="created_by" type="string" />
+        <property name="write_date" type="string" />
+        <property name="write_by" type="string" />
+        <property name="deal_stage" type="string" />
+        <property name="deal_status" type="string" />
+        <property name="deal_owner" type="string" />
+        <property name="mentor" type="string" />
+        <property name="observer" type="string" />
+        <property name="expected_closing_time" type="string" />
+        <property name="contract_date" type="string" />
+        <property name="share" type="string" />
+        <property name="status" type="string" />
+        <property name="deal_type_3" type="string" />
+        <property name="state" type="string" />
+        <property name="stage" type="string" />
+        <property name="name_comment" type="string" />
+        <property name="name_deal_owner" type="string" />
+        <property name="name_created_by" type="string" />
+        <property name="name_write_by" type="string" />
+        <property name="created_comment_date" type="string" />
+        <property name="is_disable" type="boolean" />
+        <property name="is_request_edit" type="boolean" />
+        <property name="is_revise" type="boolean" />
+        <property name="comment_mandate" type="string" />
+        <property name="company_name" type="string" />
+        <property name="id" type="string" />
+        <property name="company_id" type="string" />
+      </object>
+      <object name="Run_responses_default_def" />
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://asia-001.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="text" path="/text" type="xs:string" required="true">
+              <doc title="KeyOpen" />
+            </param>
+            <param style="plain" name="text_1" path="/text_1" type="xs:string" required="true">
+              <doc title="KeyClose" />
+            </param>
+            <param style="plain" name="text_2" path="/text_2" type="xs:string" required="true">
+              <doc title="id" />
+            </param>
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:ResponseActionOutput" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

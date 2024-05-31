@@ -1,0 +1,77 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://asia-001.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="TVS-&gt;UpdateChanges-Process4-V1" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="TVS-&gt;UpdateChanges-Process4-V1" />
+  <grammars>
+    <jsonTypes targetNamespace="https://asia-001.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <string name="ManualTriggerInput_text_def" />
+      <string name="ManualTriggerInput_text_1_def" />
+      <string name="ManualTriggerInput_text_2_def" />
+      <string name="ManualTriggerInput_text_3_def" />
+      <boolean name="ManualTriggerInput_boolean_def" />
+      <boolean name="ManualTriggerInput_boolean_1_def" />
+      <boolean name="ManualTriggerInput_boolean_2_def" />
+      <boolean name="ManualTriggerInput_boolean_3_def" />
+      <string name="ManualTriggerInput_text_7_def" />
+      <object name="ManualTriggerInput">
+        <property name="text" type="string" />
+        <property name="text_1" type="string" />
+        <property name="text_2" type="string" />
+        <property name="text_3" type="string" />
+        <property name="boolean" type="boolean" />
+        <property name="boolean_1" type="boolean" />
+        <property name="boolean_2" type="boolean" />
+        <property name="boolean_3" type="boolean" />
+        <property name="text_7" type="string" />
+      </object>
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://asia-001.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="text" path="/text" type="xs:string" required="true">
+              <doc title="openKey" />
+            </param>
+            <param style="plain" name="text_1" path="/text_1" type="xs:string" required="true">
+              <doc title="closeKey" />
+            </param>
+            <param style="plain" name="text_2" path="/text_2" type="xs:string" required="true">
+              <doc title="proposal_id" />
+            </param>
+            <param style="plain" name="text_3" path="/text_3" type="xs:string" required="true">
+              <doc title="input" />
+            </param>
+            <param style="plain" name="boolean" path="/boolean" type="xs:boolean" required="true">
+              <doc title="DEV" />
+            </param>
+            <param style="plain" name="boolean_1" path="/boolean_1" type="xs:boolean" required="true">
+              <doc title="TEST" />
+            </param>
+            <param style="plain" name="boolean_2" path="/boolean_2" type="xs:boolean" required="true">
+              <doc title="UAT1" />
+            </param>
+            <param style="plain" name="boolean_3" path="/boolean_3" type="xs:boolean" required="true">
+              <doc title="UAT2" />
+            </param>
+            <param style="plain" name="text_7" path="/text_7" type="xs:string" required="true">
+              <doc title="user_id" />
+            </param>
+          </representation>
+        </request>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

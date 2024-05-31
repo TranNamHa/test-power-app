@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "87088610-cd8c-4452-8a4e-27285a66d6df",
+    "Name": "TVS->Delete-Communication-Records-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "ff77b561-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

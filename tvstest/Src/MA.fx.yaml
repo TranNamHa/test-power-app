@@ -1,0 +1,3253 @@
+"MA As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: |-
+        =RGBA(248, 248, 249, 1)
+        // Last edit Dat Ngo 15:08 15/01/2024
+    OnVisible: |-
+        =UpdateContext({ShowNotification: false});
+        //Clear(listRes);
+        Set(MenuSelect,"Business process");
+        Set(MenuSelect2, If(App.Width > 800, "M&A Capital Raising and Restructuring Services", "M&A"));
+        Set(HeaderText,"");
+        If(!isFromDetailMA, Set(isLoading, true), Set(isLoading, false));
+        Set(showAssignPopup, false);
+        Set(DealDetailTab, 1);
+        Set(StatusSelectedValue, "All");
+        Set(serverSelectedValue, "");
+        If(IsBlank(statusFilterVar)||statusFilterVar ="All",Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+        
+        Set(serverShowDropdown, false);
+        Set(statusShowDropdown, false);
+        Reset(SearchByName_Input);
+        Reset(DateFromMA_DatePicker);
+        Reset(DateToMA_DatePicker);
+        Set(userInput,"user1");
+        Set(currentPageIndex,0);
+        If(IsBlank(PageSizeNumber),Set(PageSizeNumber, 10));
+        Set(sortColumn,"created_date");
+        Set(dateFromFilterVarMA, If(IsBlank(DateFromMA_DatePicker.SelectedDate), "", Text(DateFromMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+        Set(dateToFilterVarMA,If(IsBlank(DateToMA_DatePicker.SelectedDate), "", Text(DateToMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+        Set(dealNameFilterVar,Trim(Text(SearchByName_Input.Text)));
+        Set(dealOwnerFilterVar,ServerDropDown.Text);
+        
+        // Show notification
+        Set(IsError, false);
+        Switch(ShowNotificationCheck,
+        "REQUEST_EDIT_SUCCESS", Set(NoticationText,"Request edit successfully!");UpdateContext({ShowNotification: true}),
+        "CLOSED_SUCCESS", Set(NoticationText,"Closed successfully!");UpdateContext({ShowNotification: true}),
+        "CREATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "UPDATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "REJECTED_SUCCESS", Set(NoticationText,"Rejected successfully!");UpdateContext({ShowNotification: true}),
+        "REVISED_SUCCESS", Set(NoticationText,"Revised successfully!");UpdateContext({ShowNotification: true}),
+        "APPROVED_SUCCESS", Set(NoticationText,"Approved successfully!");UpdateContext({ShowNotification: true}),
+        "PUBLISHED_SUCCESS", Set(NoticationText,"Published successfully!");UpdateContext({ShowNotification: true}),
+        "DELETED_SUCCESS", Set(NoticationText,"Deleted successfully!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR", Set(IsError, true);Set(NoticationText,"The system is busy, please try again later!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR_APPROVED", Set(IsError, true);Set(NoticationText,"This proposal has been approved, please check again.");UpdateContext({ShowNotification: true}),
+        "STATUS_CHANGED", Set(IsError, true);Set(NoticationText,"This proposal has been processed by another user, please check again.");UpdateContext({ShowNotification: true})
+        );
+        Set(ShowNotificationCheck, "");
+        
+        Clear(maUserRole);
+        ForAll(Filter(currenUserV2.permissionList, process_code="Process2") As item, Collect(maUserRole, item.action));
+        Set(maUserRoleString, Left(Concat(maUserRole, "'" & Value & "' ,"), Len(Concat(maUserRole, "'" & Value & "' ,")) -1));
+        
+        ClearCollect(maFilter,[]);
+        If(DealDetailTab = 1,
+            ClearCollect(maFilter,[]);
+            If("CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Collect(maFilter,[{value: "NEW_LEAD_CREATION"}, {value: "DEAL_ADVISORY"}, {value: "PENDING_SERVICE_CONTRACT"}, {value: "PENDING_CONTRACT_DATE"}, {value: "PENDING_EXCUTION_SIGNING_CLOSING"}, {value: "REVISED"}, {value: "APPROVE_REQUEST_EDIT"}, {value: "SUBMIT_REQUEST_EDIT"}]));
+            If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Collect(maFilter,[{value: "PENDING_MANDATE_APPROVAL"}, {value: "PENDING_REVIEW_HEAD_DIVISION"}, {value: "REQUEST_EDIT"}]));
+            If("CEO_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Collect(maFilter,[{value: "PENDING_APPROVE_CEO"}]));,
+            DealDetailTab = 2,
+            ClearCollect(maFilter,[{value: "NEW_LEAD_CREATION"}, {value: "DEAL_ADVISORY"}, {value: "PENDING_SERVICE_CONTRACT"}, {value: "PENDING_CONTRACT_DATE"}, {value: "PENDING_EXCUTION_SIGNING_CLOSING"}, {value: "REVISED"}, {value: "APPROVE_REQUEST_EDIT"}, {value: "SUBMIT_REQUEST_EDIT"}]);
+            If(!("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action)), Collect(maFilter,[{value: "PENDING_MANDATE_APPROVAL"}, {value: "PENDING_REVIEW_HEAD_DIVISION"}, {value: "REQUEST_EDIT"}]));
+            If(!("CEO_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action)), Collect(maFilter,[{value: "PENDING_APPROVE_CEO"}]));,
+            ClearCollect(maFilter,[{value: "DONE"}, {value: "CLOSED"}]);
+        );
+        
+        Set(MARoleString, If(Len(Concat(maFilter, "," & "'" & value & "'")) > 0, Right(Concat(maFilter, "," & "'" & value & "'"), Len(Concat(maFilter, "," & "'" & value & "'")) - 1), "''"));
+        
+        If(IsBlank(statusFilterVar)||statusFilterVar ="All",Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+        
+        Set(assignServerValue, Blank());
+        Set(assignDealOwnerValue, Blank());
+        Set(assignDealMentorValue, Blank());
+        ClearCollect(assignDealSupport, []);
+        ClearCollect(assignDealObserver, []);
+        ClearCollect(assignDealSupportRemove, []);
+        ClearCollect(assignDealObserverRemove, []);
+        
+        Select(GetAllMA);
+        
+        Set(isFromDetailMA, false)
+
+    RectQuickActionBar2 As rectangle:
+        Height: =56
+        Width: =Parent.Width
+        ZIndex: =1
+
+    Canvas2 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =Parent.Height - Self.Y
+        Width: =Parent.Width
+        Y: =RectQuickActionBar2.Y + RectQuickActionBar2.Height
+        ZIndex: =2
+
+        DataCard2 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =Parent.Height - 100
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+            SearchByName_Input As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HintText: ="Search ..."
+                HoverFill: =RGBA(255, 255, 255, 1)
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =If(App.Width > 600, 10.5, 12)
+                Width: =If(App.Width > 800, 450, Parent.Width - 130) - If(App.Width > 950 && App.Width < 1100, If(MobileShowMenu, 200, 150), 0)
+                X: =If(App.Width > 800, If(MobileShowMenu, MenuItemsSideBar_22.X + MenuItemsSideBar_22.Width, MenuItemsSideBar_Small_19.X + MenuItemsSideBar_Small_19.Width) + 20, 10)
+                Y: =30
+                ZIndex: =1
+
+            WhiteBgQT1 As htmlViewer:
+                Font: =Font.Arial
+                Height: =If(Parent.Width > 800, Min(App.Height - 240, TableContent_9.Height + 140), Min(570, TableContent_9.Height + 140))
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 15px); height: "&Self.Height - 20&"px; background-color: white; border-radius: 12px;box-shadow: 7px 5px 16px 0px rgba(0, 0, 0, 0.10);
+                    '></div>"
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =11.00
+                Width: =If(Parent.Width > 800, Parent.Width - If(MobileShowMenu, MenuItemsSideBar_22.Width, MenuItemsSideBar_Small_19.Width) - 30, Parent.Width)
+                X: =LabelDateCreated.X
+                Y: =QT2Tabs_8.Y + QT2Tabs_8.Height + 5
+                ZIndex: =14
+
+            TableHListEmp_2 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =WhiteBgQT1.Height - If(App.Width > 800, 85, 75) + 15
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =WhiteBgQT1.Width - If(App.Width > 600, 50, 40)
+                X: =WhiteBgQT1.X + 10
+                Y: =WhiteBgQT1.Y + 50
+                ZIndex: =20
+
+                Container3_2 As groupContainer.manualLayoutContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    Height: =TableHListEmp_2.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =LabelCloseDateTable_1.X + LabelCloseDateTable_1.Width
+                    ZIndex: =1
+
+                    TableContent_9 As gallery.variableTemplateHeightGallery:
+                        '#CopilotOverlayLabel': ="Filtered"
+                        BorderColor: =
+                        Height: |-
+                            =Min(
+                                Max(Min(Self.AllItemsCount, 10), 1) * Self.TemplateHeight,
+                                App.Height - 240 - 150,
+                                570 - 150
+                            )
+                        Items: =First(listRes).listItem
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        TemplatePadding: =0
+                        TemplateSize: =44
+                        Visible: =true 
+                        Width: =Container3_2.Width
+                        Y: =45
+                        ZIndex: =1
+
+                        Rectangle7_2 As rectangle:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Height: =Max(NoContent_1.Height, DealNameContent_1.Height, StatusContent_1.Height, StageContent_1.Height, ClientNameContent.Height, ClientNameContent.Height, 30)
+                            OnSelect: =Select(Parent)
+                            Width: =TableContent_9.Width
+                            ZIndex: =1
+
+                        NoContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =10
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.stt
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelNoTable_1.Width
+                            Y: =2
+                            ZIndex: =2
+
+                        AssignMember_Content As label:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =""
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelAssignMember.Width
+                            X: =NoContent_1.X + NoContent_1.Width
+                            ZIndex: =3
+
+                        DealNameContent_1 As label:
+                            AutoHeight: =true
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =If(IsBlank(ThisItem.deal_name), " ", ThisItem.deal_name)
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelDealNameTable_1.Width
+                            X: =AssignMember_Content.X + AssignMember_Content.Width
+                            Y: =2
+                            ZIndex: =4
+
+                        StatusContent_1 As label:
+                            Color: |-
+                                =If(ThisItem.deal_status in ["Canceled", "Revised", "Rejected"],
+                                    RGBA(214, 27, 27, 1),
+                                    ThisItem.deal_status in ["Closed"],
+                                    RGBA(11, 201, 75, 1),
+                                    ThisItem.deal_status in ["Pending approval"],
+                                    RGBA(181, 184, 24, 1),
+                                    ThisItem.deal_status in ["Draft"],
+                                    RGBA(98,95,95,1),
+                                    RGBA(181, 184, 24, 1)
+                                )
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =Max(DealNameContent_1.Height,40)
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =20
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =If(ThisItem.is_request_edit && !(ThisItem.deal_status in ["Pending request edit", "Approved request edit", "Canceled", "Rejected", "Closed", "Close"]), "E_", "") & Proper(Substitute(ThisItem.deal_status, "_", " "))
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelStatusTable_1.Width
+                            X: =ServerContent.X + ServerContent.Width
+                            Y: =2
+                            ZIndex: =5
+
+                        MainProceduresContent As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =Max(DealNameContent_1.Height,40)
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =7
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.deal_main_procedure
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelMainProcedures.Width
+                            X: =StatusContent_1.X + StatusContent_1.Width
+                            ZIndex: =6
+
+                        StageContent_1 As label:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.deal_stage
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelStageTable_1.Width
+                            X: =ClientNameContent.X + ClientNameContent.Width
+                            Y: =2
+                            ZIndex: =7
+
+                        ServerContent As label:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.share
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelServer.Width
+                            X: =DealNameContent_1.X + DealNameContent_1.Width
+                            ZIndex: =8
+
+                        ClientNameContent As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =Proper(ThisItem.state)
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelClientNameTable_1.Width
+                            X: =MainProceduresContent.X + MainProceduresContent.Width
+                            ZIndex: =9
+
+                        DealOwner As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.name_created_by
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelDealOwner.Width
+                            X: =PriorityContent_1.X + PriorityContent_1.Width
+                            Y: =2
+                            ZIndex: =10
+
+                        DealTypeContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.deal_type_1
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelDealType1Table_1.Width
+                            X: =StageContent_1.X + StageContent_1.Width
+                            Y: =2
+                            ZIndex: =11
+
+                        EngagementRiskContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.engagement_risk
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelEngagementRiskTable_1.Width
+                            X: =DealTypeContent_1.X + DealTypeContent_1.Width
+                            Y: =2
+                            ZIndex: =12
+
+                        PriorityContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.priority
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelPriorityTable_1.Width
+                            X: =EngagementRiskContent_1.X + EngagementRiskContent_1.Width
+                            Y: =2
+                            ZIndex: =13
+
+                        CreatedDateContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =Text(DateTimeValue(ThisItem.created_date), "dd/mm/yyyy")
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelCreatedDateTable_1.Width
+                            X: =DealOwner.X + DealOwner.Width
+                            Y: =2
+                            ZIndex: =14
+
+                        CloseDateContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =DealNameContent_1.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =Text(DateTimeValue(ThisItem.close_date), "dd/mm/yyyy")
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelCloseDateTable_1.Width
+                            X: =CreatedDateContent_1.Width + CreatedDateContent_1.X
+                            Y: =2
+                            ZIndex: =15
+
+                        DotIcon As htmlViewer:
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""12"" height=""12"" viewBox=""0 0 12 12"" fill=""none"">
+                                  <path d=""M6 9C7.65685 9 9 7.65685 9 6C9 4.34315 7.65685 3 6 3C4.34315 3 3 4.34315 3 6C3 7.65685 4.34315 9 6 9Z"" fill="""&
+                                    Match(
+                                        JSON(
+                                            StatusContent_1.Color ,
+                                            JSONFormat.IgnoreUnsupportedTypes
+                                        ),
+                                        "#[a-fA-F0-9]{6}"
+                                    ).FullMatch
+                                  &"""/>
+                                </svg>"
+                            OnSelect: =Select(Parent)
+                            Width: =30
+                            X: =StatusContent_1.X
+                            ZIndex: =16
+
+                        Button_OverLay_7 As button:
+                            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                            DisabledColor: =RGBA(0, 0, 0, 0)
+                            DisabledFill: =RGBA(0, 0, 0, 0)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Font: =Font.Arial
+                            Height: =Rectangle7_2.Height
+                            HoverFill: =Self.Fill
+                            OnSelect: |-
+                                =Clear(reasonOfOwner);
+                                Clear(reasonOfCEO);
+                                Clear(noteOfDeal);
+                                Clear(listFile);
+                                //Select(Parent);
+                                Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false); Set(isSummitedPopup, false);
+                                Set(isLoading, true);
+                                Set(dealSelected, TableContent_9.Selected);
+                                ClearCollect(listDealSupport,'TVS->GetEmployeeDeall'.Run(resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.id,"DEV"));
+                                Concurrent(
+                                    Set(reasonOfDeal,
+                                        AddColumns('TVS->getReasonOfDeal'.Run(ThisItem.id,resKeyOpenAll.open,resKeyOpenAll.close),step,
+                                        Switch(status, "PENDING_SERVICE_CONTRACT", 4.1, "PENDING_REVIEW_DEAL_OWNER", 4.2, "PENDING_REVIEW_HEAD_DIVISION", 4.3, "PENDING_APPROVE_CEO", 4.4, "PENDING_CONTRACT_DATE", 4.5))),
+                                    ClearCollect(noteOfDeal,'TVS->GetNoteByDealID-DEV'.Run(resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.id)),
+                                    ClearCollect(listFile,'TVS->GetFileByIDDeal'.Run(resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.id))
+                                );
+                                ClearCollect(reasonOfOwner,Filter(reasonOfDeal, status="PENDING_REVIEW_DEAL_OWNER"));
+                                ClearCollect(reasonOfCEO,Filter(reasonOfDeal, status="PENDING_APPROVE_CEO"));
+                                ClearCollect(reasonOfDealForLogs, If(dealSelected.is_request_edit || IsBlank(dealSelected.close_date),
+                                reasonOfDeal,
+                                Filter(reasonOfDeal, DateTimeValue(created_date) < DateTimeValue(DateAdd(dealSelected.close_date, 0, TimeUnit.Hours))));
+                                );
+                                Set(isLoading, false);
+                                Navigate(DetailQT1, ScreenTransition.Fade);
+                            PressedFill: =
+                            RadiusBottomLeft: =0
+                            RadiusBottomRight: =0
+                            RadiusTopLeft: =0
+                            RadiusTopRight: =0
+                            Text: =""
+                            Width: =Rectangle7_2.Width
+                            X: =Rectangle7_2.X
+                            Y: =Rectangle7_2.Y
+                            ZIndex: =17
+
+                        HtmlText8_1 As htmlViewer:
+                            AutoHeight: =true
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<div style=""cursor: pointer;""><svg xmlns=""http://www.w3.org/2000/svg"" width=""25"" height=""24"" viewBox=""0 0 25 24"" fill=""none"">
+                                  <path d=""M12.5283 4.25C12.745 4.25 12.924 4.179 13.0653 4.037C13.2067 3.895 13.2777 3.716 13.2783 3.5C13.2783 3.28333 13.2073 3.10433 13.0653 2.963C12.9233 2.82167 12.7443 2.75067 12.5283 2.75C12.3117 2.75 12.1327 2.821 11.9913 2.963C11.85 3.105 11.779 3.284 11.7783 3.5C11.7783 3.71667 11.8493 3.89567 11.9913 4.037C12.1333 4.17833 12.3123 4.24933 12.5283 4.25ZM18.5283 23C17.145 23 15.9657 22.5123 14.9903 21.537C14.015 20.5617 13.5277 19.3827 13.5283 18C13.5283 16.6167 14.016 15.4373 14.9913 14.462C15.9667 13.4867 17.1457 12.9993 18.5283 13C19.9117 13 21.091 13.4877 22.0663 14.463C23.0417 15.4383 23.529 16.6173 23.5283 18C23.5283 19.3833 23.0407 20.5627 22.0653 21.538C21.09 22.5133 19.911 23.0007 18.5283 23ZM18.0283 21H19.0283V18.5H21.5283V17.5H19.0283V15H18.0283V17.5H15.5283V18.5H18.0283V21ZM7.52832 9H17.5283V7H7.52832V9ZM12.2033 21H5.52832C4.97832 21 4.50732 20.804 4.11532 20.412C3.72332 20.02 3.52766 19.5493 3.52832 19V5C3.52832 4.45 3.72432 3.979 4.11632 3.587C4.50832 3.195 4.97899 2.99933 5.52832 3H9.72832C9.94499 2.4 10.3077 1.91667 10.8163 1.55C11.325 1.18333 11.8957 1 12.5283 1C13.1617 1 13.7327 1.18333 14.2413 1.55C14.75 1.91667 15.1123 2.4 15.3283 3H19.5283C20.0783 3 20.5493 3.196 20.9413 3.588C21.3333 3.98 21.529 4.45067 21.5283 5V11.7C21.045 11.4667 20.5573 11.2917 20.0653 11.175C19.5733 11.0583 19.061 11 18.5283 11C18.345 11 18.174 11.004 18.0153 11.012C17.8567 11.02 17.6943 11.041 17.5283 11.075V11H7.52832V13H13.6533C13.3533 13.2833 13.0823 13.5917 12.8403 13.925C12.5983 14.2583 12.386 14.6167 12.2033 15H7.52832V17H11.6033C11.57 17.1667 11.549 17.3293 11.5403 17.488C11.5317 17.6467 11.5277 17.8173 11.5283 18C11.5283 18.55 11.5783 19.0627 11.6783 19.538C11.7783 20.0133 11.9533 20.5007 12.2033 21Z"" fill=""black""/>
+                                </svg></div>"
+                            OnSelect: |-
+                                =// Set(isLoading, true);
+                                Set(dealSelected, TableContent_9.Selected);
+                                ClearCollect(listDealSupport,'TVS->GetEmployeeDeall'.Run(resKeyOpenAll.open,resKeyOpenAll.close,dealSelected.id,"DEV"));
+                                
+                                Set(assignServerValue, dealSelected.share);
+                                Set(assignDealOwnerValue, First(Filter(EmpP2, id = dealSelected.deal_owner)));
+                                Set(assignDealMentorValue, First(Filter(EmpP2, id = dealSelected.mentor)));
+                                ClearCollect(assignDealSupport, Filter(EmpP2, id in Filter(listDealSupport, type = "deal_support").employee_id));
+                                ClearCollect(assignDealObserver, Filter(EmpP2, id in Filter(listDealSupport, type = "deal_observer").employee_id));
+                                ClearCollect(assignDealSupportRemove, []);
+                                ClearCollect(assignDealObserverRemove, []);
+                                
+                                
+                                // Set(isLoading, false);
+                                
+                                ////
+                                Clear(listUserAsignFirst);
+                                ForAll(
+                                    assignDealSupport,
+                                    Collect(
+                                        listUserAsignFirst,
+                                        {
+                                            employee_id: ThisRecord.id,
+                                            email:ThisRecord.email,
+                                            internal_email:ThisRecord.internal_email,
+                                            name:ThisRecord.name,
+                                            type: "deal support"
+                                        }
+                                    )
+                                );
+                                ForAll(
+                                    assignDealObserver,
+                                    Collect(
+                                        listUserAsignFirst,
+                                        {
+                                            employee_id: ThisRecord.id,
+                                            email:ThisRecord.email,
+                                            internal_email:ThisRecord.internal_email,
+                                            name:ThisRecord.name,
+                                            type: "deal observer"
+                                        }
+                                    )
+                                );
+                                Collect(
+                                    listUserAsignFirst,
+                                    If(!IsBlank(assignDealOwnerValue),
+                                    {
+                                        employee_id: assignDealOwnerValue.id,
+                                        email:assignDealOwnerValue.email,
+                                       internal_email:assignDealOwnerValue.internal_email,
+                                        name:assignDealOwnerValue.name,
+                                        type: "deal owner"
+                                    })
+                                );
+                                Collect(
+                                    listUserAsignFirst,
+                                    If(!IsBlank(assignDealMentorValue),
+                                    {
+                                        employee_id: assignDealMentorValue.id,
+                                           email:assignDealMentorValue.email,
+                                       internal_email:assignDealMentorValue.internal_email,
+                                        name:assignDealMentorValue.name,
+                                        type: "deal mentor"
+                                    })
+                                );
+                                
+                                Set(dealType,ThisItem.deal_type_1);
+                                Set(companyName,ThisItem.company_name);
+                                Set(dealName,ThisItem.deal_name);
+                                
+                                
+                                Set(showAssignPopup, true);
+                            PaddingTop: =0
+                            Tooltip: ="Assign"
+                            Width: =40
+                            X: =AssignMember_Content.X
+                            Y: =CloseDateContent_1.Y
+                            ZIndex: =18
+
+                        DeleteIcon_MA As htmlViewer:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<div style=""cursor:pointer; width:40px; display:flex; justify-content:center; align-items:center""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 16 16"" fill=""none"">
+                                  <path d=""M4.66683 2.66634C4.66683 2.31272 4.8073 1.97358 5.05735 1.72353C5.3074 1.47348 5.64654 1.33301 6.00016 1.33301H10.0002C10.3538 1.33301 10.6929 1.47348 10.943 1.72353C11.193 1.97358 11.3335 2.31272 11.3335 2.66634V3.99967H14.0002C14.177 3.99967 14.3465 4.06991 14.4716 4.19494C14.5966 4.31996 14.6668 4.48953 14.6668 4.66634C14.6668 4.84315 14.5966 5.01272 14.4716 5.13775C14.3465 5.26277 14.177 5.33301 14.0002 5.33301H13.2875L12.7095 13.4277C12.6856 13.7641 12.535 14.0789 12.2882 14.3087C12.0415 14.5386 11.7167 14.6663 11.3795 14.6663H4.62016C4.28292 14.6663 3.95821 14.5386 3.71142 14.3087C3.46463 14.0789 3.31411 13.7641 3.29016 13.4277L2.7135 5.33301H2.00016C1.82335 5.33301 1.65378 5.26277 1.52876 5.13775C1.40373 5.01272 1.3335 4.84315 1.3335 4.66634C1.3335 4.48953 1.40373 4.31996 1.52876 4.19494C1.65378 4.06991 1.82335 3.99967 2.00016 3.99967H4.66683V2.66634ZM6.00016 3.99967H10.0002V2.66634H6.00016V3.99967ZM4.0495 5.33301L4.62083 13.333H11.3802L11.9515 5.33301H4.0495ZM6.66683 6.66634C6.84364 6.66634 7.01321 6.73658 7.13823 6.8616C7.26326 6.98663 7.3335 7.1562 7.3335 7.33301V11.333C7.3335 11.5098 7.26326 11.6794 7.13823 11.8044C7.01321 11.9294 6.84364 11.9997 6.66683 11.9997C6.49002 11.9997 6.32045 11.9294 6.19542 11.8044C6.0704 11.6794 6.00016 11.5098 6.00016 11.333V7.33301C6.00016 7.1562 6.0704 6.98663 6.19542 6.8616C6.32045 6.73658 6.49002 6.66634 6.66683 6.66634ZM9.3335 6.66634C9.51031 6.66634 9.67988 6.73658 9.8049 6.8616C9.92992 6.98663 10.0002 7.1562 10.0002 7.33301V11.333C10.0002 11.5098 9.92992 11.6794 9.8049 11.8044C9.67988 11.9294 9.51031 11.9997 9.3335 11.9997C9.15668 11.9997 8.98712 11.9294 8.86209 11.8044C8.73707 11.6794 8.66683 11.5098 8.66683 11.333V7.33301C8.66683 7.1562 8.73707 6.98663 8.86209 6.8616C8.98712 6.73658 9.15668 6.66634 9.3335 6.66634Z"" fill=""#D00C0C""/>
+                                </svg></div>"
+                            OnSelect: |-
+                                =Set(idProposalDelete, ThisItem.id);
+                                Set(isShowPopupDelete, true);
+                            Visible: =DealDetailTab=1&&MainProceduresContent.Text in ["Deal advisory opportunity","New lead creation"]&&!(StatusContent_1.Text in ["Daft"]) && ThisItem.deal_owner = currenUserV2.id
+                            Width: =40
+                            X: =CloseDateContent_1.X + CloseDateContent_1.Width - Self.Width - 10 
+                            Y: =4
+                            ZIndex: =19
+
+                    Hr_10 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        Fill: =RGBA(191, 191, 192, 1)
+                        Height: =2
+                        Width: =Container3_2.Width
+                        Y: =LabelNoTable_1.Y + LabelNoTable_1.Height
+                        ZIndex: =16
+
+                    _Label1_2 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: |-
+                            =TableContent_9.AllItemsCount = 0 
+                            //&& !isLoading
+                        Width: =Hr_1.Width
+                        X: =Hr_10.X
+                        Y: =Hr_10.Y + 5
+                        ZIndex: =17
+
+                    HeaderTableIB As group:
+                        Height: =5
+                        Width: =5
+                        X: =60
+                        Y: =60
+                        ZIndex: =18
+
+                        LabelNoTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =0
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="No"
+                            Width: =40
+                            ZIndex: =2
+
+                        LabelAssignMember As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Assign member"
+                            Width: =Max(WhiteBgQT1.Width * 0.06, 125)
+                            X: =LabelNoTable_1.X + LabelNoTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =3
+
+                        LabelDealNameTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Deal name"
+                            Width: =Max(WhiteBgQT1.Width * 0.37, If(App.Width > 800, 400, 300))
+                            X: =LabelAssignMember.X + LabelAssignMember.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =4
+
+                        LabelServer As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Server"
+                            Width: =Max(WhiteBgQT1.Width * 0.06, 120)
+                            X: =LabelDealNameTable_1.X + LabelDealNameTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =5
+
+                        LabelStatusTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Status"
+                            Width: =Max(WhiteBgQT1.Width * 0.07, 180)
+                            X: =LabelServer.X + LabelServer.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =6
+
+                        LabelMainProcedures As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Main procedures"
+                            Width: =Max(WhiteBgQT1.Width * 0.07, 230)
+                            X: =LabelStatusTable_1.X + LabelStatusTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =7
+
+                        LabelClientNameTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="State"
+                            Width: =Max(WhiteBgQT1.Width * 0.06, 100)
+                            X: =LabelMainProcedures.X + LabelMainProcedures.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =8
+
+                        LabelStageTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Stage"
+                            Width: =Max(WhiteBgQT1.Width * 0.06, 120)
+                            X: =LabelClientNameTable_1.X + LabelClientNameTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =9
+
+                        LabelDealType1Table_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Deal type 1"
+                            Width: =Max(WhiteBgQT1.Width * 0.1 - 20,120)
+                            X: =LabelStageTable_1.X + LabelStageTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =10
+
+                        LabelEngagementRiskTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Engagement Risk"
+                            Width: =Max(WhiteBgQT1.Width * 0.1,150)
+                            X: =LabelDealType1Table_1.X + LabelDealType1Table_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =11
+
+                        LabelPriorityTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Priority"
+                            Width: =Max(WhiteBgQT1.Width * 0.08, 120)
+                            X: =LabelEngagementRiskTable_1.X + LabelEngagementRiskTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =12
+
+                        LabelCreatedDateTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Created date"
+                            Width: =Max(WhiteBgQT1.Width * 0.1,120)
+                            X: =LabelDealOwner.X + LabelDealOwner.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =13
+
+                        LabelCloseDateTable_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Closed date"
+                            Width: =Max(WhiteBgQT1.Width * 0.1, 120)
+                            X: =LabelCreatedDateTable_1.X + LabelCreatedDateTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =14
+
+                        LabelDealOwner As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Created by"
+                            Width: =Max(WhiteBgQT1.Width * 0.1 - 20, 180)
+                            X: =LabelPriorityTable_1.X + LabelPriorityTable_1.Width
+                            Y: =LabelNoTable_1.Y
+                            ZIndex: =15
+
+            LabelDealInfo_1 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Bold
+                Height: =39
+                LineHeight: =1.8
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =12
+                Text: ="Deal Information"
+                Width: =259
+                X: =WhiteBgQT1.X + 10
+                Y: =WhiteBgQT1.Y + 10
+                ZIndex: =21
+
+            StatusDropDown_1 As button:
+                Align: =Align.Left
+                BorderColor: =If(statusShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =RGBA(255, 255, 255, 1)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: =Set(statusShowDropdown, !statusShowDropdown)
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Size: =10.5
+                Text: =StatusSelectedValue
+                Width: =If(Parent.Width > 800, 216, (Parent.Width - 30) / 2)
+                X: =LabelStatus.X
+                Y: =LabelStatus.Y + LabelStatus.Height
+                ZIndex: =33
+
+            CreateButtonContainer As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =33
+
+                ButtonCreate As button:
+                    BorderThickness: =0
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Lighter
+                    Height: =44
+                    OnSelect: |
+                        =Set(HeaderText, "Create New");
+                        Set(ClientDat, Blank());
+                        Set(dealSelected, Blank());
+                        Set(clientNameSelectedValue, Blank());
+                        Clear(reasonOfOwner);
+                        Clear(reasonOfCEO);
+                        Clear(noteOfDeal);
+                        Clear(listFile);
+                        Navigate(DetailQT1, ScreenTransition.Fade);
+                    PaddingBottom: =10
+                    PaddingLeft: =45
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill 
+                    Size: =10.5
+                    Text: ="Create"
+                    Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action)
+                    Width: =120
+                    X: =Parent.Width - Self.Width - If(App.Width > 800, 20, 8)
+                    Y: =If(App.Width > 800, btnRefresh_7.Y, TextDateTo.Y + TextDateTo.Height + 10)
+                    ZIndex: =2
+
+                Icon2_2 As icon.Add:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.Add
+                    OnSelect: =Select(ButtonCreate);
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action)
+                    Width: =20
+                    X: =ButtonCreate.X + 25
+                    Y: =ButtonCreate.Y + ButtonCreate.Height*0.5 - Self.Height*0.5
+                    ZIndex: =3
+
+            iconStatusDropDown_1 As htmlViewer:
+                Font: =Font.Arial
+                Height: =44
+                HtmlText: |-
+                    =If(statusShowDropdown,
+                    "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                    <g clip-path=""url(#clip0_1760_3688)"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                    </g>
+                    <defs>
+                    <clipPath id=""clip0_1760_3688"">
+                    <rect width=""24"" height=""24"" fill=""white""/>
+                    </clipPath>
+                    </defs>
+                    </svg></div>"
+                    , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                    </svg></div>")
+                OnSelect: =Set(statusShowDropdown, !statusShowDropdown)
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                Size: =11.60
+                Width: =35
+                X: =StatusDropDown_1.X + StatusDropDown_1.Width - Self.Width
+                Y: =StatusDropDown_1.Y + 5
+                ZIndex: =34
+
+            ServerDropDown As button:
+                Align: =Align.Left
+                BorderColor: =If(serverShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =RGBA(255, 255, 255, 1)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: =Set(serverShowDropdown, !serverShowDropdown)
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Size: =10.5
+                Text: =serverSelectedValue
+                Width: =If(App.Width > 800, 216, (Parent.Width - 30) / 2)
+                X: =LabelBy.X
+                Y: =LabelBy.Y + LabelBy.Height
+                ZIndex: =35
+
+            iconServerDropDown As htmlViewer:
+                Font: =Font.Arial
+                Height: =44
+                HtmlText: |-
+                    =If(serverShowDropdown,
+                    "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                    <g clip-path=""url(#clip0_1760_3688)"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                    </g>
+                    <defs>
+                    <clipPath id=""clip0_1760_3688"">
+                    <rect width=""24"" height=""24"" fill=""white""/>
+                    </clipPath>
+                    </defs>
+                    </svg></div>"
+                    , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                    </svg></div>")
+                OnSelect: =Set(serverShowDropdown, !serverShowDropdown)
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                Size: =11.60
+                Width: =35
+                X: =ServerDropDown.X + ServerDropDown.Width - Self.Width
+                Y: =ServerDropDown.Y + 5
+                ZIndex: =36
+
+            SearchCloseDropdown_3 As rectangle:
+                Fill: =RGBA(255, 255, 255, 0)
+                Height: =App.Height
+                OnSelect: |-
+                    =Set(serverShowDropdown, false);
+                    Set(statusShowDropdown, false)
+                Visible: =statusShowDropdown || serverShowDropdown
+                Width: =Parent.Width
+                ZIndex: =37
+
+            "Gl_StatusDropDown_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =0.5
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+                Items: |-
+                    =[{value: "All"},{value: "Draft"},{value: "Pending approval"},{value: "Revised"},{value: "Rejected"},{value: "Canceled"},{value: "Close"},{value: "Pending request edit"},{value: "Approved request edit"},{value: "E_Draft"},{value: "E_Pending approval"},{value: "E_Revised"}]
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =statusShowDropdown
+                Width: =StatusDropDown_1.Width
+                X: =StatusDropDown_1.X
+                Y: =StatusDropDown_1.Y + 50
+                ZIndex: =38
+
+                Button6_40 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =If(StatusSelectedValue = ThisItem.value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: |-
+                        =Set(StatusSelectedValue, ThisItem.value);
+                        Set(statusShowDropdown, false);
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10.5
+                    Text: =ThisItem.value
+                    Width: =Parent.Width
+                    X: =0.00
+                    ZIndex: =1
+
+            QT2TabsGroup_8 As group:
+                Height: =5
+                Width: =5
+                X: =60
+                Y: =60
+                ZIndex: =38
+
+                HrQT2_9 As rectangle:
+                    BorderColor: =RGBA(176, 176, 176, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(246, 246, 246, 1)
+                    Height: =0.5
+                    Visible: =false
+                    Width: =QT2Tabs_8.Width
+                    X: =QT2Tabs_8.X
+                    Y: =QT2Tabs_8.Y + QT2Tabs_8.Height - 7
+                    ZIndex: =4
+
+                QT2Tabs_8 As gallery.galleryHorizontal:
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =47
+                    Items: |-
+                        =[{text:"Action needed",tab:1},{text:"Under processing",tab:2},{text:"Completed",tab:3}]
+                    ShowScrollbar: =false
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 450, 140, (App.Width - 20) / 3)
+                    Width: =Self.AllItemsCount * Self.TemplateWidth
+                    X: =LabelDateCreated.X
+                    Y: =If(App.Width > 800, ServerDropDown.Y + ServerDropDown.Height, ButtonCreate.Height + ButtonCreate.Y + 10)
+                    ZIndex: =5
+
+                    Button8_21 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        DisabledFill: =RGBA(244, 244, 244, 0)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Bold
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =RGBA(248, 248, 249, 0)
+                        OnSelect: |-
+                            =Set(DealDetailTab,ThisItem.tab);
+                            Set(currentPageIndex,0);
+                            Select(GetAllMA_Only1Tab);
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 10.5, 10.5)
+                        Text: =ThisItem.text
+                        Tooltip: =ThisItem.text
+                        Width: =If(ThisItem.text = "Action needed", If(App.Width > 400, 126, 110), ThisItem.text = "Completed", If(App.Width > 600, 130, 110), QT2Tabs_8.TemplateWidth)
+                        Y: =5
+                        ZIndex: =1
+
+                    BottomBorder1_28 As rectangle:
+                        BorderColor: =If(DealDetailTab = ThisItem.tab, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = ThisItem.tab, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(ThisItem.tab = DealDetailTab, 2, 0)
+                        Width: =Button8_21.Width 
+                        Y: =40
+                        ZIndex: =2
+
+            "Gl_ServerDropDown As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =0.5
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+                Items: |-
+                    =[{value: "General"},{value: "Restricted"}]
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =serverShowDropdown
+                Width: =ServerDropDown.Width
+                X: =ServerDropDown.X
+                Y: =ServerDropDown.Y + 50
+                ZIndex: =39
+
+                Button6_58 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =If(serverSelectedValue = ThisItem.value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: |-
+                        =Set(serverSelectedValue, ThisItem.value);
+                        Set(serverShowDropdown, false);
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10.5
+                    Text: =ThisItem.value
+                    Width: =Parent.Width
+                    X: =0.00
+                    ZIndex: =1
+
+            FilterContainer As group:
+                Height: =5
+                Width: =5
+                X: =60
+                Y: =60
+                ZIndex: =39
+
+                LabelDateCreated As label:
+                    Color: =RGBA(82, 82, 82, 1)
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Created date"
+                    Width: =150.00
+                    X: =SearchByName_Input.X
+                    Y: =StatusDropDown_1.Y + StatusDropDown_1.Height + 10
+                    ZIndex: =7
+
+                LabelBy As label:
+                    Color: =RGBA(82, 82, 82, 1)
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Server"
+                    Width: =150.00
+                    X: =If(Parent.Width > 800,TextDateTo.X + TextDateTo.Width + 10, TextDateTo.X)
+                    Y: =If(App.Width > 800, LabelDateCreated.Y, LabelStatus.Y)
+                    ZIndex: =8
+
+                LabelStatus As label:
+                    Color: =RGBA(82, 82, 82, 1)
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Status"
+                    Width: =150.00
+                    X: =If(App.Width > 800,SearchByName_Input.X + SearchByName_Input.Width + 10, SearchByName_Input.X )
+                    Y: =If(App.Width > 800, SearchByName_Input.Y - Self.Height, SearchByName_Input.Y + SearchByName_Input.Height + 10)
+                    ZIndex: =9
+
+                TextFrom As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(0, 0, 0, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =13.00
+                    Width: =If(Parent.Width > 800, 221, (Parent.Width - 30) / 2)
+                    X: =LabelDateCreated.X
+                    Y: =LabelDateCreated.Y + LabelDateCreated.Height
+                    ZIndex: =10
+
+                TextDateTo As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(0, 0, 0, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =13.00
+                    Width: =If(Parent.Width > 800, 221, (Parent.Width - 30) / 2)
+                    X: =TextFrom.X + TextFrom.Width + 10
+                    Y: =TextFrom.Y
+                    ZIndex: =11
+
+                DateFromMA_DatePicker As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =34
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("From", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =50
+                    PaddingTop: =10
+                    Size: =10.5
+                    Width: =TextFrom.Width - 6
+                    X: =TextFrom.X + 3
+                    Y: =TextFrom.Y + 5
+                    ZIndex: =12
+
+                DateToMA_DatePicker As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =34
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("To", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =10.5
+                    Width: =TextDateTo.Width - 6
+                    X: =TextDateTo.X + 3
+                    Y: =TextDateTo.Y + 5
+                    ZIndex: =13
+
+            DeleteDealConfrimPopup As group:
+                Height: =5
+                Width: =5
+                X: =60
+                Y: =60
+                ZIndex: =40
+
+                DeleteConfirmPopupBack As rectangle:
+                    Fill: =RGBA(248, 248, 249, 0.4)
+                    Height: =Parent.Height
+                    Visible: =isConfimDelete
+                    Width: =Parent.Width
+                    ZIndex: =6
+
+                DeleteConfirmBg As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =If(Parent.Width > 600, 140, 140)
+                    HtmlText: |-
+                        ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& If(Parent.Width > 600, 120, 120) &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                        '></div>"
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =11.00
+                    Visible: =isConfimDelete
+                    Width: =If(App.Width > 600, 550, App.Width + 5)
+                    X: =If(App.Width > 600, Parent.Width / 2 - 220, 0)
+                    Y: =If(App.Width > 600, App.Height / 2 - 80, 5)
+                    ZIndex: =15
+
+                DeleteConfirmLabel As label:
+                    Font: =Font.Arial
+                    Size: =14
+                    Text: ="Are you sure to delete this deal?"
+                    Visible: =isConfimDelete
+                    Width: =DeleteConfirmBg.Width - 50
+                    X: =DeleteConfirmBg.X + 30
+                    Y: =DeleteConfirmBg.Y + 10
+                    ZIndex: =16
+
+                DeleteConfirmCloseIcon As icon.Cancel:
+                    Color: =RGBA(26, 26, 26, 1)
+                    Height: =20
+                    Icon: =Icon.Cancel
+                    OnSelect: =Set(isConfimDelete, false);
+                    Tooltip: ="Close popup"
+                    Visible: =isConfimDelete
+                    Width: =20
+                    X: =DeleteConfirmBg. X + DeleteConfirmBg.Width -50
+                    Y: =DeleteConfirmBg.Y + 20
+                    ZIndex: =17
+
+                CancelPIButton As button:
+                    BorderThickness: =
+                    Fill: =RGBA(214, 214, 214, 1)
+                    FocusedBorderThickness: =
+                    Font: =Font.Arial
+                    HoverFill: =
+                    OnSelect: =Set(isConfimDelete, false);
+                    PressedColor: =
+                    PressedFill: =
+                    Size: =10.5
+                    Text: ="Cancel"
+                    Tooltip: ="Cancel"
+                    Visible: =isConfimDelete
+                    Width: =120
+                    X: =DeletePIButton.X - 130
+                    Y: =DeletePIButton.Y
+                    ZIndex: =18
+
+                DeletePIButton As button:
+                    BorderThickness: =
+                    Fill: =RGBA(214, 27, 27, 1)
+                    FocusedBorderThickness: =
+                    Font: =Font.Arial
+                    HoverFill: =
+                    OnSelect: |-
+                        =Set(isLoading, true);
+                        Set(isLoading, false);
+                    PressedColor: =
+                    PressedFill: =
+                    Size: =10.5
+                    Text: ="Delete"
+                    Tooltip: ="Delete"
+                    Visible: =isConfimDelete
+                    Width: =120
+                    X: =DeleteConfirmBg.X + DeleteConfirmBg.Width - 150
+                    Y: =DeleteConfirmBg.Y + DeleteConfirmBg.Height - 70
+                    ZIndex: =19
+
+            Group1_3 As group:
+                Height: =5
+                Width: =5
+                X: =80
+                Y: =80
+                ZIndex: =41
+
+                SearchAUMButton_14 As button:
+                    BorderThickness: =0
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |
+                        =Set(dateFromFilterVarMA, If(IsBlank(DateFromMA_DatePicker.SelectedDate), "", Text(DateFromMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+                        Set(dateToFilterVarMA,If(IsBlank(DateToMA_DatePicker.SelectedDate), "", Text(DateToMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+                        Set(statusFilterVar,If(StatusSelectedValue = "All","",StatusSelectedValue));
+                        Set(by,ServerDropDown.Text);
+                        Set(dealNameFilterVar,Trim(Text(SearchByName_Input.Text)));
+                        Set(currentPageIndex, 0);
+                        Set(isLoading,true);
+                        Select(GetAllMA);
+                    PaddingBottom: =10
+                    PaddingLeft: =30
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: =""
+                    Width: =44
+                    X: |-
+                        =If(App.Width > 800,
+                            StatusDropDown_1.X + StatusDropDown_1.Width + 10,
+                            SearchByName_Input.X + SearchByName_Input.Width + 10)
+                    Y: =If(App.Width > 800, StatusDropDown_1.Y, SearchByName_Input.Y)
+                    ZIndex: =22
+
+                SearchAUMIcon_12 As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =35
+                    HtmlText: |-
+                        ="<div style=""display:flex;align-items:center; justify-content: center;; cursor: pointer; width: 30px; height: "&Self.Height - 2&"px""; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                          <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                        </svg><div>"
+                    OnSelect: =Select(SearchAUMButton_14)
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Width: =30
+                    X: =SearchAUMButton_14.X + 6
+                    Y: =SearchAUMButton_14.Y + 4
+                    ZIndex: =23
+
+            Group17_7 As group:
+                Height: =5
+                Width: =5
+                X: =80
+                Y: =80
+                ZIndex: =42
+
+                btnRefresh_7 As button:
+                    BorderThickness: =0
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |-
+                        =Reset(SearchByName_Input);
+                        Set(serverSelectedValue, "");
+                        Set(statusMA, Blank());
+                        Reset(DateFromMA_DatePicker);Reset(DateToMA_DatePicker);
+                        Set(StatusSelectedValue, "");
+                        Set(userInput,"user1");
+                        Set(currentPageIndex,0);
+                        If(IsBlank(PageSizeNumber),Set(PageSizeNumber, 10));
+                        Set(sortColumn,"created_date");
+                        Set(dateFromFilterVarMA, If(IsBlank(DateFromMA_DatePicker.SelectedDate), "", Text(DateFromMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+                        Set(dateToFilterVarMA,If(IsBlank(DateToMA_DatePicker.SelectedDate), "", Text(DateToMA_DatePicker.SelectedDate, "yyyy-mm-dd")));
+                        Set(dealNameFilterVar,ServerDropDown.Text);
+                        Set(dealOwnerFilterVar,ServerDropDown.Text);
+                        Set(StatusSelectedValue, "All");
+                        If(IsBlank(StatusSelectedValue)||StatusSelectedValue ="All",
+                        Set(statusFilterVar, ""),
+                        Set(statusFilterVar, StatusSelectedValue));
+                        
+                        Set(isLoading, true);
+                        Select(GetAllMA);
+                    PaddingBottom: =10
+                    PaddingLeft: =30
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: =""
+                    Tooltip: ="Click here to clear filters"
+                    Width: =44
+                    X: =SearchAUMButton_14.X + SearchAUMButton_14.Width + 10
+                    Y: =SearchAUMButton_14.Y
+                    ZIndex: =24
+
+                RefreshListIcon_12 As icon.Reload:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.Reload
+                    OnSelect: =Select(btnRefresh_7)
+                    Tooltip: ="Click here to clear filters"
+                    Width: =20
+                    X: =btnRefresh_7.X + RefreshListIcon_12.Width * 0.5 + 2
+                    Y: =btnRefresh_7.Y + btnRefresh_7.Height * 0.5 - Self.Height*0.5
+                    ZIndex: =25
+
+            Filter_Container_10 As group:
+                Height: =5
+                Width: =5
+                X: =80
+                Y: =80
+                ZIndex: =43
+
+                PreviousIcon_11 As icon.ChevronLeft:
+                    DisabledColor: =RGBA(166, 166, 166, 1)
+                    DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+                    Height: =15
+                    Icon: =Icon.ChevronLeft
+                    OnSelect: |
+                        =Set(currentPageIndex,currentPageIndex-1);
+                        Select(GetAllMA_Only1Tab);
+                    Tooltip: ="Previous page"
+                    Visible: |
+                        =If(currentPageIndex<=0,false,true)
+                    Width: =15
+                    X: =PageNumbers_11.X - 30
+                    Y: =PageNumbers_11.Y + 12.5
+                    ZIndex: =26
+
+                NextIcon_11 As icon.ChevronRight:
+                    DisabledColor: =RGBA(166, 166, 166, 1)
+                    DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+                    Height: =15
+                    Icon: =Icon.ChevronRight
+                    OnSelect: |
+                        =Set(currentPageIndex,currentPageIndex+1);
+                        Select(GetAllMA_Only1Tab);
+                    Tooltip: ="Next page"
+                    Visible: =If(currentPageIndex>=pageCount-1,false,true)
+                    Width: =15
+                    X: =WhiteBackground.X + WhiteBackground.Width - 50
+                    Y: =PageNumbers_11.Y + 12.5
+                    ZIndex: =27
+
+                "PageNumbers_11 As gallery.'BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    Height: =42
+                    Items: =listPageIndex
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =TableContent_9.AllItemsCount > 0
+                    Width: =PageNumbers_11.AllItemsCount * 40
+                    X: =NextIcon_11.X - PageNumbers_11.Width
+                    Y: =WhiteBgQT1.Y + WhiteBgQT1.Height
+                    ZIndex: =28
+
+                    pageIndex_11 As htmlViewer:
+                        DisabledFill: =RGBA(0, 0, 0, 0)
+                        DisplayMode: =If(isDisable, DisplayMode.Disabled, DisplayMode.Edit)
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style='width: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 3px; background-color: transparent; border-radius: 5px; border: " & If(currentPageIndex = ThisItem.Value, "1px solid #1890FF", "none")&";'><font color=" & If(currentPageIndex = ThisItem.Value, "#1890FF", "black")&">" & (ThisItem.Value + 1) & "</font></div>"
+                        OnSelect: |-
+                            =Set(currentPageIndex,ThisItem.Value);
+                            
+                            Select(GetAllMA_Only1Tab);
+                            
+                            If(currentPageIndex=ThisItem.Value,Color.Red);
+                        PaddingRight: =0
+                        Width: =40
+                        ZIndex: =2
+
+                PageDropdownEncryption_2 As button:
+                    Align: =Align.Left
+                    BorderColor: =If(ShowPageSizeSelectPopup, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                    BorderThickness: =1
+                    Color: =RGBA(82, 82, 82, 1)
+                    DisabledFill: =RGBA(166, 166, 166, 0.5)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =38
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedBorderColor: =
+                    PressedColor: =
+                    PressedFill: =
+                    Size: =10.5
+                    Text: =PageSizeNumber
+                    Visible: =App.Width > 800 && TableContent_9.AllItemsCount > 0
+                    Width: =70
+                    X: =PreviousIcon_11.X - 80
+                    Y: =PageNumbers_11.Y + 2 
+                    ZIndex: =29
+
+                PageChevron_11 As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =44
+                    HtmlText: |
+                        ="<div style=""cursor: pointer""> "&If(ShowPageSizeSelectPopup, "<svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                        <g clip-path=""url(#clip0_1760_3688)"">
+                        <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                        </g>
+                        <defs>
+                        <clipPath id=""clip0_1760_3688"">
+                        <rect width=""24"" height=""24"" fill=""white""/>
+                        </clipPath>
+                        </defs>
+                        </svg>",
+                        "<svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                        <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                        </svg>"
+                        )&" </div>"
+                    OnSelect: =Select(PageDropdownEncryption_2)
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =11.60
+                    Visible: =App.Width > 800 && TableContent_9.AllItemsCount > 0
+                    Width: =35
+                    X: =PageDropdownEncryption_2.X + PageDropdownEncryption_2.Width - 35
+                    Y: =PageDropdownEncryption_2.Y
+                    ZIndex: =30
+
+                PageCloseDropdown_10 As rectangle:
+                    Fill: =RGBA(255, 255, 255, 0)
+                    Height: =App.Height
+                    OnSelect: =Set(ShowPageSizeSelectPopup, false)
+                    Visible: =ShowPageSizeSelectPopup
+                    Width: =Parent.Width
+                    ZIndex: =31
+
+                "PageItems_11 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =122
+                    Items: |-
+                        =[{value: 10}, {value: 20}, {value: 50}]
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =ShowPageSizeSelectPopup
+                    Width: =PageDropdownEncryption_2.Width
+                    X: =PageDropdownEncryption_2.X
+                    Y: =PageDropdownEncryption_2.Y - 130
+                    ZIndex: =32
+
+                    Button6_41 As button:
+                        Align: =Align.Left
+                        BorderThickness: =1
+                        Color: =RGBA(82, 82, 82, 1)
+                        Fill: =If(PageSizeNumberRole = ThisItem.value, RGBA(241, 244, 249, 1) , RGBA(0, 0, 0, 0))
+                        FocusedBorderThickness: =2
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(241, 244, 249, 1)
+                        OnSelect: |-
+                            =Set(PageSizeNumber, ThisItem.value);
+                            Set(ShowPageSizeSelectPopup, false);
+                            Set(currentPageIndex,0);
+                            
+                            Select(GetAllMA_Only1Tab);
+                            Select(Parent);
+                        PaddingLeft: =15
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedFill: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =10.5
+                        Text: =ThisItem.value
+                        Width: =70
+                        X: =0.00
+                        ZIndex: =1
+
+    HeaderQT2List_IR_1 As Header:
+        ZIndex: =3
+
+    MenuItemsSideBar_IR_1 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_IR_1.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_1.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_IR_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_IR_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_IR_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =4
+
+    MenuItemsSideBar_Small_IR_1 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_IR_1.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_1.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_IR_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_IR_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_IR_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =5
+
+    AssignPopupGroup As group:
+        Height: =5
+        Width: =5
+        X: =80
+        Y: =80
+        ZIndex: =50
+
+        AssignPopupBack As rectangle:
+            Fill: =RGBA(0, 0, 0, 0.5)
+            Height: =Parent.Height
+            Visible: =showAssignPopup
+            Width: =Parent.Width
+            ZIndex: =13
+
+        AssignPopupBg As htmlViewer:
+            Font: =Font.Arial
+            Height: =Min(AssignDealSaveButton.Y + AssignDealSaveButton.Height + - Self.Y + 30, App.Height - 40)
+            HtmlText: |-
+                ="<div style='height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 7px 5px 16px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =showAssignPopup
+            Width: =If(Parent.Width > 600, 600, Parent.Width - 30)
+            X: =If(Parent.Width > 600, App.Width / 2 - 300, 10)
+            Y: =If(App.Height > 800, 100, 40)
+            ZIndex: =14
+
+        AssignTitle As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =12
+            Text: ="Assign Member"
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignPopupBg.X + 20
+            Y: =AssignPopupBg.Y + 10
+            ZIndex: =15
+
+        CloseAssignIcon As icon.Cancel:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: =Set(showAssignPopup, false)
+            Visible: =showAssignPopup
+            Width: =20
+            X: =AssignTitle.X + AssignTitle.Width - Self.Width
+            Y: =AssignTitle.Y + 13
+            ZIndex: =16
+
+        AssignDealOwner_Start_MA As label:
+            Color: =RGBA(255, 0, 0, 1)
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="*"
+            Visible: =showAssignPopup
+            Width: =40
+            X: =AssignDealOwner_Label.X + 77
+            Y: =AssignDealOwner_Label.Y
+            ZIndex: =17
+
+        AssignDealTitle1_Label As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Deal Name"
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignTitle.X
+            Y: =AssignTitle.Y + 40
+            ZIndex: =18
+
+        AssignDealTitle_Input As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =dealSelected.deal_name
+            DelayOutput: =true
+            DisabledColor: =If(App.Width < 600, RGBA(0, 0, 0, 0), RGBA(166, 166, 166, 1))
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnChange: |-
+                =UpdateContext({workingCapital: Self.Text})
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignDealTitle1_Label.X
+            Y: =AssignDealTitle1_Label.Y + AssignDealTitle1_Label.Height
+            ZIndex: =19
+
+        AssignServer_Label As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Server"
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignTitle.X
+            Y: =AssignDealTitle_Input.Y + AssignDealTitle_Input.Height + 5
+            ZIndex: =20
+
+        AssignDealServer_InputBg As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =assignServerValue
+            DelayOutput: =true
+            DisabledColor: =If(App.Width < 600, RGBA(0, 0, 0, 0), RGBA(166, 166, 166, 1))
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnChange: |-
+                =UpdateContext({workingCapital: Self.Text})
+            OnSelect: =Set(assignServerShowDropdown, !assignServerShowDropdown);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignServer_Label.X
+            Y: =AssignServer_Label.Y + AssignServer_Label.Height
+            ZIndex: =21
+
+        AssignDealOwner_Label As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Deal Owner"
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignTitle.X
+            Y: =AssignDealServer_InputBg.Y + AssignDealServer_InputBg.Height + 10
+            ZIndex: =22
+
+        AssignDealOwner_InputBg As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =assignDealOwnerValue.name
+            DelayOutput: =true
+            DisabledColor: =If(App.Width < 600, RGBA(0, 0, 0, 0), RGBA(166, 166, 166, 1))
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnChange: |-
+                =UpdateContext({workingCapital: Self.Text})
+            OnSelect: |-
+                =Set(assignDealOwnerValueOldIDPEVC, assignDealOwnerValue.id);
+                Set(assignDealOwnerValue, Blank());
+                Set(assignDealOwnerShowDropdown, !assignDealOwnerShowDropdown);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignDealOwner_Label.X
+            Y: =AssignDealOwner_Label.Y + AssignDealOwner_Label.Height
+            ZIndex: =23
+
+        AssignMentor_Label As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Deal Mentor"
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignTitle.X
+            Y: =AssignDealOwner_InputBg.Y + AssignDealOwner_InputBg.Height + 10
+            ZIndex: =24
+
+        AssignDealMentor_InputBg As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =assignDealMentorValue.name
+            DelayOutput: =true
+            DisabledColor: =If(App.Width < 600, RGBA(0, 0, 0, 0), RGBA(166, 166, 166, 1))
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnSelect: |-
+                =Set(assignDealMentorValueOldIDPEVC, assignDealMentorValue.id);
+                Set(assignDealMentorValue, Blank());
+                Set(assignDealMentorShowDropdown, !assignDealMentorShowDropdown);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =AssignPopupBg.Width - 40
+            X: =AssignMentor_Label.X
+            Y: =AssignMentor_Label.Y + AssignMentor_Label.Height
+            ZIndex: =25
+
+        AssignSupport_Label As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Deal Support"
+            Visible: =showAssignPopup
+            Width: =(AssignPopupBg.Width - 20) / 2
+            X: =AssignTitle.X
+            Y: =AssignDealMentor_InputBg.Y + AssignDealMentor_InputBg.Height + 10
+            ZIndex: =26
+
+        AssignDealSupport_InputBg As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =""
+            DelayOutput: =true
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnChange: |-
+                =UpdateContext({workingCapital: Self.Text})
+            OnSelect: =Set(assignDealSupportShowDropdown, !assignDealSupportShowDropdown);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =(AssignPopupBg.Width - 70) / 2
+            X: =AssignDealTitle1_Label.X
+            Y: =AssignSupport_Label.Y + AssignSupport_Label.Height
+            ZIndex: =27
+
+        AssignSupport_Label_1 As label:
+            Font: =Font.Arial
+            Height: =30
+            Size: =10.5
+            Text: ="Deal Observer"
+            Visible: =showAssignPopup
+            Width: =(AssignPopupBg.Width - 30) / 2
+            X: =AssignSupport_Label.X + AssignSupport_Label.Width
+            Y: =AssignSupport_Label.Y
+            ZIndex: =28
+
+        AssignDealObserver_InputBg As text:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Default: =""
+            DelayOutput: =true
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 0, 1)
+            Font: =Font.Arial
+            Height: =44
+            HoverBorderColor: =RGBA(191, 191, 192, 1)
+            HoverFill: =RGBA(255, 255, 255, 1)
+            OnSelect: =Set(assignDealObserverShowDropdown, !assignDealObserverShowDropdown);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            Size: =If(App.Width > 600, 10.5, 12)
+            Tooltip: =
+            Visible: =showAssignPopup
+            Width: =(AssignPopupBg.Width - 60) / 2
+            X: =AssignSupport_Label_1.X
+            Y: =AssignSupport_Label_1.Y + AssignSupport_Label_1.Height
+            ZIndex: =29
+
+        AssignDealCancelButton As button:
+            BorderThickness: =1
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderColor: =Self.HoverColor
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Lighter
+            Height: =42
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: =Set(showAssignPopup, false)
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =5
+            RadiusBottomRight: =5
+            RadiusTopLeft: =5
+            RadiusTopRight: =5
+            Size: =10.5
+            Text: ="Cancel"
+            Visible: =showAssignPopup
+            Width: =120
+            X: =AssignDealSaveButton.X - Self.Width - 10
+            Y: =AssignDealSaveButton.Y
+            ZIndex: =30
+
+        AssignDealSaveButton As button:
+            BorderThickness: =1
+            DisplayMode: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action) && !(dealSelected.status in ["CLOSED", "REJECTED"]), DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Lighter
+            Height: =42
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |+
+                =Set(isLoading, true);
+                UpdateContext({ShowNotification: false});
+                Set(Authorise,
+                {
+                    share:assignServerValue,
+                    deal_owner:If(IsBlank(assignDealOwnerValue.id), "", assignDealOwnerValue.id),
+                    mentor:If(IsBlank(assignDealMentorValue.id), "", assignDealMentorValue.id)
+                });
+                ClearCollect(listSupport,ForAll(assignDealSupport As iditemSupport, {type: "deal_support",  employee_id:iditemSupport.id, deal_id: dealSelected.id}));
+                ClearCollect(listObserver,ForAll(assignDealObserver As iditemObserver, {type: "deal_observer", employee_id:iditemObserver.id,deal_id: dealSelected.id}));
+                ClearCollect(All, listSupport, listObserver);
+                Set(assignRes, 'TVS->UpdateEmployee_Deal_Information'.Run(JSON(All, JSONFormat.IndentFour),resKeyOpenAll.open,resKeyOpenAll.close,dealSelected.id,"DEV",JSON(Authorise, JSONFormat.IndentFour)));
+                Set(isLoading, false);
+                Set(showAssignPopup, false);
+                
+                ///////
+                Clear(listUserAsignLast);
+                If(
+                    !IsBlank(assignDealOwnerValue.id),
+                    Collect(
+                        listUserAsignLast,
+                        {
+                            employee_id: assignDealOwnerValue.id,
+                            email:assignDealOwnerValue.email,
+                            internal_email:assignDealOwnerValue.internal_email,
+                            name:assignDealOwnerValue.name,
+                            type: "deal owner"
+                        }
+                    )
+                );
+                If(
+                    !IsBlank(assignDealMentorValue.id),
+                    Collect(
+                        listUserAsignLast,
+                        {
+                            employee_id: assignDealMentorValue.id,
+                               email:assignDealMentorValue.email,
+                            internal_email:assignDealMentorValue.internal_email,
+                            name:assignDealMentorValue.name,
+                            type: "deal mentor"
+                        }
+                    )
+                );
+                ForAll(
+                    assignDealSupport,
+                    Collect(
+                        listUserAsignLast,
+                        {
+                            employee_id: ThisRecord.id,
+                            type: "deal support",
+                             email:ThisRecord.email,
+                            internal_email:ThisRecord.internal_email,
+                            name:ThisRecord.name
+                        }
+                    )
+                );
+                
+                ForAll(
+                    assignDealObserver,
+                    Collect(
+                        listUserAsignLast,
+                        {
+                            employee_id: ThisRecord.id,
+                            type: "deal observer",
+                             email:ThisRecord.email,
+                            internal_email:ThisRecord.internal_email,
+                            name:ThisRecord.name
+                        }
+                    )
+                );
+                
+                
+                ClearCollect(
+                    listUserAsignAdd,
+                    Filter(
+                        listUserAsignLast,
+                        !(ThisRecord.employee_id in listUserAsignFirst.employee_id)
+                    )
+                );
+                ClearCollect(
+                    listUserAsignRemove,
+                    Filter(
+                        listUserAsignFirst,
+                        !(ThisRecord.employee_id in listUserAsignLast.employee_id)
+                    )
+                );
+                
+                Clear(listUserAsignChanged);
+                
+                ForAll(listUserAsignFirst As item, If(CountIf(listUserAsignLast, item.employee_id  = employee_id && item.type <> type) > 0, Collect(listUserAsignChanged, AddColumns(item, type_new, LookUp(listUserAsignLast, employee_id = item.employee_id).type)))) ;
+                
+                Set(resAsignMemberSendNoti , {
+                    listMemberCurrent:listUserAsignLast,
+                    listMemberAdd:listUserAsignAdd,
+                    listMemberRemove:listUserAsignRemove,
+                    listMemberChange:listUserAsignChanged
+                });
+                
+                'TVS->SendNotiEmailAsignMember-Process2-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,JSON(resAsignMemberSendNoti,JSONFormat.IndentFour),dealSelected.id,dealName,First(currentUserV2Res).name,envTEST,First(currentUserV2Res).id,dealType,companyName, "<a href='" & linkToApp & "?restartApp=true&screen=detail-ma&action=approve-ma&maId=" &
+                                If(IsBlank(dealSelected), dataResposneDealDraft.id, dealSelected.id) & "'>Link to item</a>",appProperty, emailFromConfix);
+                
+                If(assignRes.status = "200",
+                    Set(isLoading, true);
+                    Select(GetAllMA);
+                
+                    ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+                    Set(IsError, false); Set(NoticationText,"Assigned successfully!");UpdateContext({ShowNotification: true});,
+                    Set(IsError, true); Set(NoticationText,"Assigned failed!");UpdateContext({ShowNotification: true});
+                );
+                
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =5
+            RadiusBottomRight: =5
+            RadiusTopLeft: =5
+            RadiusTopRight: =5
+            Size: =10.5
+            Text: ="Save"
+            Visible: =showAssignPopup
+            Width: =120
+            X: =AssignPopupBg.X + AssignPopupBg.Width - Self.Width - 20
+            Y: =Max(AssignDealSpList.Y + AssignDealSpList.Height, AssignDealObserverList.Y + AssignDealObserverList.Height) + 10
+            ZIndex: =31
+
+        AssignDealServer_Chevron As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#"&If(AssignDealServer_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#"&If(AssignDealServer_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </svg></div>")
+            OnSelect: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Set(assignServerShowDropdown, !assignServerShowDropdown));
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealServer_InputBg.X + AssignDealServer_InputBg.Width - 35
+            Y: =AssignDealServer_InputBg.Y + 2
+            ZIndex: =32
+
+        AssignDealServer_Chevron_1 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#"&If(AssignDealOwner_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#"&If(AssignDealOwner_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </svg></div>")
+            OnSelect: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Set(assignDealOwnerShowDropdown, !assignDealOwnerShowDropdown));
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealOwner_InputBg.X + AssignDealOwner_InputBg.Width - 35
+            Y: =AssignDealOwner_InputBg.Y + 2
+            ZIndex: =33
+
+        AssignDealServer_Chevron_2 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#"&If(AssignDealMentor_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#"&If(AssignDealMentor_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </svg></div>")
+            OnSelect: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Set(assignDealMentorShowDropdown, !assignDealMentorShowDropdown));
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealMentor_InputBg.X + AssignDealMentor_InputBg.Width - 35
+            Y: =AssignDealMentor_InputBg.Y + 2
+            ZIndex: =34
+
+        AssignDealServer_Chevron_3 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                </svg></div>")
+            OnSelect: =Set(assignDealSupportShowDropdown, !assignDealSupportShowDropdown);
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealSupport_InputBg.X + AssignDealSupport_InputBg.Width - 35
+            Y: =AssignDealSupport_InputBg.Y + 2
+            ZIndex: =35
+
+        AssignDealServer_Chevron_4 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#"&If(AssignDealSupport_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#"&If(AssignDealSupport_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </svg></div>")
+            OnSelect: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Set(assignDealSupportShowDropdown, !assignDealSupportShowDropdown));
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealSupport_InputBg.X + AssignDealSupport_InputBg.Width - 35
+            Y: =AssignDealSupport_InputBg.Y + 2
+            ZIndex: =36
+
+        AssignDealServer_Chevron_5 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(approvalClientValueShowDropdown,
+                "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#"&If(AssignDealObserver_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#"&If(AssignDealObserver_InputBg.DisplayMode = DisplayMode.Disabled, "b6b6c0", "525252")&"""/>
+                </svg></div>")
+            OnSelect: =If("IB_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList, process_code = "Process2", action), Set(assignDealObserverShowDropdown, !assignDealObserverShowDropdown));
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =AssignDealServer_InputBg.Visible
+            Width: =35
+            X: =AssignDealObserver_InputBg.X + AssignDealObserver_InputBg.Width - 35
+            Y: =AssignDealObserver_InputBg.Y + 2
+            ZIndex: =37
+
+        "AssignDealSpList As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            Default: =//Filter(DataProcess, dataProcess.Code in Split(empSelect.process_code, "/"))
+            Height: =If(App.Width > 1500, Self.AllItemsCount, Min(Self.AllItemsCount, 2)) * 32
+            Items: =assignDealSupport
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =32
+            Visible: =AssignTitle.Visible
+            Width: =AssignDealSupport_InputBg.Width
+            X: =AssignDealSupport_InputBg.X
+            Y: =AssignDealSupport_InputBg.Y + AssignDealSupport_InputBg.Height + 3
+            ZIndex: =38
+
+            Label7_15 As label:
+                BorderColor: =RGBA(77, 77, 77, 1)
+                Font: =Font.Arial
+                Height: =32
+                OnSelect: =Select(Parent)
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width - HtmlText2_20.Width
+                X: =HtmlText2_20.X + HtmlText2_20.Width
+                ZIndex: =1
+
+            HtmlText2_20 As htmlViewer:
+                Font: =Font.Arial
+                Height: =32
+                HtmlText: |-
+                    ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""10"" height=""11"" viewBox=""0 0 10 11"" fill=""none"">
+                      <g clip-path=""url(#clip0_5576_58443)"">
+                        <path d=""M5 0.5C2.21429 0.5 0 2.71429 0 5.5C0 8.28571 2.21429 10.5 5 10.5C7.78571 10.5 10 8.28571 10 5.5C10 2.71429 7.78571 0.5 5 0.5ZM6.92857 8L5 6.07143L3.07143 8L2.5 7.42857L4.42857 5.5L2.5 3.57143L3.07143 3L5 4.92857L6.92857 3L7.5 3.57143L5.57143 5.5L7.5 7.42857L6.92857 8Z"" fill=""black""/>
+                      </g>
+                      <defs>
+                        <clipPath id=""clip0_5576_58443"">
+                          <rect width=""10"" height=""10"" fill=""white"" transform=""translate(0 0.5)""/>
+                        </clipPath>
+                      </defs>
+                    </svg>"
+                OnSelect: |-
+                    =RemoveIf(assignDealSupport, id = ThisItem.id);
+                    If(!(ThisItem in assignDealSupportRemove), Collect(assignDealSupportRemove, ThisItem));
+                Width: =25
+                ZIndex: =2
+
+        "AssignDealObserverList As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            Default: =//Filter(DataProcess, dataProcess.Code in Split(empSelect.process_code, "/"))
+            Height: =If(App.Width > 1500, Self.AllItemsCount, Min(Self.AllItemsCount, 2)) * 32
+            Items: =assignDealObserver
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =32
+            Visible: =AssignTitle.Visible
+            Width: =AssignDealObserver_InputBg.Width
+            X: =AssignDealObserver_InputBg.X
+            Y: =AssignDealSupport_InputBg.Y + AssignDealSupport_InputBg.Height + 3
+            ZIndex: =39
+
+            Label7_16 As label:
+                BorderColor: =RGBA(77, 77, 77, 1)
+                Font: =Font.Arial
+                Height: =32
+                OnSelect: =Select(Parent)
+                Size: =10.5
+                Text: |-
+                    =//LookUp(getAllHasTag, id = ThisItem.value).value
+                    ThisItem.name
+                Width: =Parent.Width - HtmlText2_21.Width
+                X: =HtmlText2_21.X + HtmlText2_21.Width
+                ZIndex: =1
+
+            HtmlText2_21 As htmlViewer:
+                Font: =Font.Arial
+                Height: =32
+                HtmlText: |-
+                    ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""10"" height=""11"" viewBox=""0 0 10 11"" fill=""none"">
+                      <g clip-path=""url(#clip0_5576_58443)"">
+                        <path d=""M5 0.5C2.21429 0.5 0 2.71429 0 5.5C0 8.28571 2.21429 10.5 5 10.5C7.78571 10.5 10 8.28571 10 5.5C10 2.71429 7.78571 0.5 5 0.5ZM6.92857 8L5 6.07143L3.07143 8L2.5 7.42857L4.42857 5.5L2.5 3.57143L3.07143 3L5 4.92857L6.92857 3L7.5 3.57143L5.57143 5.5L7.5 7.42857L6.92857 8Z"" fill=""black""/>
+                      </g>
+                      <defs>
+                        <clipPath id=""clip0_5576_58443"">
+                          <rect width=""10"" height=""10"" fill=""white"" transform=""translate(0 0.5)""/>
+                        </clipPath>
+                      </defs>
+                    </svg>"
+                OnSelect: |-
+                    =RemoveIf(assignDealObserver, id = ThisItem.id);
+                    If(!(ThisItem in assignDealObserverRemove), Collect(assignDealObserverRemove, ThisItem));
+                Width: =25
+                ZIndex: =2
+
+        MA_CloseDropdown_1 As rectangle:
+            Fill: =RGBA(255, 255, 255, 0)
+            Height: =Parent.Height - Self.Y
+            OnSelect: |-
+                =If(assignDealOwnerShowDropdown && !IsBlank(assignDealOwnerValueOldIDPEVC),
+                    Set(assignDealOwnerValue, First(Filter(EmpP2, id = assignDealOwnerValueOldIDPEVC))));
+                If(assignDealMentorShowDropdown && !IsBlank(assignDealMentorValueOldIDPEVC),
+                    Set(assignDealMentorValue, First(Filter(EmpP2, id = assignDealMentorValueOldIDPEVC))));
+                Set(assignServerShowDropdown, false);
+                Set(assignDealOwnerShowDropdown, false);
+                Set(assignDealMentorShowDropdown, false);
+                Set(assignDealSupportShowDropdown, false);
+                Set(assignDealSupportShowDropdown, false);
+                Set(assignDealObserverShowDropdown, false);
+            Visible: =assignServerShowDropdown || assignDealOwnerShowDropdown || assignDealMentorShowDropdown || assignDealSupportShowDropdown || assignDealSupportShowDropdown || assignDealObserverShowDropdown
+            Width: =Parent.Width
+            Y: =40
+            ZIndex: =40
+
+        "AssignDealServer_Items As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: |-
+                =[{value: "General"}, {value: "Restricted"}]
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignServerShowDropdown && AssignDealServer_InputBg.Visible
+            Width: =AssignDealServer_InputBg.Width
+            X: =AssignDealServer_InputBg.X
+            Y: =AssignDealServer_InputBg.Y + 45
+            ZIndex: =41
+
+            Button6_51 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(ThisItem.value = assignServerValue, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =Set(assignServerValue, ThisItem.value);
+                    Set(assignServerShowDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.value
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        "AssignDealServer_Items_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: |-
+                =Filter(EmpP2,
+                    (IsBlank(assignDealOwnerValue) || id <> assignDealOwnerValue.id) &&
+                    (IsBlank(assignDealMentorValue) || id <> assignDealMentorValue.id) &&
+                    (IsEmpty(assignDealSupport) || !(id in assignDealSupport.id)) &&
+                    (IsEmpty(assignDealObserver) || !(id in assignDealObserver.id)) &&
+                    If(IsBlank(AssignDealOwner_InputBg.Text), "", AssignDealOwner_InputBg.Text) in name
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignDealOwnerShowDropdown && AssignDealServer_InputBg.Visible
+            Width: =AssignDealOwner_InputBg.Width
+            X: =AssignDealOwner_InputBg.X
+            Y: =AssignDealOwner_InputBg.Y + 45
+            ZIndex: =42
+
+            Button6_52 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(ThisItem.id = assignDealOwnerValue.id, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =Set(assignDealOwnerValue, ThisItem);
+                    Set(assignDealOwnerShowDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        "AssignDealServer_Items_2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: |-
+                =Filter(EmpP2,
+                    (IsBlank(assignDealOwnerValue) || id <> assignDealOwnerValue.id) &&
+                    (IsBlank(assignDealMentorValue) || id <> assignDealMentorValue.id) &&
+                    (IsEmpty(assignDealSupport) || !(id in assignDealSupport.id)) &&
+                    (IsEmpty(assignDealObserver) || !(id in assignDealObserver.id)) &&
+                    If(IsBlank(AssignDealMentor_InputBg.Text), "", AssignDealMentor_InputBg.Text) in name
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignDealMentorShowDropdown && AssignDealServer_InputBg.Visible
+            Width: =AssignDealOwner_InputBg.Width
+            X: =AssignDealMentor_InputBg.X
+            Y: =AssignDealMentor_InputBg.Y + 45
+            ZIndex: =43
+
+            Button6_53 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(ThisItem.id = assignDealMentorValue.id, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =Set(assignDealMentorValue, ThisItem);
+                    Set(assignDealMentorShowDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        "AssignDealServer_Items_3 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: =EmpP2
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignDealSupportShowDropdown && AssignDealServer_InputBg.Visible && false
+            Width: =AssignDealSupport_InputBg.Width
+            X: =AssignDealSupport_InputBg.X
+            Y: =AssignDealSupport_InputBg.Y + 45
+            ZIndex: =44
+
+            Button6_54 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(true, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =// Set(assignDealMentorValue, ThisItem.value);
+                    Set(assignDealMentorShowDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        "AssignDealServer_Items_4 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: |-
+                =Filter(EmpP2,
+                    (IsBlank(assignDealOwnerValue) || id <> assignDealOwnerValue.id) &&
+                    (IsBlank(assignDealMentorValue) || id <> assignDealMentorValue.id) &&
+                    (IsEmpty(assignDealSupport) || !(id in assignDealSupport.id)) &&
+                    (IsEmpty(assignDealObserver) || !(id in assignDealObserver.id)) &&
+                    If(IsBlank(AssignDealSupport_InputBg.Text), "", AssignDealSupport_InputBg.Text) in name
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignDealSupportShowDropdown && AssignDealServer_InputBg.Visible
+            Width: =AssignDealSupport_InputBg.Width
+            X: =AssignDealSupport_InputBg.X
+            Y: =AssignDealSupport_InputBg.Y + 45
+            ZIndex: =45
+
+            Button6_55 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(ThisItem in assignDealSupport, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =If(!(ThisItem in assignDealSupport), Collect(assignDealSupport, ThisItem), RemoveIf(assignDealSupport, ThisItem.id = id));
+                    Set(assignDealSupportShowDropdown, false);
+                    Reset(AssignDealSupport_InputBg);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        "AssignDealServer_Items_5 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =If(Self.AllItemsCount = 0, 0, 0.5)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =If(Self.AllItemsCount = 0, 0, Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10)
+            Items: |-
+                =Filter(EmpP2,
+                    (IsBlank(assignDealOwnerValue) || id <> assignDealOwnerValue.id) &&
+                    (IsBlank(assignDealMentorValue) || id <> assignDealMentorValue.id) &&
+                    (IsEmpty(assignDealSupport) || !(id in assignDealSupport.id)) &&
+                    (IsEmpty(assignDealObserver) || !(id in assignDealObserver.id)) &&
+                    If(IsBlank(AssignDealObserver_InputBg.Text), "", AssignDealObserver_InputBg.Text) in name
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =assignDealObserverShowDropdown && AssignDealServer_InputBg.Visible
+            Width: =AssignDealObserver_InputBg.Width
+            X: =AssignDealObserver_InputBg.X
+            Y: =AssignDealObserver_InputBg.Y + 45
+            ZIndex: =46
+
+            Button6_56 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(ThisItem in assignDealObserver, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =If(!(ThisItem in assignDealObserver), Collect(assignDealObserver, ThisItem), RemoveIf(assignDealObserver, ThisItem.id = id));
+                    Set(assignDealObserverShowDropdown, false);
+                    Reset(AssignDealObserver_InputBg);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.name
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+        AssignDealName_MobileText As label:
+            Color: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =AssignDealTitle_Input.Height
+            PaddingBottom: =AssignDealTitle_Input.PaddingBottom
+            PaddingLeft: =AssignDealTitle_Input.PaddingLeft
+            PaddingRight: =AssignDealTitle_Input.PaddingRight
+            PaddingTop: =AssignDealTitle_Input.PaddingTop
+            Size: =12
+            Text: =AssignDealTitle_Input.Text
+            Visible: =showAssignPopup && AssignDealTitle_Input.Visible && AssignDealTitle_Input.DisplayMode = DisplayMode.Disabled && App.Width < 600
+            Width: =AssignDealTitle_Input.Width
+            X: =AssignDealTitle_Input.X
+            Y: =AssignDealTitle_Input.Y
+            ZIndex: =47
+
+        AssignDealServer_MobileText As label:
+            Color: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =AssignDealServer_InputBg.Height
+            PaddingBottom: =AssignDealServer_InputBg.PaddingBottom
+            PaddingLeft: =AssignDealServer_InputBg.PaddingLeft
+            PaddingRight: =AssignDealServer_InputBg.PaddingRight
+            PaddingTop: =AssignDealServer_InputBg.PaddingTop
+            Size: =12
+            Text: =AssignDealServer_InputBg.Text
+            Visible: =showAssignPopup && AssignDealServer_InputBg.Visible && AssignDealServer_InputBg.DisplayMode = DisplayMode.Disabled && App.Width < 600
+            Width: =AssignDealServer_InputBg.Width
+            X: =AssignDealServer_InputBg.X
+            Y: =AssignDealServer_InputBg.Y
+            ZIndex: =48
+
+        AssignDealOwner_MobileText As label:
+            Color: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =AssignDealOwner_InputBg.Height
+            PaddingBottom: =AssignDealOwner_InputBg.PaddingBottom
+            PaddingLeft: =AssignDealOwner_InputBg.PaddingLeft
+            PaddingRight: =AssignDealOwner_InputBg.PaddingRight
+            PaddingTop: =AssignDealOwner_InputBg.PaddingTop
+            Size: =12
+            Text: =AssignDealOwner_InputBg.Text
+            Visible: =showAssignPopup && AssignDealOwner_InputBg.Visible && AssignDealOwner_InputBg.DisplayMode = DisplayMode.Disabled && App.Width < 600
+            Width: =AssignDealOwner_InputBg.Width
+            X: =AssignDealOwner_InputBg.X
+            Y: =AssignDealOwner_InputBg.Y
+            ZIndex: =49
+
+        AssignDealMentor_MobileText As label:
+            Color: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =AssignDealMentor_InputBg.Height
+            PaddingBottom: =AssignDealMentor_InputBg.PaddingBottom
+            PaddingLeft: =AssignDealMentor_InputBg.PaddingLeft
+            PaddingRight: =AssignDealMentor_InputBg.PaddingRight
+            PaddingTop: =AssignDealMentor_InputBg.PaddingTop
+            Size: =12
+            Text: =AssignDealMentor_InputBg.Text
+            Visible: =showAssignPopup && AssignDealMentor_InputBg.Visible && AssignDealMentor_InputBg.DisplayMode = DisplayMode.Disabled && App.Width < 600
+            Width: =AssignDealMentor_InputBg.Width
+            X: =AssignDealMentor_InputBg.X
+            Y: =AssignDealMentor_InputBg.Y
+            ZIndex: =50
+
+        RemoveMentorIcon_MA As icon.Cancel:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =15
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(assignDealMentorValue, Blank());
+                Set(assignDealMentorValueOldIDPEVC, Blank());
+            Visible: =!IsBlank(assignDealMentorValue) && AssignDealMentor_InputBg.Visible
+            Width: =15
+            X: =AssignDealMentor_InputBg.X + AssignDealMentor_InputBg.Width - 50
+            Y: =AssignDealMentor_InputBg.Y + 12
+            ZIndex: =51
+
+    NotificationScreen_IR_1 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =52
+
+    LoadingQT2List_16 As LoadingComponent_4:
+        Visible: =isLoading
+        ZIndex: =53
+
+    Timer1_16 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_16); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =60
+        Y: =627
+        ZIndex: =54
+
+    NotificationBox_16 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_16.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =60
+        ZIndex: =55
+
+    CloseNotiIcon_16 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_16); Set(IsError, false);
+        Visible: =NotificationBox_16.Visible
+        Width: =15
+        X: =NotificationBox_16.X + NotificationBox_16.Width - 25
+        Y: =NotificationBox_16.Y + 17.5
+        ZIndex: =56
+
+    GetAllMA As button:
+        Font: =Font.Arial
+        OnSelect: |-
+            =Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeeded), 2, ClearCollect(listItem, listItemUnderProcessing), 3, ClearCollect(listItem, listItemCompleted));
+            ClearCollect(listRes, listItem.listItem);
+            Concurrent(
+                Set(EmpP2,'TVS->GetByRoleEmployeeDeal'.Run(1,1,"",resKeyOpenAll.open,resKeyOpenAll.close,"Process2")),
+                ClearCollect(listItemActionNeeded,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)),ServerDropDown.Text,First(currentUserV2Res).id,1, "a",maUserRoleString, If("E_" in statusFilterVar, true, false))),
+                ClearCollect(listItemUnderProcessing,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)), ServerDropDown.Text,First(currentUserV2Res).id,2, "a",maUserRoleString, If("E_" in statusFilterVar, true, false))),
+                ClearCollect(listItemCompleted,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)),ServerDropDown.Text,First(currentUserV2Res).id,3, "a",maUserRoleString, If("E_" in statusFilterVar, true, false)))
+            );
+            
+            Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeeded), 2, ClearCollect(listItem, listItemUnderProcessing), 3, ClearCollect(listItem, listItemCompleted));
+            ClearCollect(listRes, listItem.listItem);
+            
+            Set(isLoading, false);
+            Set(pageCount,First(listItem.pageCount).pageCount);
+            //pageIndex
+            Set(maxList,[1,2,3,4]);
+            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+            ClearCollect(listPageIndex, pageIndexFirst);
+            ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1)));
+        Text: ="Button"
+        Visible: =false
+        X: =80
+        Y: =80
+        ZIndex: =57
+
+    GetAllMA_Only1Tab As button:
+        Font: =Font.Arial
+        OnSelect: |-
+            =Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeeded), 2, ClearCollect(listItem, listItemUnderProcessing), 3, ClearCollect(listItem, listItemCompleted));
+            ClearCollect(listRes, listItem.listItem);
+            Concurrent(
+                Set(EmpP2,'TVS->GetByRoleEmployeeDeal'.Run(1,1,"",resKeyOpenAll.open,resKeyOpenAll.close,"Process2")),
+                Switch(DealDetailTab,
+                1, ClearCollect(listItemActionNeeded,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)),ServerDropDown.Text,First(currentUserV2Res).id,1, "a",maUserRoleString, If("E_" in statusFilterVar, true, false))),
+                2, ClearCollect(listItemUnderProcessing,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)), ServerDropDown.Text,First(currentUserV2Res).id,2, "a",maUserRoleString, If("E_" in statusFilterVar, true, false))),
+                ClearCollect(listItemCompleted,'TVS->Deal_GetAlll'.Run(resKeyOpenAll.open,resKeyOpenAll.close,PageSizeNumber,currentPageIndex,dateFromFilterVarMA,dateToFilterVarMA,Substitute(statusFilterVar, "E_", ""),sortColumn,"desc",Trim(Text(SearchByName_Input.Text)),ServerDropDown.Text,First(currentUserV2Res).id,3, "a",maUserRoleString, If("E_" in statusFilterVar, true, false)))
+                );
+            );
+            
+            Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeeded), 2, ClearCollect(listItem, listItemUnderProcessing), 3, ClearCollect(listItem, listItemCompleted));
+            ClearCollect(listRes, listItem.listItem);
+            
+            Set(isLoading, false);
+            Set(pageCount,First(listItem.pageCount).pageCount);
+            //pageIndex
+            Set(maxList,[1,2,3,4]);
+            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+            ClearCollect(listPageIndex, pageIndexFirst);
+            ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1)));
+        Text: ="Button"
+        Visible: =false
+        X: =120
+        Y: =120
+        ZIndex: =58
+
+    DeleteConfirm_13 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =59
+
+        RejectPopupBack_26 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =6
+
+        DeleteConfirmBg_23 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 170, 170 )
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_23.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =7
+
+        CancelResearchOpinionButton_20 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(214, 27, 27, 1)
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(214, 27, 27, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(214, 27, 27, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(214, 27, 27, 1)
+            PressedColor: =RGBA(214, 27, 27, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteResearchOpinionButton_20.X - Self.Width - 10
+            Y: =DeleteResearchOpinionButton_20.Y
+            ZIndex: =8
+
+        DeleteResearchOpinionButton_20 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(214, 27, 27, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isLoading, true);
+                Set(IsError, false);
+                UpdateContext({ShowNotification: false});
+                
+                Set(deleteStatus, 'TVS->Delete_Deal_Information'.Run(resKeyOpenAll.open, resKeyOpenAll.close, idProposalDelete).status);
+                Set(isLoading, false);
+                
+                If(Value(deleteStatus) = 200,
+                Select(CancelResearchOpinionButton_20);
+                Select(GetAllMA_Only1Tab);
+                Set(NoticationText,"Delete successfully!");UpdateContext({ShowNotification: true});,
+                Set(IsError, true);Set(NoticationText,"System error, please reload this page again.");UpdateContext({ShowNotification: true});
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(214, 27, 27, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_23.X + DeleteConfirmBg_23.Width - 150
+            Y: =DeleteConfirmBg_23.Y + DeleteConfirmBg_23.Height - Self.Height - 30
+            ZIndex: =9
+
+        DeleteConfirmCloseIcon_25 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_23. X + DeleteConfirmBg_23.Width -50
+            Y: =DeleteConfirmBg_23.Y + 20
+            ZIndex: =10
+
+        DeleteConfirmLabel_26 As label:
+            Font: =Font.Arial
+            Size: =10.5
+            Text: ="Are you sure to delete this deal ?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_23.Width - 100 - DeleteConfirmCloseIcon_25.Width
+            X: =Label2_19.X
+            Y: =Label2_19.Y + Label2_19.Height
+            ZIndex: =11
+
+        Label2_19 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =12
+            Text: ="Delete"
+            Visible: =isShowPopupDelete
+            X: =DeleteConfirmBg_23.X + 30
+            Y: =DeleteConfirmBg_23.Y + 10
+            ZIndex: =12
+

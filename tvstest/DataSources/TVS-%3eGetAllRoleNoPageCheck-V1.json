@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "5a728bde-9ef9-4ed0-95a2-0611390c00af",
+    "Name": "TVS->GetAllRoleNoPageCheck-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a9d13c9e-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

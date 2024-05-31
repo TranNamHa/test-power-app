@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "c025881b-29c3-4d77-89b2-6f320def67ab",
+    "Name": "TVS->CreateUpdateInvestment-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "01eb303a-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

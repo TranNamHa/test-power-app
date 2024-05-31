@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "9c653a00-1e38-4407-89b7-90a3f3232826",
+    "Name": "TVS->FindAllCompanyPEVC-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a878b561-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

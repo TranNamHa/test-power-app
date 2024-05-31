@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "3822faef-611a-45d3-a7de-36e20b0a4cb0",
+    "Name": "TVS->GetListKeysInKeyVault-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "2bb39c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

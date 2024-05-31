@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "de56a758-4bd3-4b34-8ebf-514e5463b957",
+    "Name": "TVS->GetOpenAndCloseFinal-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "b75d011e-0ea3-ee11-be37-6045bd58b6cb"
+  }
+]

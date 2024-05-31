@@ -1,0 +1,748 @@
+ConfigKey As screen:
+    Fill: =RGBA(248, 248, 249, 1)
+    OnVisible: |+
+        =Set(isLoading, true);
+        Set(MenuSelect, "Admin");
+        Set(MenuSelect2, "Config key");
+        Set(HeaderText, "");
+        UpdateContext({ShowNotification: false});
+        Set(ShowPageSizeSelectPopup, false);
+        Clear(ProcessInConfig);
+        Concurrent(
+        ClearCollect(colKeyVaults, 'TVS->GetAllSecretKeys'.Run(env)),
+        ClearCollect(EncryptedConfigField, 'TVS->GetFieldConfigBySecretKey'.Run(env)),
+        ClearCollect(ProcessInConfig, 'TVS->GetProcessCodeInConfig'.Run(env)),
+        Set(IsAllowUpdateConfigEncrytion,'TVS->CheckAllowEditConfigEncytionData'.Run(env).result)
+        );
+        Collect(ProcessInConfig, {process_code: "Process1.3"});
+        
+        UpdateContext({isCloseAddConfigField: true});
+        Set(searchField, false);
+        Set(searchKey, false);
+        
+        ClearCollect(ProcessEncyptedInDatabase, SortByColumns(GroupBy(EncryptedConfigField, process_code, key_use, records), "process_code", SortOrder.Ascending));
+        
+        ClearCollect(AllProcessToEncrypt, AddColumns(Collect(DropColumns(ProcessManagement, Action), 
+        {
+            No: 8,
+            Name: "Other",
+            Code: "Other",
+            Type: "Other"
+            }), IsEncrypt, LookUp(ProcessEncyptedInDatabase, process_code = Code).key_use <> Blank(), key_use, LookUp(ProcessEncyptedInDatabase, process_code = Code).key_use));
+        UpdateContext({isUpdateEncryptProcess: false});
+        UpdateContext({isRemoveEncryptProcess: false});
+        UpdateContext({isDiscard: true});
+        UpdateContext({isDiscard: false});
+        Clear(selectedProcess);
+        Set(isLoading, false);
+        
+
+    WhiteBackground_4 As htmlViewer:
+        Font: =Font.Arial
+        Height: =620
+        HtmlText: |-
+            ="<div style='width: calc(100% - 10px); height: "& If(Parent.Width > 600, 600, 600) &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+            '></div>"
+        PaddingRight: =5.00
+        PaddingTop: =5.00
+        Size: =11.00
+        Width: =If(Parent.Width > 800, Parent.Width - If(MobileShowMenu, 270, 80), Parent.Width)
+        X: =If(App.Width > 800, MenuItemsSideBar_11.X + If(MobileShowMenu, MenuItemsSideBar_11.Width, MenuItemsSideBar_Small_8.Width) + 20, 10)
+        Y: =btnSaveEncyptProcess.Y + btnSaveEncyptProcess.Height + 10
+        ZIndex: =1
+
+    btnSaveEncyptProcess As button:
+        BorderColor: =RGBA(17, 79, 144, 1)
+        BorderThickness: =1
+        DisplayMode: =If(isUpdateEncryptProcess || isRemoveEncryptProcess, DisplayMode.Edit, DisplayMode.Disabled)
+        Fill: =RGBA(17, 79, 144, 1)
+        FocusedBorderThickness: =1
+        Font: =Font.Arial
+        Height: =44
+        HoverBorderColor: =RGBA(17, 79, 144, 1)
+        HoverFill: =RGBA(17, 79, 144, 1)
+        OnSelect: |
+            =If(CountIf(FieldEncryptByTable, cbIsEncrypt.Value && (KEY_USE = "" || KEY_USE = Blank())) > 0, 
+            Notify("Please check the data to submit!", NotificationType.Error),
+            Set(isLoading, true);
+            UpdateContext({ShowNotification: false});
+            Clear(ListProcessItems);
+            ForAll(Filter(AllProcessToEncrypt, Type <> "Admin") As data, Collect(ListProcessItems, {ProcessCode: data.Code, IsEncypt: data.IsEncrypt, Key: data.key_use}));
+            ClearCollect(TableEncyptByProcess, Filter(TableDirectEncryption, ProcessCode in DropColumns(ListProcessItems, IsEncypt, Key)));
+            If("Other" in DropColumns(ListProcessItems, IsEncypt, Key), Collect(TableEncyptByProcess, TableOtherEncryption));
+            UpdateContext({isUpdateEncryptProcess: false});
+            UpdateContext({isRemoveEncryptProcess: false});
+            UpdateContext({isDiscard: true});
+            UpdateContext({isDiscard: false});
+            
+            Clear(FieldEncryptByTable);
+            ForAll(TableEncyptByProcess As table, 
+                Collect(FieldEncryptByTable, 
+                    Filter(AddColumns('TVS->GetFieldsByTable'.Run(table.Name, env), TABLE, table.Name, PROCESS_CODE, table.ProcessCode, KEY_USE, LookUp(AllProcessToEncrypt, IsEncrypt && Code = table.ProcessCode).key_use), 
+                    Not("write_date" in COLUMN_NAME) && Not("write_by" in COLUMN_NAME) && Not("created" in COLUMN_NAME) && Not("delete" in COLUMN_NAME) && Not("_id" in COLUMN_NAME) && Not("id_" in COLUMN_NAME) && Not("int" in DATA_TYPE) && Not("bigint" in DATA_TYPE) && Not("bit" in DATA_TYPE) && Not("datetime" in DATA_TYPE) && Not("datetime2" in DATA_TYPE))));
+            Set(dataToString, Concat(FieldEncryptByTable, "(" 
+                                                &  "'" & GUID() & "', "
+                                                &  "'" & TABLE & "', "
+                                                &  "'" & COLUMN_NAME & "', "
+                                                &  "'" & KEY_USE & "', "
+                                                &  "'" & TABLE_SCHEMA & "', "
+                                                &  "'" & PROCESS_CODE & "'"
+                                            & "), " )) ;
+            Set(dataToStringRemoveLastChar, If(Len(dataToString) > 0, Left(dataToString, Len(dataToString) -2), ""));
+            Set(processToString, Concat(GroupBy(TableEncyptByProcess, ProcessCode, _data), "'"  & ProcessCode & "',"));
+            Set(processToStringRemoveLastChar, If(Len(processToString) > 0, Left(processToString, Len(processToString) -1), ""));
+            
+            Set(resultInsertConfig, 'TVS->Insert/UpdateConfigTable-FieldsBySceretKey'.Run(dataToStringRemoveLastChar, processToStringRemoveLastChar, env).result);
+            If(resultInsertConfig = "true", 
+                Set(
+                    NoticationText,
+                    "Save successfully.."
+                );
+                UpdateContext({ShowNotification: true});
+                Set(
+                    IsError,
+                    false
+                ),
+                Set(
+                    NoticationText,
+                    "Save failed."
+                );
+                UpdateContext({ShowNotification: true}),
+                Set(
+                    IsError,
+                    true
+                )
+            );
+            
+            Clear(selectedProcess);
+            Set(isLoading, false));
+        Size: =10.5
+        Text: ="Save"
+        Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action)
+        Width: =120
+        X: =WhiteBackground_4.X + WhiteBackground_4.Width - Self.Width - 15
+        Y: =Header_16.Y + Header_16.Height + 15
+        ZIndex: =7
+
+    Container10 As groupContainer.horizontalAutoLayoutContainer:
+        DropShadow: =DropShadow.None
+        Height: =WhiteBackground_4.Height - 50
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowX: =LayoutOverflow.Scroll
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Width: =WhiteBackground_4.Width - 30
+        X: =WhiteBackground_4.X + 10
+        Y: =WhiteBackground_4.Y + 15
+        ZIndex: =9
+
+        Container11 As groupContainer.manualLayoutContainer:
+            DropShadow: =DropShadow.None
+            FillPortions: =0
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =lblProcessKey.X + lblProcessKey.Width + 53
+            ZIndex: =1
+
+            GalleryTableEncypt As gallery.variableTemplateHeightGallery:
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =1
+                DelayItemLoading: =true
+                Height: =547
+                Items: |-
+                    =//ProcessEncyption
+                    //ProcessManagement
+                    Filter(AllProcessToEncrypt, Type <> "Admin" && Code <> "Item_Dictionary")
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplateSize: =60
+                Width: =Container11.Width
+                X: =lblProcessNo.X
+                Y: =lblProcessNo.Y + lblProcessNo.Height + 5
+                ZIndex: =6
+
+                lblProcess_Name As label:
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =13.70
+                    Text: =//ThisItem.
+                    Visible: =false
+                    Width: =172
+                    ZIndex: =2
+
+                lblTable_Name As label:
+                    AutoHeight: =true
+                    Font: =Font.Arial
+                    Height: =55
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =13.70
+                    Text: =//Concat(GroupBy(ThisItem.records, "table_name", "data"), table_name, ", ")
+                    Visible: =false
+                    Width: =732
+                    X: =172
+                    ZIndex: =3
+
+                lblKey_Name As label:
+                    Font: =Font.Arial
+                    Height: =55
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =13.70
+                    Text: =//ThisItem.key_use
+                    Visible: =false
+                    Width: =338
+                    X: =802
+                    ZIndex: =4
+
+                Icon1 As icon.Edit:
+                    Height: =lblTable_Name.Height
+                    Icon: =Icon.Edit
+                    OnSelect: |-
+                        =UpdateContext({isCloseEditConfigField: false});
+                        Set(varSelectProcessConfig, ThisItem)
+                    Visible: =false
+                    X: =1076
+                    ZIndex: =5
+
+                lblNo As label:
+                    Font: =Font.Arial
+                    Height: =lblName.Height
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: =ThisItem.No
+                    Visible: =true 
+                    Width: =lblProcessNo.Width
+                    ZIndex: =6
+
+                lblType As label:
+                    Font: =Font.Arial
+                    Height: =lblName.Height
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: =ThisItem.Type
+                    Visible: =true 
+                    Width: =lblProcessType.Width
+                    X: =lblNo.X + lblNo.Width
+                    ZIndex: =7
+
+                lblName As label:
+                    AutoHeight: =true
+                    Font: =Font.Arial
+                    Height: =33
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: =If(ThisItem.Code = "Other", ThisItem.Code, ThisItem.Name)
+                    Visible: =true 
+                    Width: =lblProcessNAme.Width
+                    X: =lblType.X + lblType.Width
+                    ZIndex: =8
+
+                cbIsEncrypt As checkbox:
+                    BorderColor: =
+                    BorderStyle: =BorderStyle.None
+                    CheckboxBorderColor: =RGBA(0, 0, 0, 1)
+                    CheckboxSize: =30
+                    Default: |-
+                        =//LookUp(ProcessEncyption, process_code = ThisItem.Code).key_use <> Blank()
+                        ThisItem.IsEncrypt
+                    DisplayMode: =If(isUpdateEncryptProcess && ThisItem.Code in selectedProcess, DisplayMode.Edit, DisplayMode.Disabled)
+                    Font: =Font.Arial
+                    Height: =lblName.Height
+                    HoverColor: =
+                    OnCheck: |-
+                        =Patch(AllProcessToEncrypt, ThisItem, {IsEncrypt: Self.Value});
+                    OnUncheck: |-
+                        =Patch(AllProcessToEncrypt, ThisItem, {IsEncrypt: Self.Value});
+                        Reset(cbKey_2);
+                    PressedColor: =
+                    Reset: =isDiscard
+                    Text: =""
+                    Width: =lblProcessIsEncypt.Width
+                    X: =lblName.X + lblName.Width
+                    ZIndex: =9
+
+                cbKey_2 As combobox:
+                    BorderColor: =If(cbIsEncrypt.Value && IsBlankOrError(Self.Selected.name), Color.Red, RGBA(0, 18, 107, 1))
+                    BorderThickness: =1
+                    ChevronBackground: =RGBA(0, 0, 0, 0)
+                    ChevronDisabledBackground: =
+                    ChevronDisabledFill: =RGBA(186, 186, 186, 1)
+                    ChevronFill: =RGBA(0, 0, 0, 1)
+                    ChevronHoverBackground: =RGBA(255, 255, 255, 1)
+                    ChevronHoverFill: =
+                    DefaultSelectedItems: |-
+                        =If(cbIsEncrypt.Value, {name: ThisItem.key_use})
+                    DisplayFields: =["name"]
+                    DisplayMode: =If(isUpdateEncryptProcess && cbIsEncrypt.Value && ThisItem.Code in selectedProcess, DisplayMode.Edit, DisplayMode.Disabled)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    Height: =35
+                    IsSearchable: =false
+                    Items: =colKeyVaults
+                    OnChange: |-
+                        =Patch(AllProcessToEncrypt, LookUp(AllProcessToEncrypt, Code = ThisItem.Code), {key_use: Self.Selected.name});
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Reset: =isDiscard
+                    SearchFields: =["name"]
+                    SearchItems: =[]
+                    SelectMultiple: =false
+                    Size: =10.5
+                    Width: =lblProcessKey.Width
+                    X: =cbIsEncrypt.X + cbIsEncrypt.Width
+                    ZIndex: =10
+
+                PI_EditButton_1 As htmlViewer:
+                    DisabledFill: =RGBA(0, 0, 0, 0)
+                    DisplayMode: =If(IsAllowUpdateConfigEncrytion || Not(ThisItem.Code in ProcessInConfig), DisplayMode.Edit, DisplayMode.Disabled)
+                    Fill: =
+                    Font: =Font.Arial
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer; float: right""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 16 16"" fill=""none"">
+                          <path d=""M4.6665 11.3423L7.6085 11.3323L14.0298 4.97226C14.2818 4.72026 14.4205 4.38559 14.4205 4.02959C14.4205 3.67359 14.2818 3.33893 14.0298 3.08693L12.9725 2.02959C12.4685 1.52559 11.5892 1.52826 11.0892 2.02759L4.6665 8.38893V11.3423ZM12.0298 2.97226L13.0892 4.02759L12.0245 5.08226L10.9672 4.02559L12.0298 2.97226ZM5.99984 8.94493L10.0198 4.96293L11.0772 6.02026L7.05784 10.0009L5.99984 10.0043V8.94493Z"" fill="""& If(IsAllowUpdateConfigEncrytion || Not(ThisItem.Code in ProcessInConfig), "#427BE9", "#BFBFC0") & """/>
+                          <path d=""M3.33333 14H12.6667C13.402 14 14 13.402 14 12.6667V6.888L12.6667 8.22133V12.6667H5.43867C5.42133 12.6667 5.40333 12.6733 5.386 12.6733C5.364 12.6733 5.342 12.6673 5.31933 12.6667H3.33333V3.33333H7.898L9.23133 2H3.33333C2.598 2 2 2.598 2 3.33333V12.6667C2 13.402 2.598 14 3.33333 14Z"" fill="""& If(IsAllowUpdateConfigEncrytion || Not(ThisItem.Code in ProcessInConfig), "#427BE9", "#BFBFC0") & """/>
+                        </svg></div>"
+                    OnSelect: |-
+                        =UpdateContext({isUpdateEncryptProcess: true});
+                        If(CountIf(selectedProcess, Value = ThisItem.Code) <= 0, Collect(selectedProcess, ThisItem.Code))
+                    Tooltip: ="Edit"
+                    Visible: ="EDIT" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action)
+                    Width: =42
+                    X: =cbKey_2.X + cbKey_2.Width
+                    Y: =cbKey_2.Y
+                    ZIndex: =12
+
+                Refresh As icon.Sync:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =20
+                    Icon: =Icon.Sync
+                    OnSelect: |-
+                        =Set(isLoading, true);
+                        UpdateContext({ShowNotification: false});
+                        Set(ProcessSelected , GalleryTableEncypt.Selected);
+                        If(ProcessSelected.Code = "Other", ClearCollect(TableEncyptByProcessUpdate, TableOtherEncryption), ClearCollect(TableEncyptByProcessUpdate, Filter(TableDirectEncryption, ProcessCode = ProcessSelected.Code)));
+                        
+                        Clear(FieldEncryptByTableUpdate);
+                        ForAll(TableEncyptByProcessUpdate As table, 
+                            Collect(FieldEncryptByTableUpdate, 
+                                Filter(AddColumns('TVS->GetFieldsByTable'.Run(table.Name, env), TABLE, table.Name, PROCESS_CODE, table.ProcessCode, KEY_USE, ProcessSelected.key_use), 
+                                Not("write_date" in COLUMN_NAME) && Not("write_by" in COLUMN_NAME) && Not("created" in COLUMN_NAME) && Not("delete" in COLUMN_NAME) && Not("_id" in COLUMN_NAME) && Not("id_" in COLUMN_NAME) && Not("int" in DATA_TYPE) && Not("bigint" in DATA_TYPE) && Not("bit" in DATA_TYPE) && Not("datetime" in DATA_TYPE) && Not("datetime2" in DATA_TYPE))));
+                        Set(dataToString, Concat(FieldEncryptByTableUpdate, "(" 
+                                                            &  "'" & GUID() & "', "
+                                                            &  "'" & TABLE & "', "
+                                                            &  "'" & COLUMN_NAME & "', "
+                                                            &  "'" & KEY_USE & "', "
+                                                            &  "'" & TABLE_SCHEMA & "', "
+                                                            &  "'" & PROCESS_CODE & "'"
+                                                        & "), " )) ;
+                        Set(dataToStringRemoveLastChar, If(Len(dataToString) > 0, Left(dataToString, Len(dataToString) -2), ""));
+                        
+                        Set(result, 'TVS->UpdateConfigTable-FieldsBySceretKey'.Run(dataToStringRemoveLastChar, ProcessSelected.Code, env).result);
+                        
+                        If(result = "200", Notify("Success", NotificationType.Success), Notify("Error", NotificationType.Error));
+                        Set(ProcessSelected, Blank());
+                        Set(isLoading, false);
+                    Tooltip: ="Update"
+                    Visible: ="EDIT" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action)
+                    Width: =20
+                    X: =lblType.X + lblType.Width - 60
+                    Y: =5
+                    ZIndex: =13
+
+            GroupTitle As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =7
+
+                lblProcessNo As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =44
+                    PaddingRight: =5.27
+                    Size: =10.5
+                    Text: ="No"
+                    Visible: =true 
+                    Width: =Max(WhiteBackground_4.Width * 0.08, 50)
+                    ZIndex: =1
+
+                lblProcessType As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =45
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: ="Process type"
+                    Visible: =true 
+                    Width: =Max(WhiteBackground_4.Width * 0.225, 250)
+                    X: =lblProcessNo.X + lblProcessNo.Width
+                    Y: =lblProcessNo.Y
+                    ZIndex: =2
+
+                lblProcessKey As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =44
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: ="Select key"
+                    Visible: =true 
+                    Width: =Max(WhiteBackground_4.Width * 0.225, 300)
+                    X: =lblProcessIsEncypt.X + lblProcessIsEncypt.Width
+                    Y: =lblProcessIsEncypt.Y
+                    ZIndex: =3
+
+                lblProcessNAme As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =44
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: ="Process name"
+                    Visible: =true 
+                    Width: =If(App.Width < 1500 && App.Width > 1400, 300, Max(WhiteBackground_4.Width * 0.3, 300))
+                    X: =lblProcessType.X + lblProcessType.Width
+                    Y: =lblProcessType.Y
+                    ZIndex: =4
+
+                lblProcessIsEncypt As label:
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =44
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =10.5
+                    Text: ="Data encrypt"
+                    Visible: =true 
+                    Width: =Max(WhiteBackground_4.Width * 0.1, 100)
+                    X: =lblProcessNAme.X + lblProcessNAme.Width
+                    Y: =lblProcessNAme.Y
+                    ZIndex: =5
+
+    btnAdd_1 As button:
+        BorderColor: =RGBA(17, 79, 144, 1)
+        BorderThickness: =1
+        DisplayMode: |-
+            =//If(CountRows(FieldToEncypt) <= 0, DisplayMode.Edit,  DisplayMode.Disabled)
+            If(isUpdateEncryptProcess || isRemoveEncryptProcess, DisplayMode.Edit, DisplayMode.Disabled)
+        Fill: =RGBA(17, 79, 144, 1)
+        FocusedBorderThickness: =1
+        Font: =Font.Arial
+        Height: =44
+        HoverBorderColor: =RGBA(17, 79, 144, 1)
+        HoverFill: =RGBA(17, 79, 144, 1)
+        OnSelect: |-
+            =//UpdateContext({isCloseAddConfigField: false})
+            Set(isLoading, true);
+            ClearCollect(EncryptedConfigField, 'TVS->GetFieldConfigBySecretKey'.Run(env));
+            ClearCollect(AllProcessToEncrypt, AddColumns(Collect(DropColumns(ProcessManagement, Action), {
+                        No: 7,
+                        Name: "Other",
+                        Code: "Other",
+                        Type: "Other"
+                    }), IsEncrypt, LookUp(ProcessEncyptedInDatabase, process_code = Code).key_use <> Blank(), key_use, LookUp(ProcessEncyptedInDatabase, process_code = Code).key_use));
+            UpdateContext({isUpdateEncryptProcess: false});
+            UpdateContext({isRemoveEncryptProcess: false});
+            UpdateContext({isDiscard: true});
+            UpdateContext({isDiscard: false});
+            Clear(selectedProcess);
+            Set(isLoading, false);
+        PaddingRight: =5.27
+        PaddingTop: =5.27
+        Size: =10.5
+        Text: ="Discard"
+        Visible: ="EDIT" in LookUp(currenUserV2.permissionList, process_code = "Admin4", action)
+        Width: =120
+        X: =btnSaveEncyptProcess.X - 10 - Self.Width
+        Y: =btnSaveEncyptProcess.Y
+        ZIndex: =10
+
+    Hr_5 As rectangle:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        BorderStyle: =BorderStyle.None
+        DisplayMode: =DisplayMode.View
+        Fill: =RGBA(191, 191, 192, 1)
+        Height: =1
+        Width: =WhiteBackground_4.Width - 30
+        X: =Container10.X
+        Y: =Container10.Y + 40
+        ZIndex: =11
+
+    Header_16 As Header:
+        ZIndex: =12
+
+    MenuItemsSideBar_11 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_11.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_11.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_11.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_11.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_11.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_11.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_11.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_11.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_11.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_11.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_11.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_11.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_11.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_11.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_11.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_11.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =Header_16.Y + Header_16.Height
+        ZIndex: =13
+
+    MenuItemsSideBar_Small_8 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_8.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_8.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_8.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_8.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_8.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_8.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_8.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_8.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_8.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_8.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_8.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_8.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =65
+        ZIndex: =14
+
+    Timer1_8 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_8); UpdateContext({ShowNotification: false});
+        Start: =ShowNotification
+        Visible: =false
+        X: =40
+        Y: =607
+        ZIndex: =15
+
+    NotificationBox_8 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(214, 27, 27, 1)
+        BorderThickness: =0
+        DisabledFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_8.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =40
+        ZIndex: =16
+
+    CloseNotiIcon_8 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_8)
+        Visible: =NotificationBox_8.Visible
+        Width: =15
+        X: =NotificationBox_8.X + NotificationBox_8.Width - 25
+        Y: =NotificationBox_8.Y + 17.5
+        ZIndex: =17
+
+    LoadingQT2List_6 As LoadingComponent:
+        Visible: =isLoading
+        ZIndex: =18
+

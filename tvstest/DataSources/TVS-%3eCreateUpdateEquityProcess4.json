@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "46df0633-dc63-48ee-91e7-3dff1218029a",
+    "Name": "TVS->CreateUpdateEquityProcess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "f91d47e3-daa2-ee11-be37-6045bd58b6cb"
+  }
+]

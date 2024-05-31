@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "254665fa-826c-482a-96f4-91f0b910782b",
+    "Name": "TVS->FindByIdPEVCDivestmentProcess5",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "ed52064a-deb8-ee11-9078-6045bd58b6cb"
+  }
+]

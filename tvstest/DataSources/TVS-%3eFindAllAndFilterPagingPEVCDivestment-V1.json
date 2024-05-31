@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "1d1b15de-4057-48d9-ad34-f770974d7b79",
+    "Name": "TVS->FindAllAndFilterPagingPEVCDivestment-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "f5f0fa43-deb8-ee11-9078-6045bd58b6cb"
+  }
+]

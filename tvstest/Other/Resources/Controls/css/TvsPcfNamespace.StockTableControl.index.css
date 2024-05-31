@@ -1,0 +1,250 @@
+html,
+body {
+  height: 100%;
+}
+
+.transparentInput {
+    border: 1px solid transparent !important;
+    border-radius: unset !important;
+    width: 100%;
+    display: block !important;
+    margin-top: -30px;
+    padding: 0 !important;
+}
+
+.transparentInput::after {
+    content: none !important;
+}
+
+.transparentInput input {
+  width: 100%;
+  line-height: 30px !important;
+}
+
+.wrapperTd.error > div {
+    border: 0.5px solid red !important;
+}
+
+.wrapperTd.disable {
+    color: black;
+    background-color: #f4f4f4;
+}
+
+.wrapperTd {
+    padding: 1px !important;
+}
+
+.actionDelete {
+    justify-content: flex-start;
+}
+
+.actionDelete>button {
+    border: none !important;
+    border-radius: 0;
+    width: 33px;
+    min-width: 33px !important;
+    height: 33px;
+    padding: 0 !important;
+}
+
+.refreshButton,
+.createButton {
+    width: 44px;
+    min-width: 44px !important;
+    height: 44px;
+}
+
+.refreshButton,
+.createButton {
+    background-color: #114F90 !important;
+    border: transparent !important;
+    border-radius: 8px !important;
+    padding: 5px !important;
+}
+
+.noCell {
+    display: none;
+}
+
+.wrapperInputData {
+    display: flex;
+    align-items: center;
+}
+
+.wrapperInputData>.labelInputData {
+    color: #525252;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 22px;
+    margin-right: 25px;
+}
+
+.wrapperInputData>.inputData {
+    border: 1px solid #BFBFC0 !important;
+    border-radius: 5px !important;
+    height: 44px;
+    width: 250px;
+    max-width: 250px;
+}
+
+.wrapperInputData>.inputData.inputType {
+    padding: 0 10px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    min-width: 0px;
+    border-style: none;
+    /* padding: 0 var(--spacingHorizontalXXS); */
+    color: var(--colorNeutralForeground1);
+    background-color: transparent;
+    outline-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+.wrapperInputData>.inputData::after {
+    content: none !important;
+}
+
+.select-style {
+    width: 100%;
+    height: 100%;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.StockTableControl td .displayInput.show {
+    position: relative;
+    background-color: white;
+    color: inherit;
+    z-index: 1;
+    font-weight: initial;
+    width: 100%;
+    text-align: center;
+    visibility: visible;
+    height: 30px;
+}
+
+.StockTableControl td .displayInput.hide {
+    position: relative;
+    background-color: white;
+    color: inherit;
+    z-index: -1;
+    font-weight: initial;
+    height: 30px;
+}
+
+.inputData.disable,
+.refreshButton.disable {
+    pointer-events: none;
+    cursor: not-allowed;
+    background-color: #EDEDED !important;
+    border-color: #EDEDED !important;
+}
+
+.refreshButton.disable path {
+    fill: #bdbdbd
+}
+
+.border-white {
+    border-color: white !important;
+    background-color: white !important;
+    min-width: 40px !important;
+}
+
+.StockTableControl .wrapperInput {
+    display: block;
+    position: relative;
+}
+
+.StockTableControl table thead {
+    position: sticky;
+    top: 0;
+    z-index: 9999999999 !important;
+    background-color: white;
+}
+
+.Attendees {
+  width: 100%;
+  height: 100%;
+}
+
+.Attendees1 {
+  color: #23313b;
+  -webkit-box-align: center;
+  align-items: center;
+  display: flex;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+}
+
+.TableWrapper {
+  position: relative;
+  width: min-content;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  border: 1px solid black;
+}
+
+.TableWrapper table {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+  border-bottom: 1px solid black;
+}
+
+.TableWrapper th, .TableWrapper td {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  border: solid black;
+  border-width: 0 1px 1px 0;
+  vertical-align: middle;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.TableWrapper th:first-child, .TableWrapper td:first-child, .TableWrapper th:last-child, .TableWrapper td:last-child {
+    min-width: 60px;
+}
+
+.TableWrapper th:last-child, .TableWrapper td:last-child {
+  border-right-width: 0;
+}
+
+.TableWrapper tr:last-child td {
+  border-bottom-width: 0;
+}
+
+.TableWrapper th {
+  position: sticky;
+  z-index: 1;
+  text-align: center;
+}
+
+.TableWrapper th:not(.filter) {
+  top: 0;
+  background-color: white;
+}
+
+.TableWrapper th.filter {
+  top: 31px;
+  padding: 0;
+  background-color: lightblue;
+}
+
+.TableWrapper th:nth-child(-n+4) {
+  width: 1%;
+}
+
+.TableWrapper th:nth-child(5) {
+  width: auto;
+}
+
+.TableWrapper td {
+    text-align: center;
+}

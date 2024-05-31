@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "3eefa253-b43b-4f49-8bed-4dd44ea1a060",
+    "Name": "TVS->DeletePrePevc-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "26dec9ab-a5cf-ee11-9079-6045bd5b2c0e"
+  }
+]

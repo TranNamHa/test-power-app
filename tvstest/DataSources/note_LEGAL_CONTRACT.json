@@ -1,0 +1,9 @@
+[
+  {
+    "IsComponentScoped": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "Name": "note_LEGAL_CONTRACT",
+    "Type": "CollectionDataSourceInfo"
+  }
+]

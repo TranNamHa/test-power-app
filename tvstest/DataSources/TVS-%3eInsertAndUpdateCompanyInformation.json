@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "c757f549-ff26-4ffd-9470-15e81c27019a",
+    "Name": "TVS->InsertAndUpdateCompanyInformation",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0678b561-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

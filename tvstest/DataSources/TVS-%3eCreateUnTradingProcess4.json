@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "a8039a53-510c-487d-ae18-e51ef0396a64",
+    "Name": "TVS->CreateUnTradingProcess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "681e47e3-daa2-ee11-be37-6045bd58b6cb"
+  }
+]

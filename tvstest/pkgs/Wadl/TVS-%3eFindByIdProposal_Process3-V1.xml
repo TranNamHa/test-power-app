@@ -1,0 +1,161 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://asia-001.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="TVS-&gt;FindByIdProposal_Process3-V1" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="TVS-&gt;FindByIdProposal_Process3-V1" />
+  <grammars>
+    <jsonTypes targetNamespace="https://asia-001.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <string name="ManualTriggerInput_text_1_def" />
+      <string name="ManualTriggerInput_text_2_def" />
+      <string name="ManualTriggerInput_text_def" />
+      <boolean name="ManualTriggerInput_boolean_def" />
+      <boolean name="ManualTriggerInput_boolean_1_def" />
+      <boolean name="ManualTriggerInput_boolean_2_def" />
+      <boolean name="ManualTriggerInput_boolean_3_def" />
+      <object name="ManualTriggerInput">
+        <property name="text_1" type="string" />
+        <property name="text_2" type="string" />
+        <property name="text" type="string" />
+        <property name="boolean" type="boolean" />
+        <property name="boolean_1" type="boolean" />
+        <property name="boolean_2" type="boolean" />
+        <property name="boolean_3" type="boolean" />
+      </object>
+      <string name="ResponseActionOutput_id_def" />
+      <string name="ResponseActionOutput_issuer_def" />
+      <string name="ResponseActionOutput_short_name_def" />
+      <string name="ResponseActionOutput_proposal_name_def" />
+      <string name="ResponseActionOutput_type_def" />
+      <string name="ResponseActionOutput_sector_def" />
+      <string name="ResponseActionOutput_principal_def" />
+      <string name="ResponseActionOutput_interest_def" />
+      <string name="ResponseActionOutput_interest_rate_def" />
+      <string name="ResponseActionOutput_created_date_def" />
+      <string name="ResponseActionOutput_old_status_def" />
+      <string name="ResponseActionOutput_payment_frequency_def" />
+      <string name="ResponseActionOutput_term_min_def" />
+      <string name="ResponseActionOutput_term_max_def" />
+      <string name="ResponseActionOutput_validity_starting_time_def" />
+      <string name="ResponseActionOutput_validity_ending_time_def" />
+      <string name="ResponseActionOutput_limit_on_aum_def" />
+      <string name="ResponseActionOutput_entity_def" />
+      <string name="ResponseActionOutput_percent_aum_def" />
+      <string name="ResponseActionOutput_note_def" />
+      <string name="ResponseActionOutput_proposal_status_def" />
+      <string name="ResponseActionOutput_status_def" />
+      <string name="ResponseActionOutput_write_by_def" />
+      <string name="ResponseActionOutput_write_date_def" />
+      <string name="ResponseActionOutput_created_by_def" />
+      <string name="ResponseActionOutput_created_id_def" />
+      <string name="ResponseActionOutput_listAttach_def_items_def_id_def" />
+      <string name="ResponseActionOutput_listAttach_def_items_def_file_name_def" />
+      <string name="ResponseActionOutput_listAttach_def_items_def_created_date_def" />
+      <string name="ResponseActionOutput_listAttach_def_items_def_name_employee_def" />
+      <object name="ResponseActionOutput_listAttach_def_items_def">
+        <property name="id" type="string" />
+        <property name="file_name" type="string" />
+        <property name="created_date" type="string" />
+        <property name="name_employee" type="string" />
+      </object>
+      <array typeRef="ResponseActionOutput_listAttach_def_items_def" name="ResponseActionOutput_listAttach_def" />
+      <string name="ResponseActionOutput_list_investment_board_def_items_def_employee_id_def" />
+      <string name="ResponseActionOutput_list_investment_board_def_items_def_created_date_def" />
+      <string name="ResponseActionOutput_list_investment_board_def_items_def_name_user_def" />
+      <string name="ResponseActionOutput_list_investment_board_def_items_def_action_def" />
+      <object name="ResponseActionOutput_list_investment_board_def_items_def">
+        <property name="employee_id" type="string" />
+        <property name="created_date" type="string" />
+        <property name="name_user" type="string" />
+        <property name="action" type="string" />
+      </object>
+      <array typeRef="ResponseActionOutput_list_investment_board_def_items_def" name="ResponseActionOutput_list_investment_board_def" />
+      <string name="ResponseActionOutput_list_time_status_def_items_def_created_date_def" />
+      <string name="ResponseActionOutput_list_time_status_def_items_def_level_def" />
+      <string name="ResponseActionOutput_list_time_status_def_items_def_status_def" />
+      <object name="ResponseActionOutput_list_time_status_def_items_def">
+        <property name="created_date" type="string" />
+        <property name="level" type="string" />
+        <property name="status" type="string" />
+      </object>
+      <array typeRef="ResponseActionOutput_list_time_status_def_items_def" name="ResponseActionOutput_list_time_status_def" />
+      <boolean name="ResponseActionOutput_isResubmit_def" />
+      <object name="ResponseActionOutput">
+        <property name="id" type="string" />
+        <property name="issuer" type="string" />
+        <property name="short_name" type="string" />
+        <property name="proposal_name" type="string" />
+        <property name="type" type="string" />
+        <property name="sector" type="string" />
+        <property name="principal" type="string" />
+        <property name="interest" type="string" />
+        <property name="interest_rate" type="string" />
+        <property name="created_date" type="string" />
+        <property name="old_status" type="string" />
+        <property name="payment_frequency" type="string" />
+        <property name="term_min" type="string" />
+        <property name="term_max" type="string" />
+        <property name="validity_starting_time" type="string" />
+        <property name="validity_ending_time" type="string" />
+        <property name="limit_on_aum" type="string" />
+        <property name="entity" type="string" />
+        <property name="percent_aum" type="string" />
+        <property name="note" type="string" />
+        <property name="proposal_status" type="string" />
+        <property name="status" type="string" />
+        <property name="write_by" type="string" />
+        <property name="write_date" type="string" />
+        <property name="created_by" type="string" />
+        <property name="created_id" type="string" />
+        <property name="listAttach" typeRef="ResponseActionOutput_listAttach_def" />
+        <property name="list_investment_board" typeRef="ResponseActionOutput_list_investment_board_def" />
+        <property name="list_time_status" typeRef="ResponseActionOutput_list_time_status_def" />
+        <property name="isResubmit" type="boolean" />
+      </object>
+      <object name="Run_responses_default_def" />
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://asia-001.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="text_1" path="/text_1" type="xs:string" required="true">
+              <doc title="idProposal" />
+            </param>
+            <param style="plain" name="text_2" path="/text_2" type="xs:string" required="true">
+              <doc title="keyOpen" />
+            </param>
+            <param style="plain" name="text" path="/text" type="xs:string" required="true">
+              <doc title="keyClose" />
+            </param>
+            <param style="plain" name="boolean" path="/boolean" type="xs:boolean" required="true">
+              <doc title="evn1" />
+            </param>
+            <param style="plain" name="boolean_1" path="/boolean_1" type="xs:boolean" required="true">
+              <doc title="evn2" />
+            </param>
+            <param style="plain" name="boolean_2" path="/boolean_2" type="xs:boolean" required="true">
+              <doc title="evn3" />
+            </param>
+            <param style="plain" name="boolean_3" path="/boolean_3" type="xs:boolean" required="true">
+              <doc title="evn4" />
+            </param>
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:ResponseActionOutput" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

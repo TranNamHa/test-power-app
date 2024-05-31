@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "be3b16a0-6af9-4714-b22d-e3ebfdacbac7",
+    "Name": "TVS->FindByIdEquityProcess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "5e1d47e3-daa2-ee11-be37-6045bd58b6cb"
+  }
+]

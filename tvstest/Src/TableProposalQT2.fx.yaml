@@ -1,0 +1,2721 @@
+"TableProposalQT2 As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: =RGBA(248, 248, 249, 1)
+    OnVisible: |-
+        =Set(ShowNotificationPopup,false);
+        // Set config variabless
+        Set(MenuSelect,"Business process");
+        Set(MenuSelect2,"Fix income investment process");
+        Set(HeaderText,"");
+        Set(DealDetailTab, 1);
+        Set(isActionNeeded, true);
+        Set(isShowPopupDelete, false);
+        UpdateContext({ShowNotification: false});
+        Set(isShowCreateProposalPopup, false);
+        Set(isInIC, If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process3",name_team), 1, 0));
+        
+        //ClearCollect(issuersList, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2).list_issuer);
+        
+        Set(entityList, []);
+        If(("TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division)) ||
+        "IC" in First(currenUserV2.permissionList).name_team ||
+        "Risk Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division) ||
+        "CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action),
+                Set(entityList, [{value: "All"}, {value: "TVS-Treasury"}, {value: "TVAM-Asset Management"}]);
+                Set(StatusSelectedValue, "All");
+                Set(StatusSelectedArray, []);,
+                "TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                Set(entityList, [{value: "TVS-Treasury"}]);
+                Set(StatusSelectedValue, "TVS-Treasury");
+                Set(StatusSelectedArray, [{value: "TVS-Treasury"}]);,
+                "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                Set(entityList, [{value: "TVAM-Asset Management"}]);
+                Set(StatusSelectedValue, "TVAM-Asset Management");
+                Set(StatusSelectedArray, [{value: "TVAM-Asset Management"}]);,
+        
+                Set(entityList, []);
+                Set(StatusSelectedValue, "");
+                Set(StatusSelectedArray, [{value: "AccessDenied"}]);
+        );
+        
+        
+        // Reset form
+        Reset(DateFrom_Datepicker);
+        Reset(DateTo_DatePicker);
+        Reset(ProposalNameFilter_Input);
+        Reset(input_searchAll);
+        Clear(listAttachFile);
+        Clear(colAttachments);
+        Clear(listAttachDelete);
+        Clear(listAttachmentInsert);
+        Clear(listAttachmentDelete);
+        If(IsBlank(statusFilterVar),Set(statusFilterVar, ""), Set(statusFilterVar, StatusSelectedValue));
+        
+        // Set filter values
+        Set(PageSizeNumber, 10);
+        Set(sortColumn,"created_date");
+        Set(dateFromFilterVar,DateFrom_Datepicker.SelectedDate);
+        Set(dateToFilterVar,DateTo_DatePicker.SelectedDate);
+        Set(proposalNameFilterVar,ProposalNameFilter_Input.Text);
+        If(IsBlank(currentPageIndex),Set(currentPageIndex,0));
+        Set(isAllowTab, true); // isActive
+        //ClearCollect(proposalFilterStatus,[]);
+        //If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "DRAFT"}));
+        //If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PARTIALLY_REJECTED"}));
+        //If("HD_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}));
+        //If("RM_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}));
+        //If("CIO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_CIO"}));
+        //If("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_CEO"}));
+        //If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process3",name_team), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}));
+        
+        // Call API get datas
+        //Set(isLoading, true);
+        //ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+         //   resKeyOpenAll.open,
+         //   resKeyOpenAll.close,
+         //   If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+          //  Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+          //  Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+          //  If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+         //   PageSizeNumber,currentPageIndex,
+         //   If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+          //  If(isAllowTab, "ACTIVE", "INACTIVE"),
+         //    currenUserV2.id, isActionNeeded, isInIC,
+         //    envDEV,envTEST, envUAT1, envUAT2);
+        //);
+        //Set(isLoading, false);
+        
+         ClearCollect(proposalFilterStatusActionNeed,[]);
+            If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "DRAFT"}));
+            If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "PARTIALLY_REJECTED"}));
+            If("HD_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}));
+            If("RM_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}));
+            If("CIO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "PENDING_REVIEW_BY_CIO"}));
+            If("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatusActionNeed,{value: "PENDING_REVIEW_BY_CEO"}));
+            If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process3",name_team), Collect(proposalFilterStatusActionNeed,{value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}));
+        
+             ClearCollect(proposalFilterStatusCompleted,[{value: "APPROVED"}, {value: "REJECTED"}]);
+        
+              ClearCollect(proposalFilterStatusInprogess,[]);
+            If(!("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "DRAFT"}));
+            If(!("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "PARTIALLY_REJECTED"}));
+            If(!("HD_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}));
+            If(!("RM_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}));
+            If(!("CIO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "PENDING_REVIEW_BY_CIO"}));
+            If(!("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action)), Collect(proposalFilterStatusInprogess,{value: "PENDING_REVIEW_BY_CEO"}));
+            If(true , Collect(proposalFilterStatusInprogess,{value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}));
+            
+        ClearCollect(proposalFilterStatusInActive, [{value: "DRAFT"}, {value: "PARTIALLY_REJECTED"}, {value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}, {value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}, {value: "PENDING_REVIEW_BY_CIO"}, {value: "PENDING_REVIEW_BY_CEO"}, {value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}, {value: "REJECTED"}, {value: "APPROVED"}, {value: "INACTIVE"}]);
+        
+        If(!isFromDetailFI, Set(isLoading, true), Set(isLoading, false));
+        ClearCollect(listItem,listItemActionNeed);
+        Concurrent(
+        ClearCollect(listItemActionNeed,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+            resKeyOpenAll.open,
+            resKeyOpenAll.close,
+            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+            PageSizeNumber,currentPageIndex,
+            If(Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) - 1), "''"),
+            If(isAllowTab, "ACTIVE", "INACTIVE"),
+             currenUserV2.id, isActionNeeded, isInIC,
+              envDEV,envTEST, envUAT1, envUAT2);
+        ),
+        ClearCollect(listItemInprogress,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+            resKeyOpenAll.open,
+            resKeyOpenAll.close,
+            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+            PageSizeNumber,currentPageIndex,
+            If(Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) - 1), "''"),
+            If(isAllowTab, "ACTIVE", "INACTIVE"),
+             currenUserV2.id, isActionNeeded, isInIC,
+              envDEV,envTEST, envUAT1, envUAT2);
+        ),
+        ClearCollect(listItemCompleted1,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+            resKeyOpenAll.open,
+            resKeyOpenAll.close,
+            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+            PageSizeNumber,currentPageIndex,
+            If(Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) - 1), "''"),
+            If(isAllowTab, "ACTIVE", "INACTIVE"),
+             currenUserV2.id, isActionNeeded, isInIC,
+              envDEV,envTEST, envUAT1, envUAT2);
+        ),
+        ClearCollect(listItemFIInactive, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+            resKeyOpenAll.open,
+            resKeyOpenAll.close,
+            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+            PageSizeNumber,currentPageIndex,
+            If(Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInActive, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) - 1), "''"),
+            If(false, "ACTIVE", "INACTIVE"),
+             currenUserV2.id, isActionNeeded, isInIC,
+              envDEV,envTEST, envUAT1, envUAT2)
+        ));
+        
+        Set(isLoading, false);
+        ClearCollect(listItem,listItemActionNeed);
+        
+        
+        ClearCollect(listRes,listItem.listItem);
+        Set(pageCount,First(listItem.pageCount).pageCount);
+        
+        ClearCollect(issuersList, 'TVS->GetIssuerListCurrent-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2).list_issuer);
+        //pageIndex
+        Set(maxList,[1,2,3,4]);
+        
+        Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+        ClearCollect(listPageIndex, pageIndexFirst);
+        
+        ForAll(
+            maxList,
+            If(Last(listPageIndex).Value + 1 < pageCount,
+                Collect(listPageIndex,Last(listPageIndex).Value + 1);
+            );
+        );
+        
+        // Show notification
+        Set(IsError, false);
+        Switch(ShowNotificationCheck,
+        "CREATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "UPDATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "REJECTED_SUCCESS", Set(NoticationText,"Rejected successfully!");UpdateContext({ShowNotification: true}),
+        "REVISED_SUCCESS", Set(NoticationText,"Revised successfully!");UpdateContext({ShowNotification: true}),
+        "APPROVED_SUCCESS", Set(NoticationText,"Approved successfully!");UpdateContext({ShowNotification: true}),
+        "DELETED_SUCCESS", Set(NoticationText,"Deleted successfully!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR", Set(IsError, true);Set(NoticationText,"The system is busy, please try again later!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR_APPROVED", Set(IsError, true);Set(NoticationText,"This proposal has been approved, please check again.");UpdateContext({ShowNotification: true}),
+        "STATUS_CHANGED", Set(IsError, true);Set(NoticationText,"This proposal has been processed by another user, please reload this page.");UpdateContext({ShowNotification: true})
+        );
+        Set(ShowNotificationCheck, "");
+
+    RectQuickActionBar1 As rectangle:
+        Height: =56
+        Width: =1440.00
+        X: =0.00
+        ZIndex: =1
+
+    Canvas1 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =App.Height
+        Width: =Parent.Width
+        Y: =RectQuickActionBar1.Y + RectQuickActionBar1.Height
+        ZIndex: =2
+
+        DataCard1 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =If(App.Width > 1400, App.Height, App.Width > 600, 1050, 1050)
+            Width: =Parent.Width
+            X: =0.00
+            Y: =0
+            ZIndex: =1
+
+            WhiteBackground As htmlViewer:
+                Font: =Font.Arial
+                Height: |-
+                    =If(
+                        App.Width > 1400,
+                        Min(
+                            App.Height - 345,
+                            Max(
+                                TableContent_4.AllItemsCount * TableContent_4.TemplateHeight + ProposalInfomation_Title.Height + 82,
+                                ProposalInfomation_Title.Height + 140
+                            )
+                        ),
+                        550
+                    )
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 10px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =11.00
+                Width: =If(Parent.Width > 800, Parent.Width - If(MobileShowMenu, 255, 70), Parent.Width + 5)
+                X: =If(Parent.Width > 800, If(MobileShowMenu, 255, 60), 0)
+                Y: =QT2Tabs_3.Y + QT2Tabs_3.Height + If(App.Width > 600, 0, 0) - If(!isAllowTab, 40)
+                ZIndex: =1
+
+            TableHoziContainer As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =WhiteBackground.Height - ProposalInfomation_Title.Height - 30
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =Hr.Width + If(App.Width > 600, 5, -5)
+                X: =WhiteBackground.X + 16
+                Y: =ProposalInfomation_Title.Y + ProposalInfomation_Title.Height
+                ZIndex: =2
+
+                Container7 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    Height: =40
+                    LayoutMinHeight: =TableHoziContainer.Height
+                    LayoutMinWidth: =40
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =HeaderCreatedBy.X + HeaderCreatedBy.Width
+                    ZIndex: =4
+
+                    TableContent_4 As gallery.variableTemplateHeightGallery:
+                        '#CopilotOverlayLabel': ="Filtered"
+                        BorderColor: =
+                        Height: =Parent.Height - Self.Y - 20
+                        Items: =First(listRes).listItem
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        TemplatePadding: =0
+                        TemplateSize: =42
+                        Width: =Container7.Width
+                        Y: =40
+                        ZIndex: =1
+
+                        No_Content_4 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent)
+                            Size: =10.5
+                            Text: =ThisItem.stt
+                            Width: =HeaderNo.Width
+                            ZIndex: =1
+
+                        Entity_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.entity
+                            Width: =HeaderEntity.Width
+                            X: =No_Content_4.X + No_Content_4.Width
+                            ZIndex: =2
+
+                        ProposalName_Content_4 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.id
+                            Width: =HeaderProposalName.Width
+                            X: =Entity_Content_2.X + Entity_Content_2.Width
+                            ZIndex: =3
+
+                        IssuersShortName_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.short_name
+                            Width: =HeaderIssuersShortName.Width
+                            X: =ProposalName_Content_4.X + ProposalName_Content_4.Width
+                            ZIndex: =4
+
+                        Type_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.type
+                            Width: =HeaderType.Width
+                            X: =IssuersShortName_Content_2.X + IssuersShortName_Content_2.Width
+                            ZIndex: =5
+
+                        Principal_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: |-
+                                =Text(Value(Substitute(Substitute(ThisItem.principal, ".",""), ",","")), "[$-en-GB]#,###")
+                            Width: =HeaderPrincipal.Width
+                            X: =Type_Content_2.X + Type_Content_2.Width
+                            ZIndex: =6
+
+                        Status_Content_3 As label:
+                            Color: |-
+                                =If(
+                                    DateDiff(Now(),DateValue(ThisItem.validity_ending_time),TimeUnit.Days) <= 7,
+                                    RGBA(214,27,27,1),
+                                    ThisItem.proposal_status = "DRAFT",
+                                    RGBA(98,95,95,1),
+                                    !IsBlank(Find("PENDING",ThisItem.proposal_status)),
+                                    RGBA(181,184,24,1),
+                                    !IsBlank(Find("REJECTED",ThisItem.proposal_status)),
+                                    RGBA(214,27,27,1),
+                                    ThisItem.proposal_status = "APPROVED",
+                                    RGBA(11,201,75,1)
+                                )
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =29
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =If(ThisItem.proposal_status in ["PENDING_REVIEW_BY_CEO"], "Pending Review By Investment Committee - Executive", ThisItem.proposal_status in ["PENDING_REVIEW_BY_CEO", "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"], "Pending Approval", ThisItem.proposal_status in ["PARTIALLY_REJECTED"], "Revised", ThisItem.proposal_status in ["PENDING_REVIEW_BY_CIO"], "Pending Review By CIO", Proper(Substitute(ThisItem.proposal_status, "_", " ")))
+                            Width: =HeaderStatus.Width
+                            X: =Principal_Content_2.X + Principal_Content_2.Width
+                            ZIndex: =7
+
+                        ValidityEndingTime_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =IfError(Text(DateTimeValue(ThisItem.validity_ending_time), "dd/mm/yyyy"), "", Text(DateTimeValue(ThisItem.validity_ending_time), "dd/mm/yyyy"))
+                            Width: =HeaderValidityEndingTime.Width
+                            X: =Status_Content_3.X + Status_Content_3.Width
+                            ZIndex: =8
+
+                        RemainingDays_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =If(ThisItem.proposal_status = "REJECTED", "", DateDiff(Now(),DateValue(ThisItem.validity_ending_time), TimeUnit.Days))
+                            Width: =HeaderRemainingDays.Width
+                            X: =ValidityEndingTime_Content_2.X + ValidityEndingTime_Content_2.Width
+                            ZIndex: =9
+
+                        CreatedDate_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =Text(DateValue(ThisItem.created_date), "dd/mm/yyyy")
+                            Width: =HeaderCreatedDate.Width
+                            X: =RemainingDays_Content_2.X + RemainingDays_Content_2.Width
+                            Y: =2
+                            ZIndex: =10
+
+                        CreatedBy_Content_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =45
+                            Size: =10.5
+                            Text: =ThisItem.created_by
+                            Width: =HeaderCreatedBy.Width
+                            X: =CreatedDate_Content_2.X + CreatedDate_Content_2.Width
+                            ZIndex: =11
+
+                        Status_Icon_2 As label:
+                            Color: =If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1), ThisItem.proposal_status = "DRAFT", RGBA(98, 95, 95, 1), !IsBlank(Find("PENDING",ThisItem.proposal_status)), RGBA(181, 184, 24, 1), !IsBlank(Find("REJECTED",ThisItem.proposal_status)), RGBA(214, 27, 27, 1), ThisItem.proposal_status = "APPROVED", RGBA(11, 201, 75, 1))
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Lato
+                            OnSelect: =Select(Parent);
+                            Size: =50
+                            Text: ="."
+                            VerticalAlign: =VerticalAlign.Bottom
+                            Visible: =Len(ThisItem.proposal_status) > 0
+                            Width: =30
+                            X: =Status_Content_3.X - 1
+                            Y: =2
+                            ZIndex: =12
+
+                        ClickButton_2 As button:
+                            BorderThickness: =0
+                            Color: =RGBA(0, 0, 0, 0)
+                            DisabledBorderColor: =RGBA(166, 166, 166, 0)
+                            DisabledColor: =RGBA(166, 166, 166, 0)
+                            DisabledFill: =RGBA(244, 244, 244, 0)
+                            Fill: =RGBA(56, 96, 178, 0)
+                            FocusedBorderThickness: =0
+                            Font: =Font.Arial
+                            Height: =TableContent_4.TemplateHeight
+                            HoverColor: =RGBA(255, 255, 255, 0)
+                            HoverFill: =ColorFade(RGBA(56, 96, 178, 0), -20%)
+                            OnSelect: |
+                                =Set(DealDetailTab, 1);
+                                Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+                                Set(proposalInfoEdit, ThisItem);
+                                Navigate(DetailProposal, ScreenTransition.Fade);
+                                Concurrent(
+                                ClearCollect(
+                                    proposalDetailLogs,
+                                    'TVS->FindByProposalIdComment-V1'.Run(
+                                        resKeyOpenAll.open,
+                                        resKeyOpenAll.close,
+                                        ThisItem.id, envDEV,envTEST, envUAT1, envUAT2
+                                    ),
+                                    ClearCollect(
+                                    issuersList,
+                                    'TVS->GetIssuerListCurrent-V1'.Run(
+                                        resKeyOpenAll.open,
+                                        resKeyOpenAll.close, 
+                                        envDEV,envTEST, envUAT1, envUAT2
+                                    ).list_issuer
+                                )),
+                                Set(fileAndlistIC,'TVS->GetFileAndInvestmentBoard-V1'.Run(ThisItem.id,resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.principal,ThisItem.limit_on_aum,envDEV,envTEST, envUAT1, envUAT2)));
+                                RemoveIf(proposalDetailLogs, id =  Blank() || id = "");
+                                ClearCollect(listAttachFileRes,fileAndlistIC.listAttach);
+                                Clear(listAttachFile);
+                                ForAll(listAttachFileRes,Collect(listAttachFile,{
+                                    Id:ThisRecord.id,
+                                    Name:ThisRecord.file_name,
+                                    Date:ThisRecord.created_date,
+                                    By:ThisRecord.name_employee
+                                }));
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            RadiusBottomLeft: =0
+                            RadiusBottomRight: =0
+                            RadiusTopLeft: =0
+                            RadiusTopRight: =0
+                            Size: =10
+                            Text: =""
+                            Width: =Parent.Width
+                            ZIndex: =13
+
+                        DeleteIconBg_2 As rectangle:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Height: =40
+                            OnSelect: =Select(Parent)
+                            Width: =DeleteIcon_2.Width
+                            X: =CreatedBy_Content_2.X + CreatedBy_Content_2.Width - Self.Width
+                            ZIndex: =14
+
+                        DeleteIcon_2 As htmlViewer:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<div style=""cursor:pointer; width:40px; display:flex; justify-content:center; align-items:center""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 16 16"" fill=""none"">
+                                  <path d=""M4.66683 2.66634C4.66683 2.31272 4.8073 1.97358 5.05735 1.72353C5.3074 1.47348 5.64654 1.33301 6.00016 1.33301H10.0002C10.3538 1.33301 10.6929 1.47348 10.943 1.72353C11.193 1.97358 11.3335 2.31272 11.3335 2.66634V3.99967H14.0002C14.177 3.99967 14.3465 4.06991 14.4716 4.19494C14.5966 4.31996 14.6668 4.48953 14.6668 4.66634C14.6668 4.84315 14.5966 5.01272 14.4716 5.13775C14.3465 5.26277 14.177 5.33301 14.0002 5.33301H13.2875L12.7095 13.4277C12.6856 13.7641 12.535 14.0789 12.2882 14.3087C12.0415 14.5386 11.7167 14.6663 11.3795 14.6663H4.62016C4.28292 14.6663 3.95821 14.5386 3.71142 14.3087C3.46463 14.0789 3.31411 13.7641 3.29016 13.4277L2.7135 5.33301H2.00016C1.82335 5.33301 1.65378 5.26277 1.52876 5.13775C1.40373 5.01272 1.3335 4.84315 1.3335 4.66634C1.3335 4.48953 1.40373 4.31996 1.52876 4.19494C1.65378 4.06991 1.82335 3.99967 2.00016 3.99967H4.66683V2.66634ZM6.00016 3.99967H10.0002V2.66634H6.00016V3.99967ZM4.0495 5.33301L4.62083 13.333H11.3802L11.9515 5.33301H4.0495ZM6.66683 6.66634C6.84364 6.66634 7.01321 6.73658 7.13823 6.8616C7.26326 6.98663 7.3335 7.1562 7.3335 7.33301V11.333C7.3335 11.5098 7.26326 11.6794 7.13823 11.8044C7.01321 11.9294 6.84364 11.9997 6.66683 11.9997C6.49002 11.9997 6.32045 11.9294 6.19542 11.8044C6.0704 11.6794 6.00016 11.5098 6.00016 11.333V7.33301C6.00016 7.1562 6.0704 6.98663 6.19542 6.8616C6.32045 6.73658 6.49002 6.66634 6.66683 6.66634ZM9.3335 6.66634C9.51031 6.66634 9.67988 6.73658 9.8049 6.8616C9.92992 6.98663 10.0002 7.1562 10.0002 7.33301V11.333C10.0002 11.5098 9.92992 11.6794 9.8049 11.8044C9.67988 11.9294 9.51031 11.9997 9.3335 11.9997C9.15668 11.9997 8.98712 11.9294 8.86209 11.8044C8.73707 11.6794 8.66683 11.5098 8.66683 11.333V7.33301C8.66683 7.1562 8.73707 6.98663 8.86209 6.8616C8.98712 6.73658 9.15668 6.66634 9.3335 6.66634Z"" fill=""#D00C0C""/>
+                                </svg></div>"
+                            OnSelect: |-
+                                =Set(isLoading, true);
+                                Set(idProposalDelete, ThisItem.id);
+                                ClearCollect(listAttachFileRes,proposalInfoEdit.listAttach);
+                                ForAll(listAttachFileRes,Collect(listAttachFile,{
+                                    Id:ThisRecord.id,
+                                    Name:ThisRecord.file_name,
+                                    Date:ThisRecord.created_date,
+                                    By:ThisRecord.name_employee
+                                }));
+                                Set(isShowPopupDelete, true);
+                                Set(isLoading, false);
+                            Visible: =ThisItem.proposal_status = "DRAFT"
+                            Width: =40
+                            X: =DeleteIconBg_2.X
+                            ZIndex: =15
+
+                    TableHeader As group:
+                        Height: =5
+                        Width: =5
+                        X: =80
+                        Y: =80
+                        ZIndex: =13
+
+                        HeaderNo As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="No"
+                            Width: =40
+                            X: =5
+                            ZIndex: =2
+
+                        HeaderEntity As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Division/Entity"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 8, 120)
+                            X: =HeaderNo.X + HeaderNo.Width
+                            ZIndex: =3
+
+                        HeaderProposalName As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Proposal ID"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 30, 120)
+                            X: =HeaderEntity.X + HeaderEntity.Width
+                            ZIndex: =4
+
+                        HeaderIssuersShortName As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Issuer"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 40, 220)
+                            X: =HeaderProposalName.X + HeaderProposalName.Width
+                            ZIndex: =5
+
+                        HeaderType As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Type"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 20, 100)
+                            X: =HeaderIssuersShortName.X + HeaderIssuersShortName.Width
+                            ZIndex: =6
+
+                        HeaderPrincipal As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Principal (VND bn)"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 50, 150)
+                            X: =HeaderType.X + HeaderType.Width
+                            ZIndex: =7
+
+                        HeaderStatus As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Status"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 + 110, 230)
+                            X: =HeaderPrincipal.X + HeaderPrincipal.Width
+                            ZIndex: =8
+
+                        HeaderValidityEndingTime As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Validity ending time"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 20, 160)
+                            X: =HeaderStatus.X + HeaderStatus.Width
+                            ZIndex: =9
+
+                        HeaderRemainingDays As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Remaining days"
+                            Width: =If(isAllowTab, Max((WhiteBackground.Width - 70) / 9 - 50, 120), 0)
+                            X: =HeaderValidityEndingTime.X + HeaderValidityEndingTime.Width
+                            ZIndex: =10
+
+                        HeaderCreatedDate As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Created date"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - 50, 120)
+                            X: =HeaderRemainingDays.X + HeaderRemainingDays.Width
+                            Y: =HeaderRemainingDays.Y
+                            ZIndex: =11
+
+                        HeaderCreatedBy As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Created by"
+                            Width: =Max((WhiteBackground.Width - 70) / 9 - If(MobileShowMenu, 10, -30), If(App.Width > 600, 150, 200))
+                            X: =HeaderCreatedDate.X + HeaderCreatedDate.Width
+                            ZIndex: =12
+
+            ProposalInfomation_Title As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Bold
+                Height: =43
+                LineHeight: =2.2
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =12
+                Text: ="Proposal Information"
+                Width: =299
+                X: =WhiteBackground.X + 20
+                Y: =WhiteBackground.Y + 10
+                ZIndex: =3
+
+            Hr As rectangle:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                Fill: =RGBA(191, 191, 192, 1)
+                Height: =2
+                Width: =WhiteBackground.Width - If(App.Width > 600, 40, 35)
+                X: =WhiteBackground.X + 15
+                Y: =ProposalInfomation_Title.Y + ProposalInfomation_Title.Height + 40
+                ZIndex: =4
+
+            MarginTab As button:
+                BorderColor: =Self.Color
+                BorderThickness: =1
+                Color: =If(isAllowTab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                HoverColor: =Self.Color
+                HoverFill: =Self.Fill
+                OnSelect: |
+                    =
+                    Set(isAllowTab, true); Set(DealDetailTab, 1);
+                    Set(currentPageIndex, 0);
+                     ClearCollect(listItem, listItemActionNeed);
+                    // Reset status
+                    ClearCollect(proposalFilterStatus,[]);
+                    Set(isActionNeeded, true);
+                    If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "DRAFT"}));
+                    If("CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PARTIALLY_REJECTED"}));
+                    If("HD_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}));
+                    If("RM_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}));
+                    If("CIO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_CIO"}));
+                    If("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_CEO"}));
+                    If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process3",name_team), Collect(proposalFilterStatus,{value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}));
+                    
+                    // Call API get datas
+                    //ClearCollect(listItem, []);
+                    //Set(isLoading, true);
+                    ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                        If(isAllowTab, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2);
+                    );
+                    //Set(isLoading, false);
+                    ClearCollect(listRes,listItem.listItem);
+                    
+                    // set PageIndex
+                    Set(pageCount,First(listItem.pageCount).pageCount);
+                    Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                    ClearCollect(listPageIndex, pageIndexFirst);
+                    ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+                PressedColor: =Self.Color
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =8
+                RadiusBottomRight: =0
+                RadiusTopLeft: =8
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: ="Active"
+                Width: =72
+                X: =DateFrom_Label.X + 1
+                Y: =StatusDropdown.Y + StatusDropdown.Height + If(App.Width > 600, 10, 70)
+                ZIndex: =5
+
+            ListNotAllowTab As button:
+                BorderColor: =Self.Color
+                BorderThickness: =1
+                Color: =If(!isAllowTab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                HoverColor: =Self.Color
+                HoverFill: =Self.Fill
+                OnSelect: |
+                    =
+                    Set(isAllowTab, false); Set(DealDetailTab, 1);
+                    Set(currentPageIndex, 0);
+                    
+                    // Reset status
+                    ClearCollect(proposalFilterStatus, [{value: "DRAFT"}, {value: "PARTIALLY_REJECTED"}, {value: "PENDING_REVIEW_BY_HEAD_OF_DIVISION"}, {value: "PENDING_REVIEW_BY_RISK_MANAGEMENT"}, {value: "PENDING_REVIEW_BY_CIO"}, {value: "PENDING_REVIEW_BY_CEO"}, {value: "PENDING_REVIEW_BY_INVESTMENT_COMMITEE"}, {value: "REJECTED"}, {value: "APPROVED"}, {value: "INACTIVE"}]);
+                    
+                    // Call API get datas
+                    ClearCollect(listItem, listItemFIInactive);
+                    ClearCollect(listRes,listItem.listItem);
+                    Set(pageCount,First(listItem.pageCount).pageCount);
+                    Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                    ClearCollect(listPageIndex, pageIndexFirst);
+                    ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1)));
+                    
+                    ClearCollect(listItemFIInactive,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                        If(isAllowTab, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2)
+                    );
+                    ClearCollect(listItem, listItemFIInactive);
+                    ClearCollect(listRes,listItem.listItem);
+                    
+                    // set PageIndex
+                    Set(pageCount,First(listItem.pageCount).pageCount);
+                    Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                    ClearCollect(listPageIndex, pageIndexFirst);
+                    ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1)));
+                PressedColor: =Self.Color
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =8
+                RadiusTopLeft: =0
+                RadiusTopRight: =8
+                Size: =10.5
+                Text: ="Inactive"
+                Width: =72
+                X: =MarginTab.X + MarginTab.Width + 1
+                Y: =MarginTab.Y
+                ZIndex: =6
+
+            SubmitButtonContainer As group:
+                Height: =5
+                Width: =5
+                X: =-1121
+                Y: =30
+                ZIndex: =35
+
+                SubmitButton As button:
+                    BorderThickness: =0
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |-
+                        =Set(isShowCreateProposalPopup, true);
+                        Set(isSubmited, false);
+                        Reset(CreateProposalName_Input);
+                        Set(FIDivisionValue, Blank());
+                    PaddingBottom: =10
+                    PaddingLeft: =40
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: ="Create"
+                    Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action)
+                    Width: =120
+                    X: =GoAUMButton.X - If(GoAUMButton.Visible, 130, 0)
+                    Y: =GoAUMButton.Y
+                    ZIndex: =12
+
+                SubmitButtonIcon As icon.AddDocument:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.Add
+                    OnSelect: =Select(SubmitButton);
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Tooltip: ="New"
+                    Visible: ="CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action)
+                    Width: =20
+                    X: =SubmitButton.X + 25
+                    Y: =SubmitButton.Y + 12
+                    ZIndex: =13
+
+            _Label1 As label:
+                Align: =Align.Center
+                Font: =Font.Arial
+                Size: =10.5
+                Text: ="Empty data."
+                Visible: =IsBlank(First(listRes).listItem) || IsEmpty(First(listRes).listItem)
+                Width: =Hr.Width
+                X: =Hr.X
+                Y: =Hr.Y + 10
+                ZIndex: =38
+
+            btnRefresh_8 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: =Select(RefreshListIcon_4)
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Width: =44
+                X: =RefreshListIcon_4.X - 11
+                Y: =SearchAUMButton_1.Y
+                ZIndex: =39
+
+            RefreshListIcon_4 As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Set(isLoading, true);
+                    
+                    Set(entityList, []);
+                    If(("TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division)) ||
+                    "IC" in First(currenUserV2.permissionList).name_team ||
+                    "Risk Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division) ||
+                    "CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process3",action),
+                            Set(entityList, [{value: "All"}, {value: "TVS-Treasury"}, {value: "TVAM-Asset Management"}]);
+                            Set(StatusSelectedValue, "All");
+                            Set(StatusSelectedArray, []);,
+                            "TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                            Set(entityList, [{value: "TVS-Treasury"}]);
+                            Set(StatusSelectedValue, "TVS-Treasury");
+                            Set(StatusSelectedArray, [{value: "TVS-Treasury"}]);,
+                            "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                            Set(entityList, [{value: "TVAM-Asset Management"}]);
+                            Set(StatusSelectedValue, "TVAM-Asset Management");
+                            Set(StatusSelectedArray, [{value: "TVAM-Asset Management"}]);,
+                    
+                            Set(entityList, []);
+                            Set(StatusSelectedValue, "");
+                            Set(StatusSelectedArray, [{value: "AccessDenied"}]);
+                    );
+                    
+                    Reset(DateFrom_Datepicker);
+                    Reset(DateTo_DatePicker);
+                    Reset(ProposalNameFilter_Input);
+                    Reset(input_searchAll);
+                    
+                    UpdateContext({ShowNotification: false});
+                    Set(currentPageIndex,0);
+                    Set(dateFromFilterVar, DateFrom_Datepicker.SelectedDate);
+                    Set(dateToFilterVar, DateTo_DatePicker.SelectedDate);
+                    
+                    If(DateDiff(DateFrom_Datepicker.SelectedDate, DateTo_DatePicker.SelectedDate) < 0,
+                    
+                    Set(NoticationText, "The from date cannot be greater than the to date!"); Set(IsError, true); UpdateContext({ShowNotification: true}); Set(isLoading, false),
+                    
+                    Set(proposalNameFilterVar, ProposalNameFilter_Input.Text);
+                    If(StatusSelectedValue="All",Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+                    
+                    Concurrent(
+                    ClearCollect(listItemActionNeed,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) - 1), "''"),
+                        If(isAllowTab, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2);
+                    ),
+                    ClearCollect(listItemInprogress,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) - 1), "''"),
+                        If(isAllowTab, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2);
+                    ),
+                    ClearCollect(listItemCompleted1,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) - 1), "''"),
+                        If(isAllowTab, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2);
+                    ),
+                    ClearCollect(listItemFIInactive, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                        Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                        If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                        PageSizeNumber,currentPageIndex,
+                        If(Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInActive, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) - 1), "''"),
+                        If(false, "ACTIVE", "INACTIVE"),
+                         currenUserV2.id, isActionNeeded, isInIC,
+                          envDEV,envTEST, envUAT1, envUAT2)
+                    ));
+                    
+                    If(isAllowTab, Switch(DealDetailTab, 1, ClearCollect(listRes, listItemActionNeed.listItem), 2, ClearCollect(listRes, listItemCompleted1.listItem),
+                    3, ClearCollect(listRes, listItemInprogress.listItem)), ClearCollect(listRes, listItemFIInactive.listItem));
+                    
+                    // set PageIndex
+                    Set(pageCount,First(listItem.pageCount).pageCount);
+                    Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                    ClearCollect(listPageIndex, pageIndexFirst);
+                    ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1););););
+                    
+                    Set(isLoading, false);
+                Tooltip: ="Click here to clear all filters"
+                Width: =20
+                X: =SearchAUMButton_1.X + SearchAUMButton_1.Width + 17
+                Y: =SearchAUMButton_1.Y + 12
+                ZIndex: =40
+
+            QT2TabsGroup_3 As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =40
+
+                HrQT2_3 As rectangle:
+                    BorderColor: =RGBA(176, 176, 176, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(246, 246, 246, 1)
+                    Height: =0.5
+                    Visible: =false
+                    Width: =QT2Tabs_3.Width
+                    X: =QT2Tabs_3.X
+                    Y: =QT2Tabs_3.Y + QT2Tabs_3.Height - 7
+                    ZIndex: =7
+
+                QT2Tabs_3 As gallery.galleryHorizontal:
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =47
+                    Items: |-
+                        =If(isAllowTab,[{text:"Action needed",tab:1},{text:"Under processing",tab:3},{text:"Completed",tab:2}],[{text:"Action needed",tab:1},{text:"Completed",tab:2}])
+                    ShowScrollbar: =false
+                    TemplatePadding: =0
+                    TemplateSize: =If(App.Width > 450, 140, (App.Width - 20) / 3)
+                    Visible: =isAllowTab
+                    Width: =Self.AllItemsCount * Self.TemplateWidth
+                    X: =MarginTab.X
+                    Y: =MarginTab.Y + MarginTab.Height 
+                    ZIndex: =8
+
+                    Button8_4 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = ThisItem.tab, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =RGBA(248, 248, 249, 1)
+                        OnSelect: |
+                            =
+                            Set(DealDetailTab,ThisItem.tab);
+                            Set(currentPageIndex, 0);
+                            Switch(
+                                ThisItem.tab,
+                                1,
+                                ClearCollect(listItem, listItemActionNeed);
+                                ClearCollect(listRes,listItem.listItem);
+                                Set(pageCount,First(listItem.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                Set(isActionNeeded, true);
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1))),
+                                2,
+                                ClearCollect(listItem, listItemCompleted1);
+                                ClearCollect(listRes,listItem.listItem);
+                                Set(pageCount,First(listItem.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1););),
+                                3,
+                                ClearCollect(listItem, listItemInprogress);
+                                ClearCollect(listRes,listItem.listItem);
+                                Set(pageCount,First(listItem.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+                                Set(isActionNeeded, false);
+                            );
+                            
+                            If(isAllowTab,
+                            Switch(DealDetailTab, 1, ClearCollect(proposalFilterStatus, proposalFilterStatusActionNeed), 2, ClearCollect(proposalFilterStatus, proposalFilterStatusCompleted),
+                            3, ClearCollect(proposalFilterStatus, proposalFilterStatusInprogess)), ClearCollect(proposalFilterStatus, proposalFilterStatusInActive));
+                            
+                            // Call API get datas
+                            //ClearCollect(listItem, []);
+                            //Set(isLoading, true);
+                            If(DealDetailTab = 1,
+                            ClearCollect(listItemActionNeed, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                                PageSizeNumber,currentPageIndex,
+                                If(Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) - 1), "''"),
+                                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                                 currenUserV2.id, isActionNeeded, isInIC,
+                                  envDEV,envTEST, envUAT1, envUAT2);
+                            ));
+                            If(DealDetailTab = 2,
+                            ClearCollect(listItemCompleted1, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                                PageSizeNumber,currentPageIndex,
+                                If(Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) - 1), "''"),
+                                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                                 currenUserV2.id, isActionNeeded, isInIC,
+                                  envDEV,envTEST, envUAT1, envUAT2);
+                            ));
+                            If(DealDetailTab = 3,
+                            ClearCollect(listItemInprogress, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                                PageSizeNumber,currentPageIndex,
+                                If(Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) - 1), "''"),
+                                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                                 currenUserV2.id, isActionNeeded, isInIC,
+                                  envDEV,envTEST, envUAT1, envUAT2);
+                            ));
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(listRes, listItemActionNeed.listItem), 2, ClearCollect(listRes, listItemCompleted1.listItem), 3, ClearCollect(listRes, listItemInprogress.listItem));
+                            
+                            // set PageIndex
+                            Set(pageCount,First(listItem.pageCount).pageCount);
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 10.5, 10.5)
+                        Text: =ThisItem.text
+                        Tooltip: =ThisItem.text
+                        Width: =If(ThisItem.text = "Action needed", 126, ThisItem.text = "Completed", 126, QT2Tabs_3.TemplateWidth)
+                        Y: =5
+                        ZIndex: =1
+
+                    BottomBorder1_11 As rectangle:
+                        BorderColor: =If(DealDetailTab = ThisItem.tab, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = ThisItem.tab, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(ThisItem.tab = DealDetailTab, 2, 0)
+                        Width: =If(ThisItem.text = "Action needed", 128, ThisItem.text = "Completed", 120, QT2Tabs_3.TemplateWidth)
+                        Y: =40
+                        ZIndex: =2
+
+            Filter_Container As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =43
+
+                PreviousIcon As icon.ChevronLeft:
+                    Height: =15
+                    Icon: =Icon.ChevronLeft
+                    OnSelect: |
+                        =Set(
+                            currentPageIndex,
+                            currentPageIndex - 1
+                        );
+                        ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                            PageSizeNumber,currentPageIndex,
+                            If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                            If(isAllowTab, "ACTIVE", "INACTIVE"),
+                             currenUserV2.id, isActionNeeded, isInIC,
+                              envDEV,envTEST, envUAT1, envUAT2);
+                        );
+                        
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        Set(
+                            pageIndexFirst,
+                            5 * RoundDown(
+                                currentPageIndex / 5,
+                                0
+                            )
+                        );
+                        ClearCollect(
+                            listPageIndex,
+                            pageIndexFirst
+                        );
+                        ForAll(
+                            maxList,
+                            If(
+                                Last(listPageIndex).Value + 1 < pageCount,
+                                Collect(
+                                    listPageIndex,
+                                    Last(listPageIndex).Value + 1
+                                );
+                            );
+                            
+                        );
+                    Tooltip: ="Previous page"
+                    Visible: =If(currentPageIndex<=0,false,true)
+                    Width: =15
+                    X: =PageNumbers.X - 22
+                    Y: =PageNumbers.Y + 10
+                    ZIndex: =9
+
+                NextIcon As icon.ChevronRight:
+                    Height: =15
+                    Icon: =Icon.ChevronRight
+                    OnSelect: |
+                        =Set(
+                            currentPageIndex,
+                            currentPageIndex + 1
+                        );
+                        ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                            Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                            Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                            If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                            PageSizeNumber,currentPageIndex,
+                            If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                            If(isAllowTab, "ACTIVE", "INACTIVE"),
+                             currenUserV2.id, isActionNeeded, isInIC,
+                              envDEV,envTEST, envUAT1, envUAT2);
+                        );
+                        ClearCollect(
+                            listRes,
+                            listItem.listItem
+                        );
+                        Set(
+                            pageIndexFirst,
+                            5 * RoundDown(
+                                currentPageIndex / 5,
+                                0
+                            )
+                        );
+                        ClearCollect(
+                            listPageIndex,
+                            pageIndexFirst
+                        );
+                        ForAll(
+                            maxList,
+                            If(
+                                Last(listPageIndex).Value + 1 < pageCount,
+                                Collect(
+                                    listPageIndex,
+                                    Last(listPageIndex).Value + 1
+                                );
+                            );
+                            
+                        );
+                    Tooltip: ="Next page"
+                    Visible: =If(currentPageIndex>=pageCount-1,false,true)
+                    Width: =15
+                    X: =WhiteBackground.X + WhiteBackground.Width - 50
+                    Y: =PageNumbers.Y + 10
+                    ZIndex: =10
+
+                "PageNumbers As gallery.'BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =42
+                    Items: =listPageIndex
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =35
+                    Width: =PageNumbers.AllItemsCount * 35
+                    X: =NextIcon.X - PageNumbers.Width
+                    Y: =WhiteBackground.Y + WhiteBackground.Height
+                    ZIndex: =11
+
+                    pageIndex As htmlViewer:
+                        DisplayMode: |
+                            =DisplayMode.Edit
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style='font-family: Arial; width: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 3px; background-color: transparent; border-radius: 5px; border: " & If(currentPageIndex = ThisItem.Value, "1px solid #1890FF", "none")&";'><font color=" & If(currentPageIndex = ThisItem.Value, "#1890FF", "black")&">" & (ThisItem.Value + 1) & "</font></div>"
+                        OnSelect: |
+                            =
+                            Set(currentPageIndex,ThisItem.Value);
+                            ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                                PageSizeNumber,currentPageIndex,
+                                If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                                 currenUserV2.id, isActionNeeded, isInIC,
+                                  envDEV,envTEST, envUAT1, envUAT2
+                                 );
+                            );
+                            ClearCollect(
+                                listRes,
+                                listItem.listItem
+                            );
+                            If(currentPageIndex=ThisItem.Value,Color.Red);
+                        PaddingRight: =0
+                        Width: =40
+                        ZIndex: =2
+
+                PageDropdown As button:
+                    Align: =Align.Left
+                    BorderColor: =If(ShowPageSizeSelectPopup, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                    BorderThickness: =1
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =32
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+                    PaddingLeft: =10
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedBorderColor: =
+                    PressedColor: =
+                    PressedFill: =
+                    Size: =10.5
+                    Text: =PageSizeNumber
+                    Visible: =App.Width > 600
+                    Width: =50
+                    X: =PreviousIcon.X - 60
+                    Y: =PageNumbers.Y + 2 
+                    ZIndex: =14
+
+                PageChevron As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =44
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                        <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                        </svg></div>"
+                    OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =11.60
+                    Visible: =App.Width > 600
+                    Width: =35
+                    X: =PageDropdown.X + PageDropdown.Width - 28
+                    Y: =PageDropdown.Y - 2
+                    ZIndex: =15
+
+                PageCloseDropdown As rectangle:
+                    Fill: =RGBA(255, 255, 255, 0)
+                    Height: =App.Height - 100
+                    OnSelect: =Set(ShowPageSizeSelectPopup, false)
+                    Visible: =ShowPageSizeSelectPopup && App.Width > 600
+                    Width: =Parent.Width
+                    ZIndex: =16
+
+                "PageItems As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =122
+                    Items: |-
+                        =[{value: 10}, {value: 20}, {value: 50}]
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =ShowPageSizeSelectPopup && App.Width > 600
+                    Width: =PageDropdown.Width
+                    X: =PageDropdown.X
+                    Y: =PageDropdown.Y - 130
+                    ZIndex: =17
+
+                    Button6_11 As button:
+                        Align: =Align.Left
+                        Color: =RGBA(82, 82, 82, 1)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(241, 244, 249, 1)
+                        OnSelect: |-
+                            =
+                            Set(PageSizeNumber, ThisItem.value);
+                            Set(ShowPageSizeSelectPopup, false);
+                            Set(currentPageIndex,0);
+                            ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                                resKeyOpenAll.open,
+                                resKeyOpenAll.close,
+                                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                                PageSizeNumber,currentPageIndex,
+                                If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                                 currenUserV2.id, isActionNeeded, isInIC,
+                                  envDEV,envTEST, envUAT1, envUAT2);
+                            );
+                            ClearCollect(
+                                listRes,
+                                listItem.listItem
+                            );
+                            
+                            // set PageIndex
+                            Set(
+                                pageCount,
+                                First(listItem.pageCount).pageCount
+                            );
+                            
+                            
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            
+                            ForAll(
+                                maxList,
+                                If(
+                                        Last(listPageIndex).Value + 1 < pageCount
+                                    ,
+                                    Collect(
+                                        listPageIndex,
+                                        Last(listPageIndex).Value + 1
+                                    );
+                                    
+                                );
+                            );
+                        PaddingLeft: =15
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedFill: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =10.5
+                        Text: =ThisItem.value
+                        Width: =70
+                        X: =0.00
+                        Y: =4
+                        ZIndex: =1
+
+            ProposalSearchGroup As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =46
+
+                SearchAUMButton_1 As button:
+                    BorderThickness: =0
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    Fill: =RGBA(17, 79, 144, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |-
+                        =Set(isLoading, true);
+                        UpdateContext({ShowNotification: false});
+                        Set(currentPageIndex,0);
+                        Set(dateFromFilterVar, DateFrom_Datepicker.SelectedDate);
+                        Set(dateToFilterVar, DateTo_DatePicker.SelectedDate);
+                        
+                        If(DateDiff(DateFrom_Datepicker.SelectedDate, DateTo_DatePicker.SelectedDate) < 0,
+                        
+                        Set(NoticationText, "The from date cannot be greater than the to date!"); Set(IsError, true); UpdateContext({ShowNotification: true}); Set(isLoading, false),
+                        
+                        Set(proposalNameFilterVar, ProposalNameFilter_Input.Text);
+                        If(StatusSelectedValue="All",Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+                        
+                        Select(FI_GetAllButton);
+                        
+                        
+                        ClearCollect(listRes,listItem.listItem);
+                        // set PageIndex
+                        Set(pageCount,First(listItem.pageCount).pageCount);
+                        Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                        ClearCollect(listPageIndex, pageIndexFirst);
+                        ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+                        Set(isLoading, false);
+                        )
+                    PaddingBottom: =10
+                    PaddingLeft: =40
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: =""
+                    Width: =44
+                    X: =input_searchAll.X + input_searchAll.Width + 10
+                    Y: =input_searchAll.Y
+                    ZIndex: =35
+
+                SearchAUMIcon_1 As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =35
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                          <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                        </svg><div>"
+                    OnSelect: =Select(SearchAUMButton_1)
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Width: =30
+                    X: =SearchAUMButton_1.X + 5
+                    Y: =SearchAUMButton_1.Y + 6
+                    ZIndex: =36
+
+                input_searchAll As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: =
+                    FocusedBorderColor: =Self.HoverBorderColor
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    Height: =44
+                    HintText: ="Search ..."
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    Size: =If(App.Width > 600, 10.5, 12)
+                    Width: |-
+                        =If(
+                            App.Width > 1300,
+                            StatusDropdown.X + StatusDropdown.Width - Self.X,
+                            App.Width > 600,
+                            StatusDropdown.X + StatusDropdown.Width - Self.X - 57 - 30,
+                            App.Width - 73 - 50
+                        )
+                    X: |-
+                        =If(
+                            Parent.Width > 800,
+                            If(MobileShowMenu, MenuItemsSideBar_1.X + MenuItemsSideBar_1.Width + 20, MenuItemsSideBar_Small_1.X + MenuItemsSideBar_Small_1.Width + 20),
+                            10
+                        )
+                    Y: =10
+                    ZIndex: =37
+
+            GoIssuerListButtonContainer As group:
+                Height: =5
+                Width: =5
+                X: =60
+                Y: =60
+                ZIndex: =46
+
+                GoAUMButton As button:
+                    BorderThickness: =0
+                    Fill: =RGBA(166, 166, 166, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    HoverFill: =Self.Fill
+                    OnSelect: =Navigate(IssuerList,ScreenTransition.Fade)
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =40
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: ="Issuer  list"
+                    Visible: =!IsEmpty(entityList)
+                    Width: =120
+                    X: =If(Parent.Width > 1000, WhiteBackground.X + WhiteBackground.Width - 140, Parent.Width > 800, Parent.Width - 140, Parent.Width - 130)
+                    Y: = If(Parent.Width > 1290, input_searchAll.Y, Parent.Width > 600, MarginTab.Y, WhiteBackground.Y - If(Parent.Width > 1025, 60, If(isAllowTab, 145, 105)))
+                    ZIndex: =18
+
+                GoAUMButtonIcon As icon.AddDocument:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.NextArrow
+                    OnSelect: =Navigate(IssuerList,ScreenTransition.Fade)
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Tooltip: ="New"
+                    Visible: =!IsEmpty(entityList)
+                    Width: =20
+                    X: =GoAUMButton.X + GoAUMButton.Width - 35
+                    Y: =GoAUMButton.Y + 12
+                    ZIndex: =19
+
+            SearchGroup As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =47
+
+                DateFrom_InputBack As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =13.00
+                    Width: =If(Parent.Width > 1000, 216.00, Parent.Width > 800, (Parent.Width - If(MobileShowMenu, 280, 90)) / 2 - 5, (Parent.Width - 25) / 2 - 2)
+                    X: =DateFrom_Label.X
+                    Y: =DateFrom_Label.Y + DateFrom_Label.Height
+                    ZIndex: =20
+
+                DateFrom_Datepicker As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =DateFrom_InputBack.Height - 6
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("From", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =50
+                    PaddingTop: =10
+                    Size: =10.5
+                    Width: =DateFrom_InputBack.Width - 6
+                    X: =DateFrom_InputBack.X + 3
+                    Y: =DateFrom_InputBack.Y + 3
+                    ZIndex: =21
+
+                DateFrom_Label As label:
+                    Color: =RGBA(16, 17, 18, 1)
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Created date"
+                    Width: =150.00
+                    X: =input_searchAll.X
+                    Y: =input_searchAll.Y + input_searchAll.Height + 5
+                    ZIndex: =22
+
+                DateTo_InputBack As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: ="Đầu vào văn bản"
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HoverBorderColor: =RGBA(191, 191, 192, 1)
+                    HoverFill: =RGBA(186, 202, 226, 0)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =13.00
+                    Width: =If(Parent.Width > 1000, 216.00, Parent.Width > 800, (Parent.Width - If(MobileShowMenu, 280, 90)) / 2 - 5, (Parent.Width - 25) / 2 - 2)
+                    X: =DateFrom_InputBack.X + DateFrom_InputBack.Width + 10
+                    Y: =DateFrom_Label.Y + DateFrom_Label.Height
+                    ZIndex: =23
+
+                DateTo_DatePicker As datepicker:
+                    BorderThickness: =0
+                    DefaultDate: =
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    Format: ="dd/mm/yyyy"
+                    Height: =DateTo_InputBack.Height - 6
+                    IconBackground: =RGBA(255, 255, 255, 1)
+                    IconFill: =RGBA(0, 0, 0, 1)
+                    InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("To", Self.Format, Self.Language))
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    Size: =10.5
+                    StartYear: =If(IsBlank(DateFrom_Datepicker.SelectedDate), 1970, Year(DateFrom_Datepicker.SelectedDate))
+                    Width: =DateTo_InputBack.Width - 6
+                    X: =DateTo_InputBack.X + 3
+                    Y: =DateTo_InputBack.Y + 3
+                    ZIndex: =24
+
+                ProposalNameFilter_Input As text:
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =1
+                    Default: =""
+                    FocusedBorderColor: =RGBA(0, 18, 107, 1)
+                    FocusedBorderThickness: =2
+                    Font: =Font.Arial
+                    Height: =44
+                    HintText: ="Proposal name"
+                    HoverFill: =RGBA(255, 255, 255, 1)
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    PressedBorderColor: =RGBA(0, 18, 107, 1)
+                    RadiusBottomLeft: =8
+                    RadiusBottomRight: =8
+                    RadiusTopLeft: =8
+                    RadiusTopRight: =8
+                    Size: =10.5
+                    Visible: =false
+                    Width: =If(Parent.Width > 600, 216, Parent.Width - 30)
+                    X: =If(Parent.Width > 600, DateTo_InputBack.X + DateTo_InputBack.Width + 10, DateFrom_InputBack.X)
+                    Y: =ProposalNameFilter_Label.Y + ProposalNameFilter_Label.Height
+                    ZIndex: =25
+
+                ProposalNameFilter_Label As label:
+                    Color: =RGBA(82, 82, 82, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Semibold
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: ="Proposal name"
+                    Visible: =false
+                    Width: =150.00
+                    X: =ProposalNameFilter_Input.X
+                    Y: =DateFrom_Label.Y + If(Parent.Width > 600, 0, 80)
+                    ZIndex: =26
+
+                Status_Label As label:
+                    Color: =RGBA(16, 17, 18, 1)
+                    Font: =Font.Arial
+                    Height: =30
+                    PaddingLeft: =0
+                    PaddingRight: =5.00
+                    PaddingTop: =5.00
+                    Size: =10.5
+                    Text: |-
+                        ="Division/Entity
+                        "
+                    Width: =150.00
+                    X: =StatusDropdown.X
+                    Y: =DateFrom_Label.Y + If(Parent.Width > 1000, 0, 80)
+                    ZIndex: =27
+
+                StatusDropdown As button:
+                    Align: =Align.Left
+                    BorderColor: =If(ShowStatusSelectPopup, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                    BorderThickness: =1
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: =Set(ShowStatusSelectPopup, !ShowStatusSelectPopup)
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedBorderColor: =
+                    PressedColor: =
+                    PressedFill: =
+                    RadiusBottomLeft: =5
+                    RadiusBottomRight: =5
+                    RadiusTopLeft: =5
+                    RadiusTopRight: =5
+                    Size: =10.5
+                    Text: =StatusSelectedValue
+                    Width: |-
+                        =If(
+                            Parent.Width > 1300,
+                            216,
+                            Parent.Width > 1000,
+                            App.Width - Self.X - 20,
+                            Parent.Width <= 1000 && Parent.Width > 800,
+                            Parent.Width - If(MobileShowMenu, 280, 90),
+                            Parent.Width - 20
+                        )
+                    X: =If(Parent.Width > 1000, DateTo_InputBack.X + DateTo_InputBack.Width + 10, DateFrom_InputBack.X)
+                    Y: =Status_Label.Y + Status_Label.Height
+                    ZIndex: =28
+
+                StatusChevron As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =44
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                        <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                        </svg></div>"
+                    OnSelect: =Set(ShowStatusSelectPopup, !ShowStatusSelectPopup)
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =11.60
+                    Width: =35
+                    X: =StatusDropdown.X + StatusDropdown.Width - 40
+                    Y: =StatusDropdown.Y + 5
+                    ZIndex: =29
+
+                SearchCloseDropdown As rectangle:
+                    Fill: =RGBA(255, 255, 255, 0)
+                    Height: =App.Height - 100
+                    OnSelect: =Set(ShowStatusSelectPopup, false)
+                    Visible: =ShowStatusSelectPopup
+                    Width: =Parent.Width
+                    ZIndex: =30
+
+                "StatusItems As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =Self.AllItemsCount * Self.TemplateHeight + 10
+                    Items: =entityList
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =ShowStatusSelectPopup
+                    Width: =StatusDropdown.Width
+                    X: =StatusDropdown.X
+                    Y: =StatusDropdown.Y + 50
+                    ZIndex: =31
+
+                    Button6_12 As button:
+                        Align: =Align.Left
+                        Color: =RGBA(82, 82, 82, 1)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(241, 244, 249, 1)
+                        OnSelect: |-
+                            =Set(StatusSelectedValue, ThisItem.value);
+                            Set(StatusSelectedArray, If(ThisItem.value = "All", Blank(), [{value: ThisItem.value}]));
+                            Set(ShowStatusSelectPopup, false);
+                        PaddingLeft: =15
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedFill: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =10.5
+                        Text: =ThisItem.value
+                        Width: =216
+                        X: =0.00
+                        Y: =4
+                        ZIndex: =1
+
+                ClearFormDateQT2 As icon.Cancel:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =15
+                    Icon: =Icon.Cancel
+                    OnSelect: |-
+                        =Reset(DateFrom_Datepicker);
+                        Set(dateFromFilterVar,DateFrom_Datepicker.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker.SelectedDate);
+                    Visible: =!IsBlank(DateFrom_Datepicker.SelectedDate)
+                    Width: =15
+                    X: =DateFrom_InputBack.X + DateFrom_InputBack.Width - 55
+                    Y: =DateFrom_InputBack.Y + 15
+                    ZIndex: =32
+
+                ClearToDateQT2 As icon.Cancel:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =15
+                    Icon: =Icon.Cancel
+                    OnSelect: |-
+                        =Reset(DateTo_DatePicker);
+                        Set(dateFromFilterVar,DateFrom_Datepicker.SelectedDate);
+                        Set(dateToFilterVar,DateTo_DatePicker.SelectedDate);
+                    Visible: =!IsBlank(DateTo_DatePicker.SelectedDate)
+                    Width: =15
+                    X: =DateTo_InputBack.X + DateTo_InputBack.Width - 55
+                    Y: =DateTo_InputBack.Y + 15
+                    ZIndex: =33
+
+                ClearStatusQT2 As icon.Cancel:
+                    Color: =RGBA(0, 0, 0, 1)
+                    Height: =15
+                    Icon: =Icon.Cancel
+                    OnSelect: =Set(StatusSelectedValue, Blank());
+                    Visible: |-
+                        =//!IsBlank(StatusSelectedValue)
+                        false
+                    Width: =15
+                    X: =StatusDropdown.X + StatusDropdown.Width - 55
+                    Y: =StatusDropdown.Y + 15
+                    ZIndex: =34
+
+    HeaderQT2List As Header:
+        ZIndex: =3
+
+    MenuItemsSideBar_1 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        IconPortal: |-
+            ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+              <path d=""M5 21C4.45 21 3.979 20.804 3.587 20.412C3.195 20.02 2.99934 19.5493 3 19V5C3 4.45 3.196 3.979 3.588 3.587C3.98 3.195 4.45067 2.99934 5 3H19C19.55 3 20.021 3.196 20.413 3.588C20.805 3.98 21.0007 4.45067 21 5V19C21 19.55 20.804 20.021 20.412 20.413C20.02 20.805 19.5493 21.0007 19 21H5ZM5 8.325H19V5H5V8.325ZM5 13.675H19V10.325H5V13.675ZM5 19H19V15.675H5V19ZM6 7.65V5.65H8V7.65H6ZM6 13V11H8V13H6ZM6 18.35V16.35H8V18.35H6Z"" fill=""black""/>
+            </svg>"
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_1.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_1.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_1.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =4
+
+    MenuItemsSideBar_Small_1 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_1.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_1.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_1.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_1.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_1.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_1.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =5
+
+    CreateProposalName_Required As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Font: =Font.Arial
+        Height: =20
+        LineHeight: =2.2
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =8
+        Text: =If(IsBlank(CreateProposalName_Input.Text) || Len(Trim(CreateProposalName_Input.Text)) = 0, TextRequired, "Max length 150")
+        Visible: =isShowCreateProposalPopup && isSubmited && (IsBlank(CreateProposalName_Input.Text) || Len(CreateProposalName_Input.Text) > 150 || Len(Trim(CreateProposalName_Input.Text)) = 0)
+        Width: =299
+        X: =CreateProposal_Title.X
+        Y: =CreateProposalName_Input.Y + CreateProposalName_Input.Height
+        ZIndex: =19
+
+    CreateProposalEntity_Required As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Font: =Font.Arial
+        Height: =20
+        LineHeight: =2.2
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =8
+        Text: =TextRequired
+        Visible: =isShowCreateProposalPopup && isSubmited && IsBlank(PaymentFrequencyDropdown_1.Text)
+        Width: =299
+        X: =CreateProposal_Title.X
+        Y: =PaymentFrequencyDropdown_1.Y + PaymentFrequencyDropdown_1.Height
+        ZIndex: =20
+
+    Timer1_4 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_4); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =1135
+        Y: =592
+        ZIndex: =28
+
+    NotificationBox_4 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_4.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =25
+        ZIndex: =29
+
+    DeleteConfirm As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =29
+
+        RejectPopupBack_5 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =21
+
+        DeleteConfirmBg_3 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 200, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_3.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =22
+
+        CancelResearchOpinionButton_1 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(214, 27, 27, 1)
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(214, 27, 27, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(214, 27, 27, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(214, 27, 27, 1)
+            PressedColor: =RGBA(214, 27, 27, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_3.X + DeleteConfirmBg_3.Width - 280
+            Y: =DeleteConfirmBg_3.Y + DeleteConfirmBg_3.Height - 70
+            ZIndex: =23
+
+        DeleteResearchOpinionButton_1 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(214, 27, 27, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isLoading, true);
+                Set(IsError, false);
+                UpdateContext({ShowNotification: false});
+                
+                Set(deleteStatus, 'TVS->DeleteProposal_Process3-V1'.Run(idProposalDelete,  resKeyOpenAll.open, resKeyOpenAll.close,envDEV,envTEST, envUAT1, envUAT2).status);
+                
+                If(IsBlank(statusFilterVar),Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+                ClearCollect(listItem,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                    resKeyOpenAll.open,
+                    resKeyOpenAll.close,
+                    If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                    Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                    Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                    If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                    PageSizeNumber,currentPageIndex,
+                    If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                    If(isAllowTab, "ACTIVE", "INACTIVE"),
+                     currenUserV2.id, isActionNeeded, isInIC,envDEV,envTEST, envUAT1, envUAT2);
+                );
+                ClearCollect(listRes,listItem.listItem);
+                
+                Set(isShowPopupDelete, false);
+                Set(isLoading, false);
+                
+                If(Value(deleteStatus) = 200,
+                Set(NoticationText,"Delete successfully!");UpdateContext({ShowNotification: true});,
+                Set(IsError, true);Set(NoticationText,"This proposal has been processed by another user, please reload this page again.");UpdateContext({ShowNotification: true});
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(214, 27, 27, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_3.X + DeleteConfirmBg_3.Width - 150
+            Y: =DeleteConfirmBg_3.Y + DeleteConfirmBg_3.Height - 70
+            ZIndex: =24
+
+        DeleteConfirmCloseIcon_4 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_3. X + DeleteConfirmBg_3.Width -50
+            Y: =DeleteConfirmBg_3.Y + 20
+            ZIndex: =25
+
+        DeleteConfirmLabel_5 As label:
+            Font: =Font.Arial
+            Size: =12
+            Text: ="Are you sure to delete this proposal?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_3.Width - 100 - DeleteConfirmCloseIcon_4.Width
+            X: =Label2_1.X
+            Y: =Label2_1.Y + Label2_1.Height
+            ZIndex: =26
+
+        Label2_1 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =14
+            Text: ="Delete"
+            Visible: =isShowPopupDelete
+            X: =DeleteConfirmBg_3.X + 30
+            Y: =DeleteConfirmBg_3.Y + 10
+            ZIndex: =27
+
+    CloseNotiIcon_4 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_4); Set(IsError, false);
+        Visible: =NotificationBox_4.Visible
+        Width: =15
+        X: =NotificationBox_4.X + NotificationBox_4.Width - 25
+        Y: =NotificationBox_4.Y + 17.5
+        ZIndex: =30
+
+    NotificationScreen_2 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =31
+
+    LoadingQT2List As LoadingComponent:
+        Visible: =isLoading
+        ZIndex: =32
+
+    FI_GetAllButton As button:
+        Font: =Font.Arial
+        OnSelect: |-
+            =Set(isLoading, true);
+            If(isAllowTab, Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeed), 2, ClearCollect(listItem, listItemCompleted1),
+            3, ClearCollect(listItem, listItemInprogress)), ClearCollect(listItem, listItemFIInactive));
+            Concurrent(
+            ClearCollect(listItemActionNeed,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                resKeyOpenAll.open,
+                resKeyOpenAll.close,
+                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                PageSizeNumber,currentPageIndex,
+                If(Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActionNeed, "," & "'" & value & "'")) - 1), "''"),
+                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                 currenUserV2.id, isActionNeeded, isInIC,
+                  envDEV,envTEST, envUAT1, envUAT2);
+            ),
+            ClearCollect(listItemInprogress,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                resKeyOpenAll.open,
+                resKeyOpenAll.close,
+                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                PageSizeNumber,currentPageIndex,
+                If(Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInprogess, "," & "'" & value & "'")) - 1), "''"),
+                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                 currenUserV2.id, isActionNeeded, isInIC,
+                  envDEV,envTEST, envUAT1, envUAT2);
+            ),
+            ClearCollect(listItemCompleted1,'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                resKeyOpenAll.open,
+                resKeyOpenAll.close,
+                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                PageSizeNumber,currentPageIndex,
+                If(Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusCompleted, "," & "'" & value & "'")) - 1), "''"),
+                If(isAllowTab, "ACTIVE", "INACTIVE"),
+                 currenUserV2.id, isActionNeeded, isInIC,
+                  envDEV,envTEST, envUAT1, envUAT2);
+            ),
+            ClearCollect(listItemFIInactive, 'TVS->FindAllWithFilterPagingSortingProposal_Process3-V1'.Run(
+                resKeyOpenAll.open,
+                resKeyOpenAll.close,
+                If(IsBlank(StatusSelectedArray) || IsEmpty(StatusSelectedArray), "''", Right(Concat(StatusSelectedArray, "," & "'" & value & "'"), Len(Concat(StatusSelectedArray, "," & "'" & value & "'")) - 1)),
+                Text(dateFromFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                Text(dateToFilterVar, "yyyy-mm-dd hh:mm:ss"),
+                If(IsBlank(input_searchAll.Text), "", Trim(Text(input_searchAll.Text))),
+                PageSizeNumber,currentPageIndex,
+                If(Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusInActive, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusInActive, "," & "'" & value & "'")) - 1), "''"),
+                If(false, "ACTIVE", "INACTIVE"),
+                 currenUserV2.id, isActionNeeded, isInIC,
+                  envDEV,envTEST, envUAT1, envUAT2)
+            ));
+            If(isAllowTab, Switch(DealDetailTab, 1, ClearCollect(listItem, listItemActionNeed), 2, ClearCollect(listItem, listItemCompleted1),
+            3, ClearCollect(listItem, listItemInprogress)), ClearCollect(listItem, listItemFIInactive));
+            ClearCollect(listRes,listItem.listItem);
+            Set(pageCount,First(listItem.pageCount).pageCount);
+            
+            Set(isLoading, false);
+            //pageIndex
+            Set(maxList,[1,2,3,4]);
+            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+            ClearCollect(listPageIndex, pageIndexFirst);
+            ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+        Text: ="Button"
+        Visible: =false
+        X: =40
+        Y: =40
+        ZIndex: =33
+
+    CreateProposalPopup As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =33
+
+        CreateProposalPopupBack As rectangle:
+            Fill: =RGBA(166, 166, 166, 0.5)
+            Height: =App.Height
+            Visible: =isShowCreateProposalPopup
+            Width: =App.Width
+            ZIndex: =6
+
+        CreateProposalPopupBg As htmlViewer:
+            Font: =Font.Arial
+            Height: =330
+            HtmlText: |-
+                ="<div style='width: calc(100% - 10px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowCreateProposalPopup
+            Width: =If(Parent.Width > 600, 600, Parent.Width)
+            X: =If(Parent.Width > 600, App.Width / 2 - Self.Width / 2, 5)
+            Y: =If(Parent.Width > 600, 72, (App.Height - Self.Height) / 2)
+            ZIndex: =7
+
+        CreateProposal_Title As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =43
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Create proposal"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposalPopupBg.X + 20
+            Y: =CreateProposalPopupBg.Y + 10
+            ZIndex: =8
+
+        CreateProposalName_Title As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =43
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10.5
+            Text: ="Proposal name"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposal_Title.X
+            Y: =CreateProposal_Title.Y + CreateProposal_Title.Height + 10
+            ZIndex: =9
+
+        CreateProposalName_Input As text:
+            BorderColor: =If(isSubmited && (IsBlank(Self.Text) || Len(Self.Text) > 150 || Len(Trim(Self.Text)) = 0), RGBA(255, 0, 0, 1), RGBA(191, 191, 192, 1))
+            BorderThickness: =1
+            Default: =
+            FocusedBorderColor: =Self.HoverBorderColor
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HintText: =""
+            HoverFill: =RGBA(186, 202, 226, 0)
+            Size: =If(App.Width > 600, 10.5, 12)
+            Visible: =isShowCreateProposalPopup
+            Width: =CreateProposalPopupBg.Width - 50
+            X: =CreateProposalName_Title.X
+            Y: =CreateProposalName_Title.Y + CreateProposalName_Title.Height
+            ZIndex: =10
+
+        CreateProposalEntity_Title As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =43
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10.5
+            Text: ="Division/Entity"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposal_Title.X
+            Y: =CreateProposalName_Input.Y + CreateProposalName_Input.Height + 10
+            ZIndex: =11
+
+        CreateProposalCreateButton As button:
+            BorderThickness: =0
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =If(!IsBlank(CreateProposalName_Input.Text) && !IsBlank(PaymentFrequencyDropdown_1.Text) && (Len(CreateProposalName_Input.Text) <= 150 && Len(Trim(CreateProposalName_Input.Text)) > 0),
+                Set(isCreateProposalInfo, true);
+                Set(isProposalView, false);
+                Set(proposalInfoEdit, Blank());
+                Set(isShowCreateProposalPopup, false);
+                Navigate(DetailProposal,ScreenTransition.Fade), Set(isSubmited, true));
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Create"
+            Visible: =isShowCreateProposalPopup
+            Width: =120
+            X: =CreateProposalPopupBg.X + CreateProposalPopupBg.Width - 150
+            Y: =CreateProposalPopupBg.Y + CreateProposalPopupBg.Height - 70
+            ZIndex: =12
+
+        CreateProposalCancelButton As button:
+            BorderThickness: =0
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: =Set(isShowCreateProposalPopup, false)
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Cancel"
+            Visible: =isShowCreateProposalPopup
+            Width: =120
+            X: =CreateProposalCreateButton.X - 130
+            Y: =CreateProposalPopupBg.Y + CreateProposalPopupBg.Height - 70
+            ZIndex: =13
+
+        CreateProposalPopupCloseIcon As icon.Cancel:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: =Set(isShowCreateProposalPopup, false)
+            Visible: =isShowCreateProposalPopup
+            Width: =20
+            X: =CreateProposalPopupBg.X + CreateProposalPopupBg.Width - 50
+            Y: =CreateProposal_Title.Y + 10
+            ZIndex: =14
+
+        PaymentFrequencyDropdown_1 As button:
+            Align: =Align.Left
+            BorderColor: =If(reportYearShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+            BorderThickness: =1
+            Color: =RGBA(82, 82, 82, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            FocusedBorderColor: =RGBA(0, 18, 107, 1)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =layout_ip_payment.Height
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(241, 244, 249, 1)
+            OnSelect: =Set(FIPFShowDropdown, !FIPFShowDropdown)
+            PaddingLeft: =15
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            RadiusBottomLeft: =5
+            RadiusBottomRight: =5
+            RadiusTopLeft: =5
+            RadiusTopRight: =5
+            Size: =10.5
+            Text: =FIDivisionValue
+            Visible: =isShowCreateProposalPopup
+            Width: =CreateProposalName_Input.Width
+            X: =CreateProposalEntity_Title.X
+            Y: =CreateProposalEntity_Title.Y + CreateProposalEntity_Title.Height
+            ZIndex: =15
+
+        PaymentFrequencyChevron_1 As htmlViewer:
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                =If(reportYearShowDropdown,
+                "<div style="""&If(!isDisable, "cursor: pointer")&"""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                <g clip-path=""url(#clip0_1760_3688)"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                </g>
+                <defs>
+                <clipPath id=""clip0_1760_3688"">
+                <rect width=""24"" height=""24"" fill=""white""/>
+                </clipPath>
+                </defs>
+                </svg></div>"
+                , "<div style="""&If(!isDisable, "cursor: pointer")&"""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                </svg></div>")
+            OnSelect: =If(!isDisable, Select(PaymentFrequencyDropdown_1))
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =isShowCreateProposalPopup
+            Width: =35
+            X: =PaymentFrequencyDropdown_1.X + PaymentFrequencyDropdown_1.Width - If(App.Width > 800, 40, 30)
+            Y: =PaymentFrequencyDropdown_1.Y + 5
+            ZIndex: =16
+
+        SearchCloseDropdown_14 As rectangle:
+            Fill: =RGBA(255, 255, 255, 0)
+            Height: =App.Height
+            OnSelect: |-
+                =Set(FIIssuerShowDropdown, false);
+                Set(FITypeShowDropdown, false);
+                Set(FILimitShowDropdown, false);
+                Set(FIPFShowDropdown, false);
+                If(IsBlank(issuerObjectDetail), ClearCollect(issuerObjectDetail, issuerObjectDetailLast));
+            Visible: =isShowCreateProposalPopup&& (FIPFShowDropdown)
+            Width: =Parent.Width
+            ZIndex: =17
+
+        "FI_PaymentFrequencyItems_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =0.5
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+            Items: |-
+                =If(
+                    "TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                    ["TVS-Treasury", "TVAM-Asset Management"],
+                    "TVS" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Treasury" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                    ["TVS-Treasury"],
+                    "TVAM" in LookUp(currenUserV2.permissionList,process_code = "Process3",company) && "Asset Management" in LookUp(currenUserV2.permissionList,process_code = "Process3", division),
+                    ["TVAM-Asset Management"],
+                    [""]
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =FIPFShowDropdown && isShowCreateProposalPopup
+            Width: =PaymentFrequencyDropdown_1.Width
+            X: =PaymentFrequencyDropdown_1.X
+            Y: =PaymentFrequencyDropdown_1.Y + 45
+            ZIndex: =18
+
+            Button6_91 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =If(FILimitValue = ThisItem.Value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |-
+                    =Set(FIDivisionValue, ThisItem.Value);
+                    Set(FIPFShowDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedColor: =Self.Color
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.Value
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+

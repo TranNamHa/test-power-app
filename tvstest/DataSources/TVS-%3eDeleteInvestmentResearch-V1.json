@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "1124b7e9-c71a-4b3a-8152-b0a813d94c2c",
+    "Name": "TVS->DeleteInvestmentResearch-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0eea303a-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

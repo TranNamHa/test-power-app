@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "d002e755-a499-4290-87b0-678c5e735a14",
+    "Name": "TVS->CreateProposalBrokeOMSProcess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "098c4780-09b5-ee11-a568-6045bd58b6cb"
+  }
+]

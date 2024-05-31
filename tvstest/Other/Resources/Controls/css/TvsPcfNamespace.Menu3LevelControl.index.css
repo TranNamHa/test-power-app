@@ -1,0 +1,18 @@
+.addPaddingInto {
+    padding: 5px 10px;
+    padding-left: calc((var(--fluent-TreeItem--level, 1) - 1) * var(--spacingHorizontalXXL) + 10px) !important;
+    outline: none !important;
+}
+
+.removeHoverAndPointer:hover {
+    color: inherit !important;
+    background-color: inherit !important;
+}
+
+.customTreeItemLayoutLv3 > .fui-TreeItemLayout__main {
+    width: 100%;
+}
+
+.selectedTreeItemLayout {
+    background-color: #D1DDFF
+}

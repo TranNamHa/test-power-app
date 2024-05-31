@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "8326a743-5c27-4b77-8855-2ea9168e6446",
+    "Name": "TVS->CreateIssuerList-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "fa88da6d-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

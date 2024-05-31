@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "9a57a3f1-3a22-440e-b10c-a6d6bada860b",
+    "Name": "TVS->CreateUpdatePevcDealInfo-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a3dac1f4-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

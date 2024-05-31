@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "50997068-395d-4210-94fb-1311d5d7cd16",
+    "Name": "TVS->GetCurrentUser-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a8ea3cfb-dca2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "f02f1b31-03cd-411a-8323-d88c322e1b84",
+    "Name": "Copyof-TVS->InsertUpdateRecordsRI",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0b69b541-749d-ee11-be37-6045bd58b6cb"
+  }
+]

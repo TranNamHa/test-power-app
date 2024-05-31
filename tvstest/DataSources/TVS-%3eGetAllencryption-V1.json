@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "1908daa4-4aa2-4a9b-bbe3-745f5eaf3f0f",
+    "Name": "TVS->GetAllencryption-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "d2b39c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

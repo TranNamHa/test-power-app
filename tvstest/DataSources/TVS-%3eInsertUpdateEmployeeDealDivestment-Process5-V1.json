@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "58a8ea77-6ba6-43f4-bc0e-347ab2dfecb5",
+    "Name": "TVS->InsertUpdateEmployeeDealDivestment-Process5-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "1b53064a-deb8-ee11-9078-6045bd58b6cb"
+  }
+]

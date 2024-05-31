@@ -1,0 +1,293 @@
+WelcomePage As screen:
+    Fill: |-
+        =RGBA(248, 248, 249, 1)
+        // Last edited tung le 21/3 1h10pm
+    OnVisible: |-
+        =Set(ShowSubMenu, 0);
+        Set(MenuSelect,"");
+        Set(MenuSelect2,"");
+        Set(HeaderText,"");
+        // ----- Notification --------
+        Set(ShowNotification,false);
+        Reset(Timer1_13);
+        Switch(ShowNotificationCheck,
+        "ACCESS_DENIED_PROPOSAL", Set(IsError, true);Set(NoticationText,"Your account does not have permission to access this link");UpdateContext({ShowNotification: true}),
+        "ACCESS_DENIED_IR", Set(IsError, true);Set(NoticationText,"Your account does not have permission to access this link");UpdateContext({ShowNotification: true})
+        );
+        Set(ShowNotificationCheck, "");
+        // last edited tung le 22/2 7h00pm
+
+    bg_1 As image:
+        Height: =App.Height - HeaderDashboard_1.Height
+        Image: =If(App.Width > 1100, desktop_newbg, App.Width > 600, ipad_newbg, mobile_newbg)
+        ImagePosition: =ImagePosition.Center
+        Width: =If(App.Width > 600, If(MobileShowMenu, App.Width - MenuItemsSideBar_13.Width,App.Width - MenuItemsSideBar_Small_5.Width), App.Width )
+        X: =If(App.Width > 600, If(MobileShowMenu, MenuItemsSideBar_13.Width, MenuItemsSideBar_Small_13.Width),0)
+        Y: =HeaderDashboard_1.Y + HeaderDashboard_1.Height
+        ZIndex: =1
+
+    HeaderDashboard_1 As Header:
+        ZIndex: =2
+
+    MenuItemsSideBar_13 As MenuItemsSideBar:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_13.IconDasboard,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_13.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_13.IconSettings,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_13.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_13.IconDasboard,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_13.IconDasboard,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_13.IconSettings,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_13.IconSettings,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_13.IconFile,
+                            MenuScreenNavigate: Decentralization,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =3
+
+    MenuItemsSideBar_Small_13 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_13.IconDasboard,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_13.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_13.IconSettings,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconDasboard,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconDasboard,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_13.IconSettings,
+                    MenuScreenNavigate: WelcomePage,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_13.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_13.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: WelcomePage,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_13.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 600 && !MobileShowMenu
+        Y: =56
+        ZIndex: =4
+
+    NotificationScreen_11 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =5
+
+    LoadingComponent_7 As LoadingComponent:
+        Visible: =isLoading
+        ZIndex: =6
+
+    NotificationBox_24 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =12
+        Text: =NoticationText
+        Visible: =Timer1_25.Value <> 0
+        Width: =300
+        X: =App.Width - 305
+        Y: =25
+        ZIndex: =7
+
+    CloseNotiIcon_24 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =//Reset(Timer1_13); Set(IsError, false);
+        Visible: =NotificationBox_24.Visible
+        Width: =15
+        X: =NotificationBox_24.X + NotificationBox_24.Width - 25
+        Y: =NotificationBox_24.Y + 17.5
+        ZIndex: =8
+
+    Timer1_25 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_25); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =1155
+        Y: =612
+        ZIndex: =9
+

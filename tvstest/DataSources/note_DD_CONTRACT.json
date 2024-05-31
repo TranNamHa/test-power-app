@@ -1,0 +1,9 @@
+[
+  {
+    "IsComponentScoped": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "Name": "note_DD_CONTRACT",
+    "Type": "CollectionDataSourceInfo"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "aec37fac-a796-486c-85b4-8593d83f2853",
+    "Name": "TVS->GetEmployeeByDepartment",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "8e9dbc5b-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

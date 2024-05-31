@@ -1,0 +1,20 @@
+LoadingComponent_6 As CanvasComponent:
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =App.Height
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    loadingIcon_3 As image:
+        Image: =spinner
+        X: =Parent.Width / 2 - 50
+        Y: =Parent.Height / 2 - 50
+        ZIndex: =1
+
+    loadingBackground_3 As rectangle:
+        Fill: =RGBA(237, 237, 237, 0.4)
+        Height: =Parent.Height
+        Width: =Parent.Width
+        ZIndex: =2
+

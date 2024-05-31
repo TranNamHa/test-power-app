@@ -1,0 +1,124 @@
+CustomDropdownComponent As CanvasComponent:
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =640
+    Width: =640
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    DropdownContent As button:
+        Align: =Align.Left
+        BorderColor: =
+        BorderThickness: =1
+        Color: =RGBA(0, 0, 0, 1)
+        DisplayMode: =
+        Fill: =RGBA(255, 255, 255, 1)
+        FocusedBorderThickness: =1
+        Font: =Font.Arial
+        FontWeight: =FontWeight.Normal
+        Height: =44
+        HoverColor: =RGBA(0, 0, 0, 1)
+        HoverFill: =RGBA(241, 244, 249, 1)
+        PaddingLeft: =15
+        PaddingRight: =30
+        PaddingTop: =5.27
+        PressedBorderColor: =
+        PressedColor: =
+        PressedFill: =
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =If(App.Width > 800,10.5,12)
+        Text: =
+        Width: =CustomDropdownComponent.Width - 1
+        ZIndex: =1
+
+    ChevronDown As htmlViewer:
+        Font: =Font.Arial
+        Height: =44
+        HtmlText: |-
+            ="<div style="""&If(true, "cursor: pointer")&"; margin-left: 4px; margin-top: 4px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+            <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+            </svg></div>"
+        PaddingRight: =5.27
+        PaddingTop: =5.27
+        Size: =11.60
+        Width: =44
+        X: =595
+        ZIndex: =2
+
+    ChevronUp As htmlViewer:
+        Font: =Font.Arial
+        Height: =44
+        HtmlText: |-
+            ="<div style="""&If(true, "cursor: pointer")&"; margin-left: 4px; margin-top: 4px""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+            <g clip-path=""url(#clip0_1760_3688)"">
+            <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+            </g>
+            <defs>
+            <clipPath id=""clip0_1760_3688"">
+            <rect width=""24"" height=""24"" fill=""white""/>
+            </clipPath>
+            </defs>
+            </svg></div>"
+        PaddingRight: =5.27
+        PaddingTop: =5.27
+        Size: =11.60
+        Width: =44
+        X: =471
+        ZIndex: =3
+
+    "ListItem As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+        '#CopilotOverlayLabel': ="Filtered"
+        DelayItemLoading: =true
+        Height: =CustomDropdownComponent.Height - Self.Y
+        Items: =Sequence(30)
+        Layout: =Layout.Vertical
+        LoadingSpinner: =LoadingSpinner.Data
+        OnSelect: =Collect(Data,ThisItem)
+        TemplatePadding: =0
+        TemplateSize: =42
+        Width: =CustomDropdownComponent.Width - 30
+        X: =DropdownContent.X
+        Y: =DropdownContent.Y+ (DropdownContent.Height * 2) + 20
+        ZIndex: =4
+
+        Label7 As label:
+            Font: =Font.Arial
+            OnSelect: =Select(Parent)
+            Text: =ThisItem.Value
+            X: =205
+            ZIndex: =1
+
+    SearchDropdownContent As text:
+        Default: ="Text input"
+        Font: =Font.Arial
+        Height: =44
+        Width: =CustomDropdownComponent.Width - 1
+        X: =DropdownContent.X
+        Y: =DropdownContent.Y + DropdownContent.Height + 5
+        ZIndex: =6
+
+    SearchDropdownIcon As htmlViewer:
+        Font: =Font.Arial
+        Height: =44
+        HtmlText: |-
+            ="<div style="""&If(true, "cursor: pointer")&"; margin-left: 4px; margin-top: 4px""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+            <g clip-path=""url(#clip0_1760_3688)"">
+            <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+            </g>
+            <defs>
+            <clipPath id=""clip0_1760_3688"">
+            <rect width=""24"" height=""24"" fill=""white""/>
+            </clipPath>
+            </defs>
+            </svg></div>"
+        PaddingRight: =5.27
+        PaddingTop: =5.27
+        Size: =11.60
+        Width: =44
+        X: =596
+        Y: =49
+        ZIndex: =7
+

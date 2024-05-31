@@ -1,0 +1,32 @@
+Loading As CanvasComponent:
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =850
+    Width: =1440
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    Image1_10 As image:
+        Height: =147
+        Image: =loading
+        Width: =178
+        X: =617
+        Y: =290
+        ZIndex: =1
+
+    Rectangle4 As rectangle:
+        Fill: =RGBA(0.2, 0.2, 0.2, 0.2)
+        Height: =850
+        Width: =1440
+        ZIndex: =2
+
+    Label1_2 As label:
+        Font: =Font.Arial
+        Height: =47
+        Size: =15
+        Text: ="Please wait..."
+        Width: =291
+        X: =628
+        Y: =452
+        ZIndex: =3
+

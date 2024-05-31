@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "85ec2dba-1d29-484e-a659-9462ae829eb9",
+    "Name": "TVS->GetApprovalLogProcess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "7e144424-e1b8-ee11-9078-6045bd58b6cb"
+  }
+]

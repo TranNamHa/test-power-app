@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "b66b77a7-e928-45fd-b2c6-f1b06fbf4a39",
+    "Name": "TVS->InsertKeyChangeHistory",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "d0e79294-59b0-ee11-a569-6045bd58b6cb"
+  }
+]

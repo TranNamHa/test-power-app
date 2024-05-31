@@ -1,0 +1,32 @@
+{
+  "components": [
+    {
+      "Capabilities": {
+        "PCFExternalServiceUsageAllowed": false
+      },
+      "ComponentName": "CustomControl",
+      "Identifier": "mstmlc_TvsPcfNamespace.Menu3LevelControl",
+      "IdentifierType": 0
+    },
+    {
+      "Capabilities": {
+        "PCFExternalServiceUsageAllowed": false
+      },
+      "ComponentName": "CustomControl",
+      "Identifier": "mstst_TvsPcfNamespace.StockTableControl",
+      "IdentifierType": 0
+    },
+    {
+      "Capabilities": {
+        "PCFExternalServiceUsageAllowed": false
+      },
+      "ComponentName": "CustomControl",
+      "Identifier": "mstst_TvsPcfNamespace.StockTableControl",
+      "IdentifierType": 0
+    }
+  ],
+  "dataSources": {},
+  "instanceUrl": "https://orgfeaf3c3b.crm5.dynamics.com/",
+  "state": "Configured",
+  "webApiVersion": "v9.0"
+}

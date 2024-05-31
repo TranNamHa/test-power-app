@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "3e05fef6-5aa1-41e6-8455-1836d5165f17",
+    "Name": "TVS->GetAllRoleUser-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "5eb59c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

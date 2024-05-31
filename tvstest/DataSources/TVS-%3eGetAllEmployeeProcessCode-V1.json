@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "d4c577c3-a28a-4e48-ab44-753887ef7327",
+    "Name": "TVS->GetAllEmployeeProcessCode-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "d4b39c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

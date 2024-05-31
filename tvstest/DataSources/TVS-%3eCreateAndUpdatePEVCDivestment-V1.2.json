@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "f792e036-2aed-48b6-9ff9-8290f5c56b08",
+    "Name": "TVS->CreateAndUpdatePEVCDivestment-V1.2",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "f4f0fa43-deb8-ee11-9078-6045bd58b6cb"
+  }
+]

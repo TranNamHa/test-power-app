@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "264c5d0b-a94d-4096-8385-873b799c1c13",
+    "Name": "TVS->GetDealEmployeeDivestment-Process5-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "fe52064a-deb8-ee11-9078-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,1077 @@
+"ChangeKeys As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: =RGBA(248, 248, 249, 1)
+    OnVisible: |-
+        =Set(MenuSelect, "Admin");
+        Set(MenuSelect2, "Change keys");
+        Set(HeaderText, "");
+        Concurrent(ClearCollect(AllKeys, 'TVS->GetAllSecretKeys'.Run("TEST")), 
+        ClearCollect(KeysUsed, 'TVS->GetSecretKeysConfiged'.Run()),
+        ClearCollect(KeyChangeHistories, AddColumns('TVS->GetAllKeyChangeHistories'.Run(), process_name, LookUp(ProcessManagement, Code = process_code).Name)));
+        
+        Set(newKeySelected, Blank());
+        Set(currentKeySelected, Blank());
+        Clear(ProcessByKeyUse);
+        Set(serverShowDropdown, false);
+        Set(statusShowDropdown, false);
+        Set(isShowConfirm, false);
+        
+        Set(StatusSelectedValue, "");
+        Set(serverSelectedValue, "");
+        Set(serverShowDropdown, false);
+        Set(statusShowDropdown, false);
+
+    RectQuickActionBar3 As rectangle:
+        Height: =56
+        Width: =Parent.Width
+        ZIndex: =1
+
+    Canvas5 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =Parent.Height - Self.Y
+        Width: =Parent.Width
+        Y: =RectQuickActionBar3.Y + RectQuickActionBar3.Height
+        ZIndex: =2
+
+        DataCard5 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =Parent.Height - 100
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+            WhiteBgQT1_1 As htmlViewer:
+                Font: =Font.Arial
+                Height: =App.Height - 80 
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 15px); height: "&Self.Height - 20&"px; background-color: white; border-radius: 12px;box-shadow: 7px 5px 16px 0px rgba(0, 0, 0, 0.10);
+                    '></div>"
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =11.00
+                Width: =App.Width - Self.X
+                X: =If(App.Width > 800, If(MobileShowMenu, MenuItemsSideBar_ChangeKeys.X + MenuItemsSideBar_ChangeKeys.Width, MenuItemsSideBar_Small_ChangeKeys.X + MenuItemsSideBar_Small_ChangeKeys.Width) + 20, 10)
+                Y: =10
+                ZIndex: =1
+
+            LabelDealInfo_2 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =39
+                LineHeight: =1.8
+                PaddingBottom: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10.5
+                Text: ="Current key"
+                Width: =300
+                X: =WhiteBgQT1_1.X + If(App.Width > 800, 20, 15)
+                Y: =WhiteBgQT1_1.Y + 20
+                ZIndex: =2
+
+            DropDownCurrentKey As button:
+                Align: =Align.Left
+                BorderColor: =If(serverShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =RGBA(255, 255, 255, 1)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: =Set(serverShowDropdown, !serverShowDropdown)
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Size: =10.5
+                Text: =currentKeySelected
+                Width: =If(App.Width > 800, 300, Parent.Width - 60)
+                X: =LabelDealInfo_2.X
+                Y: =LabelDealInfo_2.Y + LabelDealInfo_2.Height
+                ZIndex: =3
+
+            iconServerDropDown_2 As htmlViewer:
+                Height: =44
+                HtmlText: |-
+                    =If(serverShowDropdown,
+                    "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                    <g clip-path=""url(#clip0_1760_3688)"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                    </g>
+                    <defs>
+                    <clipPath id=""clip0_1760_3688"">
+                    <rect width=""24"" height=""24"" fill=""white""/>
+                    </clipPath>
+                    </defs>
+                    </svg></div>"
+                    , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                    </svg></div>")
+                OnSelect: =Set(serverShowDropdown, !serverShowDropdown)
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                Size: =11.60
+                Width: =35
+                X: =DropDownCurrentKey.X + DropDownCurrentKey.Width - Self.Width
+                Y: =DropDownCurrentKey.Y + 5
+                ZIndex: =4
+
+            DropDownNewKey As button:
+                Align: =Align.Left
+                BorderColor: =If(statusShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                BorderThickness: =1
+                Color: =RGBA(82, 82, 82, 1)
+                Fill: =RGBA(255, 255, 255, 1)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: =Set(statusShowDropdown, !statusShowDropdown)
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =5
+                RadiusBottomRight: =5
+                RadiusTopLeft: =5
+                RadiusTopRight: =5
+                Size: =10.5
+                Text: =newKeySelected
+                Width: =DropDownCurrentKey.Width
+                X: =LabelDealInfo_3.X
+                Y: =LabelDealInfo_3.Y + LabelDealInfo_3.Height
+                ZIndex: =5
+
+            iconStatusDropDown_3 As htmlViewer:
+                Height: =44
+                HtmlText: |-
+                    =If(statusShowDropdown,
+                    "<div style=""cursor: pointer""><svg width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"" xmlns=""http://www.w3.org/2000/svg"">
+                    <g clip-path=""url(#clip0_1760_3688)"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M11.2682 8.62347C11.4558 8.436 11.7101 8.33068 11.9752 8.33068C12.2404 8.33068 12.4947 8.436 12.6822 8.62347L18.3392 14.2805C18.4348 14.3727 18.5109 14.4831 18.5633 14.6051C18.6158 14.7271 18.6433 14.8583 18.6445 14.9911C18.6456 15.1238 18.6203 15.2555 18.5701 15.3784C18.5198 15.5013 18.4455 15.613 18.3516 15.7069C18.2577 15.8008 18.1461 15.875 18.0232 15.9253C17.9003 15.9756 17.7686 16.0009 17.6358 15.9997C17.5031 15.9986 17.3718 15.971 17.2498 15.9186C17.1278 15.8662 17.0175 15.79 16.9252 15.6945L11.9752 10.7445L7.02524 15.6945C6.83664 15.8766 6.58404 15.9774 6.32184 15.9751C6.05965 15.9729 5.80883 15.8677 5.62342 15.6823C5.43802 15.4969 5.33285 15.2461 5.33057 14.9839C5.32829 14.7217 5.42908 14.4691 5.61124 14.2805L11.2682 8.62347Z"" fill=""#525252""/>
+                    </g>
+                    <defs>
+                    <clipPath id=""clip0_1760_3688"">
+                    <rect width=""24"" height=""24"" fill=""white""/>
+                    </clipPath>
+                    </defs>
+                    </svg></div>"
+                    , "<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                    <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                    </svg></div>")
+                OnSelect: =Set(statusShowDropdown, !statusShowDropdown)
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                Size: =11.60
+                Width: =35
+                X: =DropDownNewKey.X + DropDownNewKey.Width - Self.Width
+                Y: =DropDownNewKey.Y + 5
+                ZIndex: =6
+
+            LabelDealInfo_3 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =39
+                LineHeight: =1.8
+                PaddingBottom: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10.5
+                Text: ="New key"
+                Width: =259
+                X: =If(App.Width > 800, LabelDealInfo_2.X + LabelDealInfo_2.Width + 10, DropDownCurrentKey.X)
+                Y: =If(App.Width > 800, LabelDealInfo_2.Y, DropDownCurrentKey.Y + DropDownCurrentKey.Height + 10)
+                ZIndex: =9
+
+            TableHListEmp_3 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =Min(WhiteBgQT1_1.Height - Self.Y - 20, TableContent_11.Height + 70)
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =WhiteBgQT1_1.Width - 70
+                X: =WhiteBgQT1_1.X + 27
+                Y: =LabelDealInfo_4.Y + LabelDealInfo_4.Height + 10
+                ZIndex: =10
+
+                Container3_3 As groupContainer.manualLayoutContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    Height: =TableHListEmp_3.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =LabelMainProcedures_1.X + LabelMainProcedures_1.Width
+                    ZIndex: =1
+
+                    TableContent_11 As gallery.variableTemplateHeightGallery:
+                        '#CopilotOverlayLabel': ="Filtered"
+                        BorderColor: =
+                        Height: =Max(Min(Self.AllItemsCount, 10), 1) * Self.TemplateHeight
+                        Items: =SortByColumns(KeyChangeHistories, "no", SortOrder.Ascending)
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =44
+                        Visible: =true 
+                        Width: =Container3_3.Width
+                        Y: =45
+                        ZIndex: =1
+
+                        Rectangle7_3 As rectangle:
+                            Fill: =If(Mod(Value(ThisItem.no), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Height: =Max(NoContent_2.Height, DealNameContent_2.Height, StatusContent_2.Height, 30)
+                            OnSelect: =Select(Parent)
+                            Width: =TableContent_11.Width
+                            ZIndex: =1
+
+                        NoContent_2 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Lato
+                            Height: =DealNameContent_2.Height
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =10
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.no
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelNoTable_2.Width
+                            Y: =2
+                            ZIndex: =2
+
+                        DealNameContent_2 As label:
+                            AutoHeight: =true
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =If(IsBlank(ThisItem.old_key), " ", ThisItem.old_key)
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelDealNameTable_2.Width
+                            X: =NoContent_2.X + NoContent_2.Width
+                            Y: =2
+                            ZIndex: =3
+
+                        StatusContent_2 As label:
+                            Color: |-
+                                =If(ThisItem.status in ["Canceled", "Revised", "Rejected"],
+                                    RGBA(214, 27, 27, 1),
+                                    ThisItem.status in ["Closed"],
+                                    RGBA(11, 201, 75, 1),
+                                    ThisItem.status in ["Pending approval"],
+                                    RGBA(181, 184, 24, 1),
+                                    ThisItem.status in ["Draft"],
+                                    RGBA(98,95,95,1),
+                                    RGBA(181, 184, 24, 1)
+                                )
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =Max(DealNameContent_2.Height,40)
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =20
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =Proper(Substitute(ThisItem.status, "_", " "))
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelStatusTable_2.Width
+                            X: =ServerContent_1.X + ServerContent_1.Width
+                            Y: =2
+                            ZIndex: =4
+
+                        MainProceduresContent_1 As label:
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Arial
+                            Height: =Max(DealNameContent_2.Height,40)
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =7
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =Substitute(ThisItem.created_date, "-", "/")
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelMainProcedures_1.Width
+                            X: =StatusContent_2.X + StatusContent_2.Width
+                            ZIndex: =5
+
+                        ServerContent_1 As label:
+                            Fill: =If(Mod(Value(ThisItem.no), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            Height: =DealNameContent_2.Height
+                            LineHeight: =1.5
+                            OnSelect: =
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =10.5
+                            Text: =ThisItem.current_key
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =LabelServer_1.Width
+                            X: =DealNameContent_2.X + DealNameContent_2.Width
+                            ZIndex: =7
+
+                        DotIcon_3 As htmlViewer:
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<svg xmlns=""http://www.w3.org/2000/svg"" width=""12"" height=""12"" viewBox=""0 0 12 12"" fill=""none"">
+                                  <path d=""M6 9C7.65685 9 9 7.65685 9 6C9 4.34315 7.65685 3 6 3C4.34315 3 3 4.34315 3 6C3 7.65685 4.34315 9 6 9Z"" fill="""&
+                                    Match(
+                                        JSON(
+                                            StatusContent_2.Color ,
+                                            JSONFormat.IgnoreUnsupportedTypes
+                                        ),
+                                        "#[a-fA-F0-9]{6}"
+                                    ).FullMatch
+                                  &"""/>
+                                </svg>"
+                            OnSelect: =Select(Parent)
+                            Width: =30
+                            X: =StatusContent_2.X
+                            ZIndex: =15
+
+                    Hr_14 As rectangle:
+                        BorderColor: =RGBA(191, 191, 192, 1)
+                        Fill: =RGBA(191, 191, 192, 1)
+                        Height: =2
+                        Width: =Container3_3.Width
+                        Y: =LabelNoTable_2.Y + LabelNoTable_2.Height
+                        ZIndex: =15
+
+                    _Label1_4 As label:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Size: =10.5
+                        Text: ="Empty data."
+                        Visible: =TableContent_11.AllItemsCount = 0 && !isLoading
+                        Width: =Hr_14.Width
+                        X: =Hr_14.X
+                        Y: =Hr_14.Y + 5
+                        ZIndex: =16
+
+                    HeaderTableIB_1 As group:
+                        Height: =5
+                        Width: =5
+                        X: =60
+                        Y: =60
+                        ZIndex: =17
+
+                        LabelNoTable_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =0
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="No"
+                            Width: =40
+                            ZIndex: =2
+
+                        LabelDealNameTable_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Old key"
+                            Width: =If(App.Width > 800, 250, 250)
+                            X: =LabelNoTable_2.X + LabelNoTable_2.Width
+                            Y: =LabelNoTable_2.Y
+                            ZIndex: =3
+
+                        LabelServer_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingLeft: =16
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Current key"
+                            Width: =If(App.Width > 800, 250, 250)
+                            X: =LabelDealNameTable_2.X + LabelDealNameTable_2.Width
+                            Y: =LabelNoTable_2.Y
+                            ZIndex: =4
+
+                        LabelStatusTable_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Status"
+                            Width: =200
+                            X: =LabelServer_1.X + LabelServer_1.Width
+                            Y: =LabelNoTable_2.Y
+                            ZIndex: =5
+
+                        LabelMainProcedures_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            PaddingBottom: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Created date"
+                            Width: =200
+                            X: =LabelStatusTable_2.X + LabelStatusTable_2.Width
+                            Y: =LabelNoTable_2.Y
+                            ZIndex: =6
+
+            LabelDealInfo_4 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =39
+                LineHeight: =1.8
+                PaddingBottom: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10.5
+                Text: ="Key changed historires"
+                Width: =300
+                X: =WhiteBgQT1_1.X + 20
+                Y: =If(Label2_20.Visible && Label2_20.Height > 0, Label2_20.Y + Label2_20.Height + 10, DropDownNewKey.Y + DropDownNewKey.Height + 10)
+                ZIndex: =11
+
+            CreateButtonContainer_1 As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =11
+
+                ButtonCreate_1 As button:
+                    BorderThickness: =0
+                    DisplayMode: =If("EDIT" in LookUp(currenUserV2.permissionList, process_code = "Admin5", action),DisplayMode.Edit, DisplayMode.Disabled)
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Lighter
+                    Height: =44
+                    OnSelect: |+
+                        =Set(isShowConfirm, true);
+                        
+                    PaddingBottom: =10
+                    PaddingLeft: =30
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill 
+                    RadiusBottomLeft: =8
+                    RadiusBottomRight: =8
+                    RadiusTopLeft: =8
+                    RadiusTopRight: =8
+                    Size: =10.5
+                    Text: ="Save"
+                    Visible: =currentKeySelected <> Blank() && currentKeySelected <> "" && newKeySelected <> Blank() && newKeySelected <> ""
+                    Width: =100
+                    X: =If(App.Width > 800, DropDownNewKey.X + DropDownNewKey.Width + 10, DropDownNewKey.X + DropDownNewKey.Width - Self.Width)
+                    Y: =If(App.Width > 800, DropDownNewKey.Y, DropDownNewKey.Y + DropDownNewKey.Height + 10)
+                    ZIndex: =7
+
+                Icon2_3 As icon.Add:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.Check
+                    OnSelect: =Select(ButtonCreate_1);
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Visible: =currentKeySelected <> Blank() && currentKeySelected <> "" && newKeySelected <> Blank() && newKeySelected <> ""
+                    Width: =20
+                    X: =ButtonCreate_1.X + 12
+                    Y: =ButtonCreate_1.Y + ButtonCreate_1.Height*0.5 - Self.Height*0.5
+                    ZIndex: =8
+
+            Label2_20 As label:
+                Font: =Font.Arial
+                Height: =If(Len(Self.Text) > 165, 50, 35)
+                Overflow: =Overflow.Scroll
+                PaddingTop: =10
+                Size: =10.5
+                Text: |-
+                    =If(Len(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & "; ")) > 0, "Processes are using the current key: " & Left(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & "; "), Len(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & "; ")) -2))
+                Visible: =Len(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & "; ")) > 0
+                Width: =1203
+                X: =LabelDealInfo_2.X
+                Y: =ButtonCreate_1.Y + ButtonCreate_1.Height
+                ZIndex: =12
+
+            Clear_DropDownCurrentKey_Icon As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =Set(currentKeySelected, Blank());
+                    Clear(ProcessByKeyUse);
+                Visible: =DropDownCurrentKey.Visible && !IsBlank(DropDownCurrentKey.Text)
+                Width: =15
+                X: =DropDownCurrentKey.X + DropDownCurrentKey.Width - 43
+                Y: =DropDownCurrentKey.Y + 13
+                ZIndex: =13
+
+            Clear_DropDownNewKey_Icon As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: =Set(newKeySelected, Blank());
+                Visible: =DropDownNewKey.Visible && !IsBlank(DropDownNewKey.Text)
+                Width: =15
+                X: =DropDownNewKey.X + DropDownNewKey.Width - 43
+                Y: =DropDownNewKey.Y + 13
+                ZIndex: =14
+
+            SearchCloseDropdown_15 As rectangle:
+                Fill: =RGBA(255, 255, 255, 0)
+                Height: =App.Height - 56
+                OnSelect: |-
+                    =Set(serverShowDropdown, false);
+                    Set(statusShowDropdown, false)
+                Visible: =statusShowDropdown || serverShowDropdown
+                Width: =Parent.Width
+                ZIndex: =15
+
+            "Gl_CurentKey_DropDown As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =0.5
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+                Items: =If(newKeySelected <> Blank(), AddColumns(Filter(KeysUsed, name <> newKeySelected), value, name), AddColumns(KeysUsed, value, name))
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =serverShowDropdown
+                Width: =DropDownCurrentKey.Width
+                X: =DropDownCurrentKey.X
+                Y: =DropDownCurrentKey.Y + 50
+                ZIndex: =16
+
+                Button6_92 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =If(serverSelectedValue = ThisItem.value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: |-
+                        =Set(currentKeySelected, ThisItem.value);
+                        Set(serverShowDropdown, false);
+                        ClearCollect(ProcessByKeyUse, AddColumns('TVS->GetKeyUseByProcess'.Run(currentKeySelected), process_name, LookUp(ProcessManagement, Code = process_code).Name, No, LookUp(ProcessManagement, Code = process_code).No));
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10.5
+                    Text: =ThisItem.value
+                    Width: =Parent.Width
+                    X: =0.00
+                    ZIndex: =1
+
+            "Gl_NewKey_DropDown As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                '#CopilotOverlayLabel': ="Filtered"
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =0.5
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+                Items: =If(currentKeySelected <> Blank(), AddColumns(Filter(AllKeys, name <> currentKeySelected), value, name), AddColumns(AllKeys, value, name))
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplatePadding: =0
+                TemplateSize: =40
+                Visible: =statusShowDropdown
+                Width: =DropDownNewKey.Width
+                X: =DropDownNewKey.X
+                Y: =DropDownNewKey.Y + 50
+                ZIndex: =17
+
+                Button6_93 As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =If(StatusSelectedValue = ThisItem.value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: |-
+                        =Set(newKeySelected, ThisItem.value);
+                        Set(statusShowDropdown, false);
+                    PaddingLeft: =15
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedColor: =Self.Color
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10.5
+                    Text: =ThisItem.value
+                    Width: =Parent.Width
+                    X: =0.00
+                    ZIndex: =1
+
+    Header_10 As Header:
+        ZIndex: =3
+
+    MenuItemsSideBar_ChangeKeys As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_ChangeKeys.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_ChangeKeys.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_ChangeKeys.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_ChangeKeys.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_ChangeKeys.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =4
+
+    MenuItemsSideBar_Small_ChangeKeys As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_ChangeKeys.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_ChangeKeys.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_ChangeKeys.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_ChangeKeys.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =5
+
+    Timer1_32 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_32); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =60
+        Y: =627
+        ZIndex: =12
+
+    NotificationBox_30 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_32.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =60
+        ZIndex: =13
+
+    CloseNotiIcon_30 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_32); Set(IsError, false);
+        Visible: =NotificationBox_30.Visible
+        Width: =15
+        X: =NotificationBox_30.X + NotificationBox_30.Width - 25
+        Y: =NotificationBox_30.Y + 17.5
+        ZIndex: =14
+
+    NotificationScreen_IR_6 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =15
+
+    LoadingQT2List_21 As LoadingComponent_4:
+        Visible: =isLoading
+        ZIndex: =16
+
+    Group1_5 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =18
+
+        Rectangle3_4 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowConfirm
+            Width: =Parent.Width
+            ZIndex: =6
+
+        DeleteConfirmBg_24 As htmlViewer:
+            Height: =If(Parent.Width > 600, 300, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowConfirm
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_24.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =7
+
+        lblconfirm As label:
+            Font: =Font.Arial
+            Height: =45
+            Size: =10.5
+            Text: ="Enter email to receive notification"
+            Visible: =isShowConfirm
+            Width: =406
+            X: =DeleteConfirmBg_24.X + 30
+            Y: =DeleteConfirmBg_24.Y + 15
+            ZIndex: =8
+
+        btnCancel_1 As button:
+            BorderColor: =RGBA(214, 27, 27, 1)
+            BorderThickness: =1
+            Color: =RGBA(214, 27, 27, 1)
+            DisabledBorderColor: =RGBA(255, 0, 0, 1)
+            DisabledColor: =RGBA(214, 27, 27, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(255, 255, 255, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Lighter
+            Height: =44
+            HoverColor: =RGBA(214, 27, 27, 1)
+            HoverFill: =
+            OnSelect: |-
+                =Reset(inputEmail);
+                Set(isShowConfirm, false)
+            PressedBorderColor: =Color.Red
+            PressedColor: =RGBA(214, 27, 27, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowConfirm
+            Width: =120
+            X: =DeleteConfirmBg_24.X + DeleteConfirmBg_24.Width - 280
+            Y: =DeleteConfirmBg_24.Y + DeleteConfirmBg_24.Height - 70
+            ZIndex: =9
+
+        btnOk As button:
+            DisabledBorderColor: =RGBA(201, 44, 44, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(214, 27, 27, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Lighter
+            Height: =44
+            HoverFill: =
+            OnSelect: |-
+                =If(CountIf(Split(inputEmail.Text, ";"), !IsMatch(Value, "^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$") && !IsBlank(inputEmail.Text)) > 0,
+                Notify("Please enter the correct format", NotificationType.Error),
+                
+                Clear(DataInput);
+                Set(isLoading, true);
+                Set(isShowConfirm, false);
+                ClearCollect(DataInput, "'" & GUID() & "', "
+                        // & "'" & item.process_code & "', "
+                        & "'" & DropDownCurrentKey.Text & "', "
+                        & "'" & DropDownNewKey.Text & "', "
+                        & "'" & User().Email & "', "
+                        & "'" & inputEmail.Text & "', "
+                        & "'" & "REQUESTED" & "'");
+                Set(inputToString, Concat(DataInput, "(" & Value & "), "));
+                Set(dataToStringRemoveLastChar, If(Len(inputToString) > 0, Left(inputToString, Len(inputToString) -2), ""));
+                
+                Set(resultChangeKey, 'TVS->InsertKeyChangeHistory'.Run(If(IsBlank(dataToStringRemoveLastChar),"",dataToStringRemoveLastChar),If(IsBlank( DropDownCurrentKey.Text),"", DropDownCurrentKey.Text), If(IsBlank(DropDownNewKey.Text),"",DropDownNewKey.Text)));
+                
+                If(resultChangeKey.result = "200", Notify("Key change request successfully for process: " & 
+                Left(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & ", "), Len(Concat(SortByColumns(ProcessByKeyUse, "No"), process_name & ", "))-2), NotificationType.Success), 
+                Notify("The request key is already present in another request", NotificationType.Warning));
+                
+                Concurrent(
+                ClearCollect(KeyChangeHistories, AddColumns('TVS->GetAllKeyChangeHistories'.Run(), process_name, LookUp(ProcessManagement, Code = process_code).Name)),
+                ClearCollect(KeysUsed, 'TVS->GetSecretKeysConfiged'.Run()));
+                Set(isLoading, false);
+                
+                Set(newKeySelected, Blank());
+                Set(currentKeySelected, Blank());
+                Reset(inputEmail);
+                Clear(ProcessByKeyUse));
+            PressedColor: =Color.White
+            PressedFill: =RGBA(214, 27, 27, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowConfirm
+            Width: =120
+            X: =DeleteConfirmBg_24.X + DeleteConfirmBg_24.Width - 150
+            Y: =DeleteConfirmBg_24.Y + DeleteConfirmBg_24.Height - 70
+            ZIndex: =10
+
+        inputEmail As text:
+            BorderColor: =RGBA(116, 116, 116, 1)
+            BorderThickness: =1
+            Default: =""
+            Font: =Font.Arial
+            Height: =151
+            HintText: |-
+                ="Ex: abc@gmail.com;bcd@tvs.vn"
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =5
+            PaddingTop: =10
+            PressedColor: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Visible: =isShowConfirm
+            Width: =490
+            X: =DeleteConfirmBg_24.X + 30
+            Y: =lblconfirm.Y + lblconfirm.Height
+            ZIndex: =11
+

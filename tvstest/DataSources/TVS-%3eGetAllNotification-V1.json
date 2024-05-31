@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "c029a219-1631-4cfe-9ef6-efcda0bd8e4f",
+    "Name": "TVS->GetAllNotification-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "29b39c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

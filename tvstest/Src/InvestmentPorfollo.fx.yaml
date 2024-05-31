@@ -1,0 +1,2781 @@
+"InvestmentPorfollo As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+    Fill: =RGBA(248, 248, 249, 1)
+    OnVisible: |-
+        =Set(MenuSelect,"Business process");
+        UpdateContext({ShowNotification: false});
+        Set(MenuSelect2,If(App.Width > 800, "Process of Private Equity Investment", "PEVC"));
+        Set(HeaderText,"Investment Portfolio");
+        Set(portfolioCompanySearchValue, "");
+        Reset(IssuerList_SearchInput_1);
+        Set(isLoading, true);
+        ClearCollect(PEVCInvalidRows, []);
+        ClearCollect(investmentPorfolioDataAdd, []);
+        ClearCollect(investmentPortfolioList, 'TVS->FindAlllInvestmentPortfolio'.Run(resKeyOpenAll.open,resKeyOpenAll.close).listItem);
+        Set(isLoading, false);
+        ClearCollect(investmentPorfolioData, []);
+        ForAll(investmentPortfolioList,
+            Collect(investmentPorfolioData, {
+                company: ThisRecord.company_name,
+                original_investment_cost: {
+                    total: Text(ThisRecord.total_debt_investment_cost+ThisRecord.total_equity_investment_cost),
+                    equity: Text(ThisRecord.total_equity_investment_cost),
+                    debt: Text(ThisRecord.total_debt_investment_cost),
+                    ownership: Text(ThisRecord.total_percentage_ownership_investment_cost)
+                },
+                cost_of_divested_portion: {
+                    total: Text(ThisRecord.total_divested_equity+ThisRecord.total_divested_debt),
+                    equity: Text(ThisRecord.total_divested_equity),
+                    debt: Text(ThisRecord.total_divested_debt),
+                    ownership: Text(ThisRecord.total_divested_percentage_ownership)
+                },
+                net_equity_debit_investment_cost: {
+                    total:Text((ThisRecord.total_debt_investment_cost+ThisRecord.total_equity_investment_cost)-(ThisRecord.total_divested_equity+ThisRecord.total_divested_debt)),
+                    equity: Text(ThisRecord.total_equity_investment_cost-ThisRecord.total_divested_equity),
+                    debt: Text(ThisRecord.total_debt_investment_cost-ThisRecord.total_divested_debt),
+                    ownership: Text(ThisRecord.total_percentage_ownership_investment_cost-ThisRecord.total_divested_percentage_ownership)
+                }
+            })
+        );
+
+    RectQuickActionBar8_1 As rectangle:
+        Height: =56
+        Width: =Parent.Width
+        ZIndex: =1
+
+    Canvas10_1 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =Parent.Height - Self.Y
+        Width: =Parent.Width
+        Y: =RectQuickActionBar8_1.Y + RectQuickActionBar8_1.Height
+        ZIndex: =2
+
+        DataCard10_1 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =Parent.Height - 100
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+            White_Background_11 As htmlViewer:
+                Font: =Font.Arial
+                Height: =IP_Container.Y + IP_Container.Height - Self.Y + 20
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white;border-radius: 12px;box-shadow: "& If(Parent.Width > 600, "7px 5px 7px 0px rgba(0, 0, 0, 0.10)", "none") & ";
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =14.00
+                Width: =If(App.Width > 800, App.Width - If(MobileShowMenu, MenuItemsSideBar_19.Width, MenuItemsSideBar_Small_15.Width) - 5, App.Width + 10)
+                X: =SubHeaderBg_9.X + If(App.Width > 800, 10, 0)
+                Y: =SubHeaderBg_9.Height + 10
+                ZIndex: =1
+
+            IP_Container As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =IP_Data.Height + 120 + 44
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =White_Background_11.Width - 50
+                X: =White_Background_11.X + If(App.Width > 600, 20, 15)
+                Y: =IssuerList_SearchInput_1.Y + IssuerList_SearchInput_1.Height + 10
+                ZIndex: =2
+
+                Container15_1 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =headerBack4.X + headerBack4.Width
+                    ZIndex: =1
+
+                    "IP_Data As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        DelayItemLoading: =true
+                        Height: =Min(Self.AllItemsCount, 10) * Self.TemplateHeight
+                        Items: =Filter(investmentPorfolioData, Text(portfolioCompanySearchValue) in ThisRecord.company)
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        TemplatePadding: =0
+                        TemplateSize: =44
+                        Width: =headerBack4_4.X + headerBack4_4.Width
+                        X: =headerBack1.X
+                        Y: =headerBack1_1.Y + headerBack1_1.Height
+                        ZIndex: =34
+
+                        headerBack1_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack1.Width
+                            X: =headerBack1.X
+                            ZIndex: =3
+
+                        headerBack2_5 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack1.X + headerBack1.Width
+                            ZIndex: =4
+
+                        headerBack2_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_5.X + headerBack2_5.Width
+                            ZIndex: =5
+
+                        headerBack2_7 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_6.X + headerBack2_6.Width
+                            ZIndex: =6
+
+                        headerBack2_8 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_7.X + headerBack2_7.Width
+                            ZIndex: =7
+
+                        headerBack3_5 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_8.X + headerBack2_8.Width
+                            ZIndex: =8
+
+                        headerBack3_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_5.X + headerBack3_5.Width
+                            ZIndex: =9
+
+                        headerBack3_7 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_6.X + headerBack3_6.Width
+                            ZIndex: =10
+
+                        headerBack3_8 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_7.X + headerBack3_7.Width
+                            ZIndex: =11
+
+                        headerBack4_5 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_8.X + headerBack3_8.Width
+                            ZIndex: =12
+
+                        headerBack4_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_5.X + headerBack4_5.Width
+                            ZIndex: =13
+
+                        headerBack4_7 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_6.X + headerBack4_6.Width
+                            ZIndex: =14
+
+                        headerBack4_8 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_7.X + headerBack4_7.Width
+                            ZIndex: =15
+
+                        Subheader1_Label_1 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack1_2.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.company
+                            Width: =headerBack1_2.Width
+                            X: =headerBack1_2.X
+                            ZIndex: =16
+
+                        Subheader2_Label_5 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_5.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.total) > 0 && Value(ThisItem.original_investment_cost.total) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.total) = 0 || IsBlank(ThisItem.original_investment_cost.total), "0", Text(Value(ThisItem.original_investment_cost.total), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_5.Width
+                            X: =headerBack2_5.X
+                            ZIndex: =17
+
+                        Subheader2_Label_6 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_6.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.equity) > 0 && Value(ThisItem.original_investment_cost.equity) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.equity) = 0 || IsBlank(ThisItem.original_investment_cost.equity), "0", Text(Value(ThisItem.original_investment_cost.equity), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_6.Width
+                            X: =headerBack2_6.X
+                            ZIndex: =18
+
+                        Subheader2_Label_7 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_7.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.debt) > 0 && Value(ThisItem.original_investment_cost.debt) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.debt) = 0 || IsBlank(ThisItem.original_investment_cost.debt), "0", Text(Value(ThisItem.original_investment_cost.debt), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_7.Width
+                            X: =headerBack2_7.X
+                            ZIndex: =19
+
+                        Subheader2_Label_8 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_8.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.original_investment_cost.ownership
+                            Width: =headerBack2_8.Width
+                            X: =headerBack2_8.X
+                            ZIndex: =20
+
+                        Subheader3_Label_5 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_5.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.total) > 0 && Value(ThisItem.cost_of_divested_portion.total) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.total) = 0 || IsBlank(ThisItem.cost_of_divested_portion.total), "0", Text(Value(ThisItem.cost_of_divested_portion.total), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_5.Width
+                            X: =headerBack3_5.X
+                            ZIndex: =21
+
+                        Subheader3_Label_6 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_6.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.equity) > 0 && Value(ThisItem.cost_of_divested_portion.equity) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.equity) = 0 || IsBlank(ThisItem.cost_of_divested_portion.equity), "0", Text(Value(ThisItem.cost_of_divested_portion.equity), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_6.Width
+                            X: =headerBack3_6.X
+                            ZIndex: =22
+
+                        Subheader3_Label_7 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_7.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.debt) > 0 && Value(ThisItem.cost_of_divested_portion.debt) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.debt) = 0 || IsBlank(ThisItem.cost_of_divested_portion.debt), "0", Text(Value(ThisItem.cost_of_divested_portion.debt), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_7.Width
+                            X: =headerBack3_7.X
+                            ZIndex: =23
+
+                        Subheader3_Label_8 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_8.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.cost_of_divested_portion.ownership
+                            Width: =headerBack3_8.Width
+                            X: =headerBack3_8.X
+                            ZIndex: =24
+
+                        Subheader4_Label_5 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_5.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.total) > -1 && Value(ThisItem.net_equity_debit_investment_cost.total) < 1,
+                                Substitute(Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.total) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.total), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.total), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.total) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.total), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.total), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_5.Width
+                            X: =headerBack4_5.X
+                            ZIndex: =25
+
+                        Subheader4_Label_6 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_6.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.equity) > -1 && Value(ThisItem.net_equity_debit_investment_cost.equity) < 1,
+                                Substitute(Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.equity) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.equity), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.equity), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.equity) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.equity), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.equity), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_6.Width
+                            X: =headerBack4_6.X
+                            ZIndex: =26
+
+                        Subheader4_Label_7 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_7.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.debt) > -1 && Value(ThisItem.net_equity_debit_investment_cost.debt) < 1,
+                                Substitute(Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.debt) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.debt), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.debt), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.debt) = 0 || IsBlank(ThisItem.net_equity_debit_investment_cost.debt), "0", Text(Value(ThisItem.net_equity_debit_investment_cost.debt), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_7.Width
+                            X: =headerBack4_7.X
+                            ZIndex: =27
+
+                        Subheader4_Label_8 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_8.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.net_equity_debit_investment_cost.ownership
+                            Width: =headerBack4_8.Width
+                            X: =headerBack4_8.X
+                            ZIndex: =28
+
+                    HeaderIP_Group As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =34
+
+                        headerBack1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =450
+                            ZIndex: =1
+
+                        headerBack2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack1.X + headerBack1.Width
+                            Y: =headerBack1.Y
+                            ZIndex: =2
+
+                        headerBack3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack2.X + headerBack2.Width
+                            Y: =headerBack1.Y
+                            ZIndex: =3
+
+                        headerBack4 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack3.X + headerBack3.Width
+                            Y: =headerBack1.Y
+                            ZIndex: =4
+
+                        headerBack1_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack1.Width
+                            X: =headerBack1.X
+                            Y: =headerBack1.Y + headerBack1.Height
+                            ZIndex: =5
+
+                        headerBack2_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack1.X + headerBack1.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =6
+
+                        headerBack2_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_1.X + headerBack2_1.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =7
+
+                        headerBack2_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_2.X + headerBack2_2.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =8
+
+                        headerBack2_4 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_3.X + headerBack2_3.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =9
+
+                        headerBack3_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_4.X + headerBack2_4.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =10
+
+                        headerBack3_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_1.X + headerBack3_1.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =11
+
+                        headerBack3_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_2.X + headerBack3_2.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =12
+
+                        headerBack3_4 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_3.X + headerBack3_3.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =13
+
+                        headerBack4_1 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_4.X + headerBack3_4.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =14
+
+                        headerBack4_2 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_1.X + headerBack4_1.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =15
+
+                        headerBack4_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_2.X + headerBack4_2.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =16
+
+                        headerBack4_4 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_3.X + headerBack4_3.Width
+                            Y: =headerBack1_1.Y
+                            ZIndex: =17
+
+                        Header2_Label As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Original Investment Cost (USD)"
+                            Width: =headerBack2.Width
+                            X: =headerBack2.X
+                            Y: =headerBack2.Y
+                            ZIndex: =18
+
+                        Header3_Label As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Cost of divested portion (USD)"
+                            Width: =headerBack3.Width
+                            X: =headerBack3.X
+                            Y: =headerBack3.Y
+                            ZIndex: =19
+
+                        Header4_Label As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Net Equity & Debt Investment cost (USD)"
+                            Width: =headerBack4.Width
+                            X: =headerBack4.X
+                            Y: =headerBack4.Y
+                            ZIndex: =20
+
+                        Subheader1_Label As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack1_1.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Portfolio company"
+                            Width: =headerBack1_1.Width
+                            X: =headerBack1_1.X
+                            Y: =headerBack1_1.Y
+                            ZIndex: =21
+
+                        Subheader2_Label_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_1.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack2_1.Width
+                            X: =headerBack2_1.X
+                            Y: =headerBack2_1.Y
+                            ZIndex: =22
+
+                        Subheader2_Label_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_2.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack2_2.Width
+                            X: =headerBack2_2.X
+                            Y: =headerBack2_2.Y
+                            ZIndex: =23
+
+                        Subheader2_Label_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_3.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack2_3.Width
+                            X: =headerBack2_3.X
+                            Y: =headerBack2_3.Y
+                            ZIndex: =24
+
+                        Subheader2_Label_4 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_4.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack2_4.Width
+                            X: =headerBack2_4.X
+                            Y: =headerBack2_4.Y
+                            ZIndex: =25
+
+                        Subheader3_Label_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_1.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack3_1.Width
+                            X: =headerBack3_1.X
+                            Y: =headerBack3_1.Y
+                            ZIndex: =26
+
+                        Subheader3_Label_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_2.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack3_2.Width
+                            X: =headerBack3_2.X
+                            Y: =headerBack3_2.Y
+                            ZIndex: =27
+
+                        Subheader3_Label_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_3.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack3_3.Width
+                            X: =headerBack3_3.X
+                            Y: =headerBack3_3.Y
+                            ZIndex: =28
+
+                        Subheader3_Label_4 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_4.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack3_4.Width
+                            X: =headerBack3_4.X
+                            Y: =headerBack3_4.Y
+                            ZIndex: =29
+
+                        Subheader4_Label_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_1.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack4_1.Width
+                            X: =headerBack4_1.X
+                            Y: =headerBack4_1.Y
+                            ZIndex: =30
+
+                        Subheader4_Label_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_2.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack4_2.Width
+                            X: =headerBack4_2.X
+                            Y: =headerBack4_2.Y
+                            ZIndex: =31
+
+                        Subheader4_Label_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_3.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack4_3.Width
+                            X: =headerBack4_3.X
+                            Y: =headerBack4_3.Y
+                            ZIndex: =32
+
+                        Subheader4_Label_4 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_4.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack4_4.Width
+                            X: =headerBack4_4.X
+                            Y: =headerBack4_4.Y
+                            ZIndex: =33
+
+                    TotalPEVCTable As group:
+                        Height: =5
+                        Width: =5
+                        X: =60
+                        Y: =60
+                        ZIndex: =61
+
+                        headerBack1_3 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack1.Width
+                            X: =headerBack1.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =35
+
+                        headerBack2_9 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack1.X + headerBack1.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =36
+
+                        headerBack2_10 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_9.X + headerBack2_9.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =37
+
+                        headerBack2_11 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_10.X + headerBack2_10.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =38
+
+                        headerBack2_12 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_11.X + headerBack2_11.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =39
+
+                        headerBack3_9 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack2_12.X + headerBack2_12.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =40
+
+                        headerBack3_10 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_9.X + headerBack3_9.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =41
+
+                        headerBack3_11 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_10.X + headerBack3_10.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =42
+
+                        headerBack3_12 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_11.X + headerBack3_11.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =43
+
+                        headerBack4_9 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack3_12.X + headerBack3_12.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =44
+
+                        headerBack4_10 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_9.X + headerBack4_9.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =45
+
+                        headerBack4_11 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_10.X + headerBack4_10.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =46
+
+                        headerBack4_12 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2.Width / 4
+                            X: =headerBack4_11.X + headerBack4_11.Width
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =47
+
+                        Subheader1_Label_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack1_3.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack1_3.Width
+                            X: =headerBack1_3.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =48
+
+                        Subheader2_Label_9 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_9.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) < 1,
+                                Substitute(Substitute(If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack2_9.Width
+                            X: =headerBack2_9.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =49
+
+                        Subheader2_Label_10 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_10.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost))), "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_equity_investment_cost)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack2_10.Width
+                            X: =headerBack2_10.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =50
+
+                        Subheader2_Label_11 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_11.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost))), "0", Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_debt_investment_cost)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack2_11.Width
+                            X: =headerBack2_11.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =51
+
+                        Subheader2_Label_12 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_12.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost)) = 0, "0",Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost))), "0",Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_percentage_ownership_investment_cost)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack2_12.Width
+                            X: =headerBack2_12.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =52
+
+                        Subheader3_Label_9 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_9.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) < 0,
+                                Substitute(Substitute(If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt) + Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack3_9.Width
+                            X: =headerBack3_9.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =53
+
+                        Subheader3_Label_10 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_10.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)) = 0, "0",Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity))), "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_equity)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack3_10.Width
+                            X: =headerBack3_10.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =54
+
+                        Subheader3_Label_11 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_11.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt)) = 0, "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt))), "0",
+                                Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_debt)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack3_11.Width
+                            X: =headerBack3_11.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =55
+
+                        Subheader3_Label_12 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_12.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership)) > -1 && Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership)) < 1,
+                                
+                                Substitute(Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership))) || Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership)) = 0, "0",Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                
+                                Substitute(If(IsBlank(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership))), "0",Text(Value(Sum(Filter(investmentPortfolioList As iList, Text(portfolioCompanySearchValue) in iList.company_name), total_divested_percentage_ownership)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack3_12.Width
+                            X: =headerBack3_12.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =56
+
+                        Subheader4_Label_9 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_9.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)) > - 1 && Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)) < 1,
+                                Substitute(Substitute(If(Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_9.Text) - Value(Subheader3_Label_9.Text)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_9.Width
+                            X: =headerBack4_9.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =57
+
+                        Subheader4_Label_10 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_10.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text)) > -1 && Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text))) || Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text))), "0",
+                                Text(Value(Value(Subheader2_Label_10.Text) - Value(Subheader3_Label_10.Text)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_10.Width
+                            X: =headerBack4_10.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =58
+
+                        Subheader4_Label_11 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_11.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text)) > -1 && Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text)) < 1,
+                                Substitute(Substitute(If(IsBlank(Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text))) || Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                Substitute(If(IsBlank(Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text))), "0",
+                                Text(Value(Value(Subheader2_Label_11.Text) - Value(Subheader3_Label_11.Text)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_11.Width
+                            X: =headerBack4_11.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =59
+
+                        Subheader4_Label_12 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_12.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)) > -1 && Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)) < 1,
+                                
+                                Substitute(Substitute(If(Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)), "[$-en-GB]#,###.00")), ".00", ""), ".", "0."),
+                                
+                                Substitute(If(Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)) = 0, "0",
+                                Text(Value(Value(Subheader2_Label_12.Text) - Value(Subheader3_Label_12.Text)), "[$-en-GB]#,###.00")), ".00", "")
+                                )
+                            Width: =headerBack4_12.Width
+                            X: =headerBack4_12.X
+                            Y: =IP_Data.Y + IP_Data.Height
+                            ZIndex: =60
+
+            InputDateHere_Label_10 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =If(TextInput2_8.DisplayMode = DisplayMode.Edit, 42, 0)
+                Size: =10.5
+                Text: ="Input data here"
+                Width: =120
+                X: =White_Background_11.X + 15
+                Y: =LabelAddNewPEVC.Y + LabelAddNewPEVC.Height
+                ZIndex: =3
+
+            TextInput2_8 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =If(Self.Height = 0, 0, 1)
+                Default: =
+                DisplayMode: =If("PE_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process5",action), DisplayMode.Edit, DisplayMode.Disabled)
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =If(TextInput2_8.DisplayMode = DisplayMode.Edit, 42, 0)
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Mode: =TextMode.MultiLine
+                OnChange: |-
+                    =UpdateContext({ShowNotification: false});
+                    Set(inputChanged, false);
+                    Set(showRefreshButton, true);
+                    ClearCollect(PEVCInvalidRows, []);
+                    Set(splitIssuer,Substitute(Split(Self.Text,Char(10)),Char(9),"~"));
+                    ForAll(splitIssuer As data,
+                        If(!IsBlank(First(Split(data.Value,"~")).Value),
+                            Collect(listProfioData,
+                                {
+                                    company_name: Trim(First(Split(data.Value,"~")).Value),
+                                    total_pre: If(CountRows(Split(data.Value,"~")) < 2, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),2)).Value),
+                                    equity_pre: If(CountRows(Split(data.Value,"~")) < 3, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),3)).Value),
+                                    debit_pre: If(CountRows(Split(data.Value,"~")) < 4, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),4)).Value),
+                                    owner_ship_pre: If(CountRows(Split(data.Value,"~")) < 5, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),5)).Value),
+                                    total_divest: If(CountRows(Split(data.Value,"~")) < 6, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),6)).Value),
+                                    equity_divest: If(CountRows(Split(data.Value,"~")) < 7, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),7)).Value),
+                                    debit_divest: If(CountRows(Split(data.Value,"~")) < 8, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),8)).Value),
+                                    ownership_divest: If(CountRows(Split(data.Value,"~")) < 9, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),9)).Value),
+                                    total_net: If(CountRows(Split(data.Value,"~")) < 10, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),10)).Value),
+                                    equity_net: If(CountRows(Split(data.Value,"~")) < 11, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),11)).Value),
+                                    debit_net: If(CountRows(Split(data.Value,"~")) < 12, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),12)).Value),
+                                    owner_ship_net: If(CountRows(Split(data.Value,"~")) < 13, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),13)).Value)
+                                }
+                        ));
+                        If( !IsBlank(Trim(First(Split(data.Value,"~")).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 2, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),2)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 3, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),3)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 4, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),4)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 5, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),5)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 6, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),6)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 7, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),7)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 8, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),8)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 9, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),9)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 10, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),10)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 11, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),11)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 12, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),12)).Value)) &&
+                            IsNumeric(If(CountRows(Split(data.Value,"~")) < 13, "0", Last(FirstN((Split(Substitute(data.Value, ",", "."),"~")),13)).Value)),
+                            false,
+                            Collect(PEVCInvalidRows, data);
+                        );
+                    );
+                    If(!IsEmpty(listProfioData) && !IsBlank(Trim(Self.Text)), Set(inputChanged, true));
+                    ClearCollect(listProfio,listProfioData);
+                    Clear(listProfioData);
+                    Reset(Self);
+                    
+                    ClearCollect(investmentPorfolioDataAdd, []);
+                    ForAll(listProfio,
+                        Collect(investmentPorfolioDataAdd, {
+                            company: Trim(ThisRecord.company_name),
+                            original_investment_cost: {
+                                total: Text(total_pre),
+                                equity: Text(equity_pre),
+                                debt: Text(debit_pre),
+                                ownership: Text(owner_ship_pre)
+                            },
+                            cost_of_divested_portion: {
+                                total: Text(total_divest),
+                                equity: Text(equity_divest),
+                                debt: Text(debit_divest),
+                                ownership: Text(ownership_divest)
+                            },
+                            net_equity_debit_investment_cost: {
+                                total:Text(total_net),
+                                equity: Text(equity_net),
+                                debt: Text(debit_net),
+                                ownership: Text(owner_ship_net)
+                            }
+                        })
+                    );
+                    If(CountRows(Filter(PEVCInvalidRows, !IsBlank(Value))) > 0,
+                        Set(IsError, true); Set(NoticationText,"Invalid datas, please enter again!"); UpdateContext({ShowNotification: true});
+                    )
+                Size: =10.5
+                Width: =If(Parent.Width > 600, 250, App.Width - InputDateHere_Label_10.Width - 90)
+                X: =InputDateHere_Label_10.X + InputDateHere_Label_10.Width
+                Y: =InputDateHere_Label_10.Y
+                ZIndex: =4
+
+            IP_Container_1 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =If(IsEmpty(investmentPorfolioDataAdd), 0, IP_Data_1.Height + 120)
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =White_Background_11.Width - 50
+                X: =White_Background_11.X + If(App.Width > 600, 20, 15)
+                Y: =TextInput2_8.Y + TextInput2_8.Height + If(CountRows(Filter(PEVCInvalidRows, !IsBlank(Value))) > 0, 40, 10)
+                ZIndex: =5
+
+                Container15_2 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =headerBack4_13.X + headerBack4_13.Width
+                    ZIndex: =1
+
+                    "IP_Data_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        '#CopilotOverlayLabel': ="Filtered"
+                        DelayItemLoading: =true
+                        Height: =Min(Self.AllItemsCount, 10) * Self.TemplateHeight
+                        Items: =investmentPorfolioDataAdd
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        TemplatePadding: =0
+                        TemplateSize: =44
+                        Width: =headerBack4_17.X + headerBack4_17.Width
+                        X: =headerBack1_4.X
+                        Y: =headerBack1_5.Y + headerBack1_5.Height
+                        ZIndex: =34
+
+                        headerBack1_6 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack1_4.Width
+                            X: =headerBack1_4.X
+                            ZIndex: =3
+
+                        headerBack2_18 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader2_Label_17.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack1_4.X + headerBack1_4.Width
+                            ZIndex: =4
+
+                        headerBack2_19 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader2_Label_18.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_18.X + headerBack2_18.Width
+                            ZIndex: =5
+
+                        headerBack2_20 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader2_Label_19.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_19.X + headerBack2_19.Width
+                            ZIndex: =6
+
+                        headerBack2_21 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader2_Label_20.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_20.X + headerBack2_20.Width
+                            ZIndex: =7
+
+                        headerBack3_18 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader3_Label_17.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_21.X + headerBack2_21.Width
+                            ZIndex: =8
+
+                        headerBack3_19 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader3_Label_18.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_18.X + headerBack3_18.Width
+                            ZIndex: =9
+
+                        headerBack3_20 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader3_Label_19.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_19.X + headerBack3_19.Width
+                            ZIndex: =10
+
+                        headerBack3_21 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader3_Label_20.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_20.X + headerBack3_20.Width
+                            ZIndex: =11
+
+                        headerBack4_18 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader4_Label_17.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_21.X + headerBack3_21.Width
+                            ZIndex: =12
+
+                        headerBack4_19 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader4_Label_18.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_18.X + headerBack4_18.Width
+                            ZIndex: =13
+
+                        headerBack4_20 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader4_Label_19.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_19.X + headerBack4_19.Width
+                            ZIndex: =14
+
+                        headerBack4_21 As rectangle:
+                            BorderColor: =If(IsNumeric(Subheader4_Label_20.Text), RGBA(192, 192, 192, 1), Color.Red)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_20.X + headerBack4_20.Width
+                            ZIndex: =15
+
+                        Subheader1_Label_4 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack1_6.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.company
+                            Width: =headerBack1_6.Width
+                            X: =headerBack1_6.X
+                            ZIndex: =16
+
+                        Subheader2_Label_17 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_18.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.total) > 0 && Value(ThisItem.original_investment_cost.total) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.total) = 0, "0", Text(Value(ThisItem.original_investment_cost.total), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_18.Width
+                            X: =headerBack2_18.X
+                            ZIndex: =17
+
+                        Subheader2_Label_18 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_19.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.equity) > 0 && Value(ThisItem.original_investment_cost.equity) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.equity) = 0, "0", Text(Value(ThisItem.original_investment_cost.equity), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_19.Width
+                            X: =headerBack2_19.X
+                            ZIndex: =18
+
+                        Subheader2_Label_19 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_20.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.original_investment_cost.debt) > 0 && Value(ThisItem.original_investment_cost.debt) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.original_investment_cost.debt) = 0, "0", Text(Value(ThisItem.original_investment_cost.debt), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack2_20.Width
+                            X: =headerBack2_20.X
+                            ZIndex: =19
+
+                        Subheader2_Label_20 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack2_21.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.original_investment_cost.ownership
+                            Width: =headerBack2_21.Width
+                            X: =headerBack2_21.X
+                            ZIndex: =20
+
+                        Subheader3_Label_17 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_18.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.total) > 0 && Value(ThisItem.cost_of_divested_portion.total) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.total) = 0, "0", Text(Value(ThisItem.cost_of_divested_portion.total), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_18.Width
+                            X: =headerBack3_18.X
+                            ZIndex: =21
+
+                        Subheader3_Label_18 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_19.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.equity) > 0 && Value(ThisItem.cost_of_divested_portion.equity) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.equity) = 0, "0", Text(Value(ThisItem.cost_of_divested_portion.equity), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_19.Width
+                            X: =headerBack3_19.X
+                            ZIndex: =22
+
+                        Subheader3_Label_19 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_20.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.cost_of_divested_portion.debt) > 0 && Value(ThisItem.cost_of_divested_portion.debt) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.cost_of_divested_portion.debt) = 0, "0", Text(Value(ThisItem.cost_of_divested_portion.debt), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack3_20.Width
+                            X: =headerBack3_20.X
+                            ZIndex: =23
+
+                        Subheader3_Label_20 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack3_21.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.cost_of_divested_portion.ownership
+                            Width: =headerBack3_21.Width
+                            X: =headerBack3_21.X
+                            ZIndex: =24
+
+                        Subheader4_Label_17 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_18.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.total) > 0 && Value(ThisItem.net_equity_debit_investment_cost.total) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.total) = 0, "0", Text(Value(ThisItem.net_equity_debit_investment_cost.total), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack4_18.Width
+                            X: =headerBack4_18.X
+                            ZIndex: =25
+
+                        Subheader4_Label_18 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_19.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.equity) > 0 && Value(ThisItem.net_equity_debit_investment_cost.equity) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.equity) = 0, "0", Text(Value(ThisItem.net_equity_debit_investment_cost.equity), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack4_19.Width
+                            X: =headerBack4_19.X
+                            ZIndex: =26
+
+                        Subheader4_Label_19 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_20.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Value(ThisItem.net_equity_debit_investment_cost.debt) > 0 && Value(ThisItem.net_equity_debit_investment_cost.debt) < 1, "0", "") &
+                                Substitute(If(Value(ThisItem.net_equity_debit_investment_cost.debt) = 0, "0", Text(Value(ThisItem.net_equity_debit_investment_cost.debt), "[$-en-GB]#,###.00")), ".00", "")
+                            Width: =headerBack4_20.Width
+                            X: =headerBack4_20.X
+                            ZIndex: =27
+
+                        Subheader4_Label_20 As label:
+                            Font: =Font.Arial
+                            Height: =headerBack4_21.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: =ThisItem.net_equity_debit_investment_cost.ownership
+                            Width: =headerBack4_21.Width
+                            X: =headerBack4_21.X
+                            ZIndex: =28
+
+                    HeaderIP_Group_1 As group:
+                        Height: =5
+                        Width: =5
+                        X: =40
+                        Y: =40
+                        ZIndex: =34
+
+                        headerBack1_4 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =450
+                            ZIndex: =1
+
+                        headerBack2_13 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack1_4.X + headerBack1_4.Width
+                            Y: =headerBack1_4.Y
+                            ZIndex: =2
+
+                        headerBack3_13 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack2_13.X + headerBack2_13.Width
+                            Y: =headerBack1_4.Y
+                            ZIndex: =3
+
+                        headerBack4_13 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =600
+                            X: =headerBack3_13.X + headerBack3_13.Width
+                            Y: =headerBack1_4.Y
+                            ZIndex: =4
+
+                        headerBack1_5 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack1_4.Width
+                            X: =headerBack1_4.X
+                            Y: =headerBack1_4.Y + headerBack1_4.Height
+                            ZIndex: =5
+
+                        headerBack2_14 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack1_4.X + headerBack1_4.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =6
+
+                        headerBack2_15 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_14.X + headerBack2_14.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =7
+
+                        headerBack2_16 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_15.X + headerBack2_15.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =8
+
+                        headerBack2_17 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_16.X + headerBack2_16.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =9
+
+                        headerBack3_14 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack2_17.X + headerBack2_17.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =10
+
+                        headerBack3_15 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_14.X + headerBack3_14.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =11
+
+                        headerBack3_16 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_15.X + headerBack3_15.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =12
+
+                        headerBack3_17 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_16.X + headerBack3_16.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =13
+
+                        headerBack4_14 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack3_17.X + headerBack3_17.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =14
+
+                        headerBack4_15 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_14.X + headerBack4_14.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =15
+
+                        headerBack4_16 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_15.X + headerBack4_15.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =16
+
+                        headerBack4_17 As rectangle:
+                            BorderColor: =RGBA(192, 192, 192, 1)
+                            BorderThickness: =0.5
+                            Fill: =RGBA(244, 244, 244, 1)
+                            Height: =44
+                            Width: =headerBack2_13.Width / 4
+                            X: =headerBack4_16.X + headerBack4_16.Width
+                            Y: =headerBack1_5.Y
+                            ZIndex: =17
+
+                        Header2_Label_1 As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_13.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Original Investment Cost (USD)"
+                            Width: =headerBack2_13.Width
+                            X: =headerBack2_13.X
+                            Y: =headerBack2_13.Y
+                            ZIndex: =18
+
+                        Header3_Label_1 As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_13.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Cost of divested portion (USD)"
+                            Width: =headerBack3_13.Width
+                            X: =headerBack3_13.X
+                            Y: =headerBack3_13.Y
+                            ZIndex: =19
+
+                        Header4_Label_1 As label:
+                            Align: =Align.Center
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_13.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Net Equity & Debt Investment cost (USD)"
+                            Width: =headerBack4_13.Width
+                            X: =headerBack4_13.X
+                            Y: =headerBack4_13.Y
+                            ZIndex: =20
+
+                        Subheader1_Label_3 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack1_5.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Portfolio company"
+                            Width: =headerBack1_5.Width
+                            X: =headerBack1_5.X
+                            Y: =headerBack1_5.Y
+                            ZIndex: =21
+
+                        Subheader2_Label_13 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_14.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack2_14.Width
+                            X: =headerBack2_14.X
+                            Y: =headerBack2_14.Y
+                            ZIndex: =22
+
+                        Subheader2_Label_14 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_15.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack2_15.Width
+                            X: =headerBack2_15.X
+                            Y: =headerBack2_15.Y
+                            ZIndex: =23
+
+                        Subheader2_Label_15 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_16.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack2_16.Width
+                            X: =headerBack2_16.X
+                            Y: =headerBack2_16.Y
+                            ZIndex: =24
+
+                        Subheader2_Label_16 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack2_17.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack2_17.Width
+                            X: =headerBack2_17.X
+                            Y: =headerBack2_17.Y
+                            ZIndex: =25
+
+                        Subheader3_Label_13 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_14.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack3_14.Width
+                            X: =headerBack3_14.X
+                            Y: =headerBack3_14.Y
+                            ZIndex: =26
+
+                        Subheader3_Label_14 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_15.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack3_15.Width
+                            X: =headerBack3_15.X
+                            Y: =headerBack3_15.Y
+                            ZIndex: =27
+
+                        Subheader3_Label_15 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_16.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack3_16.Width
+                            X: =headerBack3_16.X
+                            Y: =headerBack3_16.Y
+                            ZIndex: =28
+
+                        Subheader3_Label_16 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack3_17.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack3_17.Width
+                            X: =headerBack3_17.X
+                            Y: =headerBack3_17.Y
+                            ZIndex: =29
+
+                        Subheader4_Label_13 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_14.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Total"
+                            Width: =headerBack4_14.Width
+                            X: =headerBack4_14.X
+                            Y: =headerBack4_14.Y
+                            ZIndex: =30
+
+                        Subheader4_Label_14 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_15.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Equity"
+                            Width: =headerBack4_15.Width
+                            X: =headerBack4_15.X
+                            Y: =headerBack4_15.Y
+                            ZIndex: =31
+
+                        Subheader4_Label_15 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_16.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="Debt"
+                            Width: =headerBack4_16.Width
+                            X: =headerBack4_16.X
+                            Y: =headerBack4_16.Y
+                            ZIndex: =32
+
+                        Subheader4_Label_16 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =headerBack4_17.Height
+                            PaddingBottom: =10
+                            PaddingLeft: =10
+                            PaddingRight: =10
+                            PaddingTop: =10
+                            Size: =10.5
+                            Text: ="% ownership"
+                            Width: =headerBack4_17.Width
+                            X: =headerBack4_17.X
+                            Y: =headerBack4_17.Y
+                            ZIndex: =33
+
+            ErrorInput_Label As label:
+                Color: =If(IP_Data_1.AllItemsCount = 0, RGBA(0,0,0,1), RGBA(237, 76, 76, 1))
+                Font: =Font.Arial
+                Height: =42
+                Italic: =If(Self.Text = "Please click outside the screen after pasting the data.", true, false)
+                Size: =10.5
+                Text: =If(Self.Color = RGBA(0,0,0,1), "Please click outside the screen after pasting the data.", "Invalid data, please check the data again.")
+                Visible: =(CountRows(Filter(PEVCInvalidRows, !IsBlank(Value))) > 0 || IP_Data_1.AllItemsCount = 0) && TextInput2_8.DisplayMode = DisplayMode.Edit
+                Width: =400
+                X: =InputDateHere_Label_10.X
+                Y: =TextInput2_8.Y + TextInput2_8.Height
+                ZIndex: =6
+
+            LabelAddNewPEVC As label:
+                Color: =RGBA(14, 63, 115, 1)
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =If(TextInput2_8.DisplayMode = DisplayMode.Edit, 40, 0)
+                Size: =12
+                Text: ="Add new Investment porfolio"
+                Width: =White_Background_11.Width - 40
+                X: =White_Background_11.X + 15
+                Y: =White_Background_11.Y + 15
+                ZIndex: =7
+
+            LabelAddCurrentPEVC As label:
+                Color: =RGBA(14, 63, 115, 1)
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Size: =12
+                Text: ="Current Investment porfolio"
+                Width: =White_Background_11.Width - 40
+                X: =White_Background_11.X + 15
+                Y: =IP_Container_1.Y + IP_Container_1.Height + If(ErrorInput_Label.Visible, 30, 0) + If(IP_Container_1.Height > 0, 10, 0)
+                ZIndex: =8
+
+            btnRefresh_PEVCAddIP As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =ClearCollect(investmentPorfolioDataAdd, []);
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear datas"
+                Visible: =TextInput2_8.Visible && TextInput2_8.Height > 0
+                Width: =42
+                X: =TextInput2_8.X + TextInput2_8.Width + 10
+                Y: =TextInput2_8.Y
+                ZIndex: =9
+
+            iconRefresh_PEVCAddIP As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: =Select(btnRefresh_PEVCAddIP);
+                Tooltip: ="Click here to clear datas"
+                Visible: =btnRefresh_PEVCAddIP.Visible
+                Width: =20
+                X: =btnRefresh_PEVCAddIP.X + 11
+                Y: =btnRefresh_PEVCAddIP.Y + btnRefresh_PEVCAddIP.Height * 0.5 - Self.Height*0.5
+                ZIndex: =10
+
+            IssuerList_SearchInput_1 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =42
+                HintText: ="Search ..."
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Size: =10.5
+                Visible: =LabelAddCurrentPEVC.Visible 
+                Width: =If(App.Width > 600, TextInput2_8.X + TextInput2_8.Width - Self.X, TextInput2_8.X + TextInput2_8.Width - Self.X - 47)
+                X: =LabelAddCurrentPEVC.X + 5
+                Y: =LabelAddCurrentPEVC.Y + LabelAddCurrentPEVC.Height
+                ZIndex: =11
+
+            SearchIssuerListButton_1 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =Set(portfolioCompanySearchValue, Text(IssuerList_SearchInput_1.Text));
+                PaddingBottom: =10
+                PaddingLeft: =40
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Visible: =LabelAddCurrentPEVC.Visible 
+                Width: =42
+                X: =IssuerList_SearchInput_1.X + IssuerList_SearchInput_1.Width + 8
+                Y: =IssuerList_SearchInput_1.Y
+                ZIndex: =12
+
+            SearchIssuerListIcon_1 As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                      <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                    </svg><div>"
+                OnSelect: =Select(SearchIssuerListButton_1)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Visible: =LabelAddCurrentPEVC.Visible 
+                Width: =30
+                X: =SearchIssuerListButton_1.X + 5
+                Y: =SearchIssuerListButton_1.Y + 5
+                ZIndex: =13
+
+            btnRefresh_IssuerList_1 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =42
+                OnSelect: =Set(portfolioCompanySearchValue, ""); Reset(IssuerList_SearchInput_1);
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Visible: =LabelAddCurrentPEVC.Visible 
+                Width: =42
+                X: =SearchIssuerListButton_1.X + SearchIssuerListButton_1.Width + 8
+                Y: =SearchIssuerListButton_1.Y
+                ZIndex: =14
+
+            RefreshListIcon_IssuerList_1 As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: =Select(btnRefresh_IssuerList_1);
+                Tooltip: ="Click here to clear all filters"
+                Visible: =LabelAddCurrentPEVC.Visible 
+                Width: =20
+                X: =btnRefresh_IssuerList_1.X + 11
+                Y: =btnRefresh_IssuerList_1.Y + 11
+                ZIndex: =15
+
+    HeaderQT2List_IR_3 As Header:
+        ZIndex: =8
+
+    MenuItemsSideBar_IR_4 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_IR_4.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_4.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_IR_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_IR_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_IR_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 800, 240, App.Width)
+        Y: =56
+        ZIndex: =9
+
+    MenuItemsSideBar_Small_IR_4 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_IR_4.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_4.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_IR_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_IR_4.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_IR_4.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_IR_4.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_IR_4.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =10
+
+    SubHeaderIssuers_2 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =16
+
+        SubHeaderBg_9 As rectangle:
+            BorderColor: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =60
+            Width: =Parent.Width - If(Parent.Width > 800, If(MobileShowMenu, 240, 50), 0)
+            X: =If(Parent.Width > 800, If(MobileShowMenu, MenuItemsSideBar_19.X + MenuItemsSideBar_19.Width,  MenuItemsSideBar_Small_15.X + MenuItemsSideBar_Small_15.Width), 0)
+            Y: =56
+            ZIndex: =3
+
+        SubHeaderHr_10 As rectangle:
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =IconBack_9.Height + 10
+            Visible: =App.Width > 600
+            Width: =0.5
+            X: =IconBack_9.X + IconBack_9.Width + 5
+            Y: =IconBack_9.Y - 5
+            ZIndex: =4
+
+        IconBack_9 As icon.ArrowLeft:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =If(App.Width > 600, 25, 15)
+            Icon: =If(App.Width > 600, Icon.ArrowLeft, Icon.ChevronLeft)
+            OnSelect: =Navigate(TablePEVC, ScreenTransition.Fade)
+            Width: =If(App.Width > 600, 40, 15)
+            X: =SubHeaderBg_9.X + 10
+            Y: =SubHeaderBg_9.Y + If(App.Width > 600, 12, 20)
+            ZIndex: =5
+
+        BackMobile_Label_6 As label:
+            Font: =Font.Arial
+            Height: =30
+            OnSelect: =Select(IconBack_9)
+            Size: =10.5
+            Text: ="Back"
+            Visible: =App.Width < 600
+            Width: =80
+            X: =IconBack_9.X + IconBack_9.Width
+            Y: =IconBack_9.Y - 7
+            ZIndex: =6
+
+        SaveButton_10 As htmlViewer:
+            BorderStyle: =BorderStyle.Solid
+            Font: =Font.Arial
+            Height: =50
+            HtmlText: |-
+                ="<div style=""width: 40px; height: 38px; display: flex; justify-content: center; align-items: center; border: 1px solid black; border-radius: 5px; cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                  <path d=""M21 7V19C21 19.55 20.804 20.021 20.412 20.413C20.02 20.805 19.5493 21.0007 19 21H5C4.45 21 3.979 20.804 3.587 20.412C3.195 20.02 2.99934 19.5493 3 19V5C3 4.45 3.196 3.979 3.588 3.587C3.98 3.195 4.45067 2.99934 5 3H17L21 7ZM19 7.85L16.15 5H5V19H19V7.85ZM12 18C12.8333 18 13.5417 17.7083 14.125 17.125C14.7083 16.5417 15 15.8333 15 15C15 14.1667 14.7083 13.4583 14.125 12.875C13.5417 12.2917 12.8333 12 12 12C11.1667 12 10.4583 12.2917 9.875 12.875C9.29167 13.4583 9 14.1667 9 15C9 15.8333 9.29167 16.5417 9.875 17.125C10.4583 17.7083 11.1667 18 12 18ZM6 10H15V6H6V10ZM5 7.85V19V5V7.85Z"" fill=""#525252""/>
+                </svg></div>"
+            OnSelect: =Set(isShowPopupDelete, true)
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Visible: =!IsEmpty(investmentPorfolioDataAdd) && "PE_DIRECTOR_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process5",action) && CountRows(Filter(PEVCInvalidRows, !IsBlank(Value))) = 0
+            Width: =42
+            X: =SubHeaderBg_1.X + SubHeaderBg_1.Width - 80
+            Y: =btnReject.Y
+            ZIndex: =7
+
+    Timer1_31 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_31); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =60
+        Y: =627
+        ZIndex: =18
+
+    NotificationBox_29 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_31.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =60
+        ZIndex: =19
+
+    CloseNotiIcon_29 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_31); Set(IsError, false);
+        Visible: =NotificationBox_29.Visible
+        Width: =15
+        X: =NotificationBox_29.X + NotificationBox_29.Width - 25
+        Y: =NotificationBox_29.Y + 17.5
+        ZIndex: =20
+
+    NotificationScreen_IR_4 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =21
+
+    LoadingQT2List_19 As LoadingComponent_4:
+        Visible: =isLoading
+        ZIndex: =22
+
+    DeleteConfirm_10 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =23
+
+        RejectPopupBack_23 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =11
+
+        DeleteConfirmBg_20 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 170, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_20.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =12
+
+        CancelResearchOpinionButton_17 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(166, 166, 166, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(166, 166, 166, 1)
+            PressedColor: =RGBA(166, 166, 166, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteResearchOpinionButton_17.X - Self.Width - 10
+            Y: =DeleteResearchOpinionButton_17.Y
+            ZIndex: =13
+
+        DeleteResearchOpinionButton_17 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(17, 79, 144, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(17, 79, 144, 1)
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isLoading, true);
+                Clear(listProfioInput);
+                ForAll(listProfio,Collect(listProfioInput,
+                {
+                    company_name:ThisRecord.company_name,
+                    equity_pre:ThisRecord.equity_pre,
+                    debit_pre:ThisRecord.debit_pre,
+                    percentage_ownership_pre:ThisRecord.owner_ship_pre,
+                    equity_divestment:ThisRecord.equity_divest,
+                    debit_divestment:ThisRecord.debit_divest,
+                    percentage_ownership_divestment:ThisRecord.ownership_divest
+                    
+                }));
+                
+                Set(listPortfolioReq,{list_investment_portfolio:listProfioInput});
+                Copy(JSON(listPortfolioReq,JSONFormat.IndentFour));
+                Set(creatFortfolio,'TVS->CreatedInvestmentPortfolio'.Run(resKeyOpenAll.open,resKeyOpenAll.close,JSON(listPortfolioReq,JSONFormat.IndentFour),currenUserV2.id));
+                
+                Clear(listProfio);
+                Clear(investmentPorfolioDataAdd);
+                Set(isLoading, true);
+                ClearCollect(investmentPortfolioList, 'TVS->FindAlllInvestmentPortfolio'.Run(resKeyOpenAll.open,resKeyOpenAll.close).listItem);
+                Set(isLoading, false);
+                ClearCollect(investmentPorfolioData, []);
+                ForAll(investmentPortfolioList,
+                    Collect(investmentPorfolioData, {
+                        company: ThisRecord.company_name,
+                        original_investment_cost: {
+                            total: Text(ThisRecord.total_debt_investment_cost+ThisRecord.total_equity_investment_cost),
+                            equity: Text(ThisRecord.total_equity_investment_cost),
+                            debt: Text(ThisRecord.total_debt_investment_cost),
+                            ownership: Text(ThisRecord.total_percentage_ownership_investment_cost)
+                        },
+                        cost_of_divested_portion: {
+                            total: Text(ThisRecord.total_divested_equity+ThisRecord.total_divested_debt),
+                            equity: Text(ThisRecord.total_divested_equity),
+                            debt: Text(ThisRecord.total_divested_debt),
+                            ownership: Text(ThisRecord.total_divested_percentage_ownership)
+                        },
+                        net_equity_debit_investment_cost: {
+                            total:Text((ThisRecord.total_debt_investment_cost+ThisRecord.total_equity_investment_cost)-(ThisRecord.total_divested_equity+ThisRecord.total_divested_debt)),
+                            equity: Text(ThisRecord.total_equity_investment_cost-ThisRecord.total_divested_equity),
+                            debt: Text(ThisRecord.total_debt_investment_cost-ThisRecord.total_divested_debt),
+                            ownership: Text(ThisRecord.total_percentage_ownership_investment_cost-ThisRecord.total_divested_percentage_ownership)
+                        }
+                    })
+                );
+                Set(isLoading, false);
+                Set(isShowPopupDelete, false);
+                UpdateContext({ShowNotification: false});
+                If(creatFortfolio.status = "200",
+                Set(IsError, false);Set(NoticationText,"Added successfully!");UpdateContext({ShowNotification: true});,
+                Set(IsError, true);Set(NoticationText,"This deal has been processed by another user, please reload this page.");UpdateContext({ShowNotification: true});
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(17, 79, 144, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_20.X + DeleteConfirmBg_20.Width - 150
+            Y: =DeleteConfirmBg_20.Y + DeleteConfirmBg_20.Height - Self.Height - 30
+            ZIndex: =14
+
+        DeleteConfirmCloseIcon_22 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_20. X + DeleteConfirmBg_20.Width -50
+            Y: =DeleteConfirmBg_20.Y + 20
+            ZIndex: =15
+
+        DeleteConfirmLabel_23 As label:
+            Font: =Font.Arial
+            Size: =10.5
+            Text: ="Are you sure to add this data to the Investment portfolio?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_20.Width - 100 - DeleteConfirmCloseIcon_22.Width
+            X: =Label2_16.X
+            Y: =Label2_16.Y + Label2_16.Height
+            ZIndex: =16
+
+        Label2_16 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =12
+            Text: ="Add new Investment porfolio"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_20.Width - 80
+            X: =DeleteConfirmBg_20.X + 30
+            Y: =DeleteConfirmBg_20.Y + 10
+            ZIndex: =17
+

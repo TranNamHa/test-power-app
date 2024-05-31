@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "37eead4c-f55d-42ed-b104-033ccbff1b01",
+    "Name": "TVS->DeleteProposal_Process3-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "f888da6d-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "527d100b-2fc8-4a15-844e-65efd1f54eff",
+    "Name": "TVS->UpdateConfigTable-FieldsBySceretKey",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "89a3e16f-749d-ee11-be37-6045bd58b6cb"
+  }
+]

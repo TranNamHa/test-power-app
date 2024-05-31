@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "9ac95986-9714-4af0-aa12-10a1b9fe8e17",
+    "Name": "TVS->CreateAndUpdateRole-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "8e87da6d-dfa2-ee11-be37-6045bd58b6cb"
+  }
+]

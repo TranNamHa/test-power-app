@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "d6038cb7-0a1a-4ad8-8548-b497b2d322c1",
+    "Name": "TVS->ApproveRejectPEVC-Process5-V2",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0cee4748-0bc4-ee11-9079-6045bd58b6cb"
+  }
+]

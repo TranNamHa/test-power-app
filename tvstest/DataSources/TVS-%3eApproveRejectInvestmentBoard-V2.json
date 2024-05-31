@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "cbb2374e-1825-4c0a-b438-7e9ec6953a3f",
+    "Name": "TVS->ApproveRejectInvestmentBoard-V2",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "c53cc0a8-94d0-ee11-9079-6045bd5b2c0e"
+  }
+]

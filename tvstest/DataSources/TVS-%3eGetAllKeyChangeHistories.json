@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "87340c33-f966-4b00-a59f-e3d84141ef2b",
+    "Name": "TVS->GetAllKeyChangeHistories",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "71b5902d-5bb0-ee11-a569-6045bd58b6cb"
+  }
+]

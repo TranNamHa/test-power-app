@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "3b3708eb-ce78-4216-b9f1-4e21410133e9",
+    "Name": "Copyof-TVS->CreateUpadateExternal",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "0869b541-749d-ee11-be37-6045bd58b6cb"
+  }
+]

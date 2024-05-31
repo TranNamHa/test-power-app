@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "58c6b4ec-58a7-473a-ab93-1cc03006646b",
+    "Name": "TVS->GetNoteByDealID-DEV",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "cfa29130-acaa-ee11-be37-6045bd58b6cb"
+  }
+]

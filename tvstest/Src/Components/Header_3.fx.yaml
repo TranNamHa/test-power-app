@@ -1,0 +1,146 @@
+Header_3 As CanvasComponent:
+    Fill: =RGBA(35, 36, 38, 1)
+    Height: =56
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    Rectangle1_4 As rectangle:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Fill: =RGBA(35, 36, 38, 1)
+        Height: =Parent.Height
+        Width: =Parent.Width
+        X: =0.00
+        ZIndex: =1
+
+    Image1_2 As image:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Height: =55
+        Image: =logo
+        PaddingRight: =0.00
+        PaddingTop: =0.00
+        Visible: =Parent.Width > 800
+        Width: =134
+        X: =45
+        ZIndex: =2
+
+    NotificationIcon_2 As htmlViewer:
+        Font: =Font.Arial
+        Height: =46
+        HtmlText: |-
+            ="<div style=""cursor: pointer""><svg width='20' height='22' viewBox='0 0 20 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d='M4 17V8C4 6.4087 4.63214 4.88258 5.75736 3.75736C6.88258 2.63214 8.4087 2 10 2C11.5913 2 13.1174 2.63214 14.2426 3.75736C15.3679 4.88258 16 6.4087 16 8V17M4 17H16M4 17H2M16 17H18M9 20H11' stroke='#FEFEFE' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/>
+            </svg></div>"
+        OnSelect: |-
+            =Set(isLoading, true);
+            Set(PageSizeNotification,10);
+            Concurrent(
+            ClearCollect(colAllNotification, 'TVS->GetAllNotification-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email, PageSizeNotification, envDEV,envTEST, envUAT1, envUAT2)),
+            If(CountRows(currentUserV2Res) > 0,Set(countNotify, 'TVS->CountNotifyByCurrentUser-V1'.Run(User().Email, envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open, resKeyOpenAll.close))));
+            Set(isLoading, false);
+            Set(ShowNotificationPopup, true);
+        PaddingRight: =5.56
+        PaddingTop: =5.56
+        Size: =12.23
+        Width: =43
+        X: =If(App.Width > 600, UserName_2.X, Avatar_1.X + 8) - Self.Width
+        Y: =12
+        ZIndex: =3
+
+    UserName_2 As label:
+        BorderColor: =RGBA(89, 0, 0, 1)
+        Color: =RGBA(234, 234, 235, 1)
+        DisabledFill: =RGBA(35, 36, 38, 1)
+        Fill: =RGBA(35, 36, 38, 1)
+        Font: =Font.Arial
+        Height: =56
+        PaddingRight: =5.56
+        PaddingTop: =5.56
+        Size: =10.5
+        Text: =currenUserV2.name
+        Visible: =Parent.Width > 600
+        Width: =100
+        X: =Parent.Width - Self.Width
+        ZIndex: =5
+
+    HtmlText4_5 As htmlViewer:
+        Font: =Font.Arial
+        Height: =If(App.Width > 900, 39, Parent.Height - Self.Y)
+        HtmlText: |-
+            ="<div style=""width:"&Self.Width-3&"px; height:"&Self.Height-3&"px; display:flex; justify-content:start; align-items:center""><span><span style=""font-size: "&If(App.Width > 900, 14, 12)&"px; font-family: Arial; color: #FFFFFF"">" & MenuSelect & If(IsBlank(MenuSelect2) || Len(MenuSelect2) = 0, "", " <span style=""color: #6F6F6F"">/ </span>")& MenuSelect2 &" </span><span style=""font-size: "&If(App.Width > 900, 14, 12)&"px; font-family: Arial; color: #FFFFFF"">" & If(Len(HeaderText) > 0, "<span style=""color: #6F6F6F"">/ </span>") &""& HeaderText & "</span></span></div>"
+        PaddingBottom: =0
+        PaddingLeft: =10
+        PaddingRight: =0
+        PaddingTop: =0
+        Visible: =!isLoadingOnStart
+        Width: =Min(450, NotificationIcon_2.X - Self.X - 8)
+        X: =If(App.Width > 800, 240, 30)
+        Y: =If(App.Width > 900, 10, 2)
+        ZIndex: =6
+
+    Rectangle3_3 As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =App.Width < 800 && MobileShowMenu
+        Width: =240
+        ZIndex: =8
+
+    Breadcum_1 As htmlViewer:
+        Font: =Font.Arial
+        HtmlText: |-
+            ="<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+              <path d=""M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"" fill="""&If(MobileShowMenu && App.Width < 800, "black", "white")&"""/>
+            </svg></div>"
+        OnSelect: =Set(MobileShowMenu, !MobileShowMenu);
+        Width: =45
+        Y: =11
+        ZIndex: =9
+
+    Avatar_1 As image:
+        Height: =30
+        Image: =User().Image
+        RadiusBottomLeft: =Self.Height / 2
+        RadiusBottomRight: =Self.Height / 2
+        RadiusTopLeft: =Self.Height / 2
+        RadiusTopRight: =Self.Height / 2
+        Visible: =App.Width < 600
+        Width: =30
+        X: =Rectangle1_4.X + Rectangle1_4.Width - Self.Width - 8
+        Y: =13
+        ZIndex: =10
+
+    NotificationCount_1 As htmlViewer:
+        Font: =Font.Arial
+        Height: =17
+        HtmlText: |-
+            ="<div style=""width: 16px; height: 16px; border-radius: 8px; background-color: red; display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: normal; color: white; cursor: pointer; line-height: 16px"">"&If(Value(countNotify.count) < 100, countNotify.count, "99")& If(Value(countNotify.count) < 100, "", "+") &"</div>"
+        OnSelect: |-
+            =Set(isLoading, true);
+            Set(PageSizeNotification,10);
+            Concurrent(
+            ClearCollect(colAllNotification, 'TVS->GetAllNotification-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email, PageSizeNotification, envDEV,envTEST, envUAT1, envUAT2)),
+            If(CountRows(currentUserV2Res) > 0,Set(countNotify, 'TVS->CountNotifyByCurrentUser-V1'.Run(User().Email, envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open, resKeyOpenAll.close))));
+            Set(isLoading, false);
+            Set(ShowNotificationPopup, true);
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Visible: =Value(countNotify.count) > 0
+        Width: =16
+        X: =NotificationIcon_2.X + 15
+        Y: =NotificationIcon_2.Y
+        ZIndex: =11
+
+    Timer1_2 As timer:
+        AutoStart: =true
+        Duration: =20 * 60 * 1000
+        Font: =Font.Arial
+        OnTimerStart: |-
+            =If(CountRows(currentUserV2Res) > 0,
+            Set(countNotify, 'TVS->CountNotifyByCurrentUser-V1'.Run(User().Email, envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open, resKeyOpenAll.close)))
+        Repeat: =true
+        Start: =
+        Visible: =false
+        ZIndex: =12
+

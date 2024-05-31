@@ -1,0 +1,135 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://asia-001.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="TVS-&gt;FindAllFilterPagegingPVEC-V1" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="TVS-&gt;FindAllFilterPagegingPVEC -V1" />
+  <grammars>
+    <jsonTypes targetNamespace="https://asia-001.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <number name="ManualTriggerInput_number_def" />
+      <number name="ManualTriggerInput_number_1_def" />
+      <string name="ManualTriggerInput_text_3_def" />
+      <string name="ManualTriggerInput_text_4_def" />
+      <string name="ManualTriggerInput_text_6_def" />
+      <string name="ManualTriggerInput_text_7_def" />
+      <string name="ManualTriggerInput_text_def" />
+      <string name="ManualTriggerInput_text_1_def" />
+      <string name="ManualTriggerInput_text_2_def" />
+      <number name="ManualTriggerInput_number_2_def" />
+      <string name="ManualTriggerInput_text_5_def" />
+      <string name="ManualTriggerInput_text_8_def" />
+      <string name="ManualTriggerInput_text_9_def" />
+      <object name="ManualTriggerInput">
+        <property name="number" type="number" />
+        <property name="number_1" type="number" />
+        <property name="text_3" type="string" />
+        <property name="text_4" type="string" />
+        <property name="text_6" type="string" />
+        <property name="text_7" type="string" />
+        <property name="text" type="string" />
+        <property name="text_1" type="string" />
+        <property name="text_2" type="string" />
+        <property name="number_2" type="number" />
+        <property name="text_5" type="string" />
+        <property name="text_8" type="string" />
+        <property name="text_9" type="string" />
+      </object>
+      <integer name="ResponseActionOutput_listItem_def_items_def_stt_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_id_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_share_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_deal_name_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_deal_status_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_deal_main_procedure_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_status_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_created_date_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_close_date_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_created_by_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_company_name_def" />
+      <string name="ResponseActionOutput_listItem_def_items_def_deal_type_def" />
+      <object name="ResponseActionOutput_listItem_def_items_def">
+        <property name="stt" type="integer" />
+        <property name="id" type="string" />
+        <property name="share" type="string" />
+        <property name="deal_name" type="string" />
+        <property name="deal_status" type="string" />
+        <property name="deal_main_procedure" type="string" />
+        <property name="status" type="string" />
+        <property name="created_date" type="string" />
+        <property name="close_date" type="string" />
+        <property name="created_by" type="string" />
+        <property name="company_name" type="string" />
+        <property name="deal_type" type="string" />
+      </object>
+      <array typeRef="ResponseActionOutput_listItem_def_items_def" name="ResponseActionOutput_listItem_def" />
+      <integer name="ResponseActionOutput_totalItem_def" />
+      <integer name="ResponseActionOutput_pageCount_def" />
+      <object name="ResponseActionOutput">
+        <property name="listItem" typeRef="ResponseActionOutput_listItem_def" />
+        <property name="totalItem" type="integer" />
+        <property name="pageCount" type="integer" />
+      </object>
+      <object name="Run_responses_default_def" />
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://asia-001.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="number" path="/number" type="xs:double" required="true">
+              <doc title="pageSize" />
+            </param>
+            <param style="plain" name="number_1" path="/number_1" type="xs:double" required="true">
+              <doc title="pageIndex" />
+            </param>
+            <param style="plain" name="text_3" path="/text_3" type="xs:string" required="true">
+              <doc title="dateFrom" />
+            </param>
+            <param style="plain" name="text_4" path="/text_4" type="xs:string" required="true">
+              <doc title="dateTo" />
+            </param>
+            <param style="plain" name="text_6" path="/text_6" type="xs:string" required="true">
+              <doc title="keyOpen" />
+            </param>
+            <param style="plain" name="text_7" path="/text_7" type="xs:string" required="true">
+              <doc title="keyClose" />
+            </param>
+            <param style="plain" name="text" path="/text" type="xs:string" required="true">
+              <doc title="searchAll" />
+            </param>
+            <param style="plain" name="text_1" path="/text_1" type="xs:string" required="true">
+              <doc title="roleName" />
+            </param>
+            <param style="plain" name="text_2" path="/text_2" type="xs:string" required="true">
+              <doc title="teamGroup" />
+            </param>
+            <param style="plain" name="number_2" path="/number_2" type="xs:double" required="true">
+              <doc title="tab" />
+            </param>
+            <param style="plain" name="text_5" path="/text_5" type="xs:string" required="true">
+              <doc title="user_id" />
+            </param>
+            <param style="plain" name="text_8" path="/text_8" type="xs:string" required="true">
+              <doc title="status" />
+            </param>
+            <param style="plain" name="text_9" path="/text_9" type="xs:string" required="true">
+              <doc title="server" />
+            </param>
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:ResponseActionOutput" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "67886323-04b8-4648-8409-1e31039fd902",
+    "Name": "TVS->CheckProposalMasterData_Procoess4",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "44914892-79d4-ee11-904d-6045bd5b2c0e"
+  }
+]

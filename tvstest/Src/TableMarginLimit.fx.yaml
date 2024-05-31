@@ -1,0 +1,2351 @@
+TableMarginLimit As screen:
+    Fill: =RGBA(248, 248, 249, 1)
+    OnVisible: |-
+        =
+        UpdateContext({ShowNotification: false});
+        
+        // Call API get datas
+        Set(ShowNotificationPopup,false);
+        // Set config variabless
+        Set(MenuSelect,"Business process");
+        Set(MenuSelect2,"Margin Limit  Approval Process");
+        Set(HeaderText,"");
+        Set(DealDetailTab, 1);
+        Set(isActionNeeded, true);
+        Set(isShowPopupDelete, false);
+        Set(isShowCreateProposalPopup, false);
+        Set(isInIC, If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process4",name_team), 1, 0));
+        Set(isInIC_SC, If("RM&IC-SC" in LookUp(currenUserV2.permissionList,process_code = "Process4",name_team), 1, 0));
+        // Reset form
+        Reset(DateFrom_Datepicker_1);
+        Reset(DateTo_DatePicker_1);
+        Reset(input_searchAll_2);
+        Reset(DateTo_DatePicker_6);
+        Reset(DateFrom_Datepicker_6);
+        Set(StatusSelectedValue, "All");
+        Set(StatusSelectedArray, []);
+        Clear(listAttachFile);
+        Clear(colAttachments);
+        Clear(listAttachDelete);
+        Clear(listAttachmentInsert);
+        Clear(listAttachmentDelete);
+        If(IsBlank(statusFilterVar),Set(statusFilterVar, ""), Set(statusFilterVar, StatusSelectedValue));
+        
+        // Set filter values
+        Set(PageSizeNumber, 10);
+        Set(sortColumn,"created_date");
+        Set(dateFromFilterVar,DateFrom_Datepicker_6.SelectedDate);
+        Set(dateToFilterVar,DateTo_DatePicker_6.SelectedDate);
+        If(IsBlank(currentPageIndex),Set(currentPageIndex,0));
+        Set(isAllowTab, true); // isActive
+        Set(isActionNeeded, true);
+        
+         //Action need
+        ClearCollect(proposalFilterStatusActioneed, []);
+        If("BROKER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "DRAFT"}));
+        If("RESEARCH_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "PENDING_RESEARCHS_OPINION"}));
+        If("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "PENDING_RISK_MANAGERMENTS_OPINION"}));
+        If("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "REVISED"}));
+        //If("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatus,{value: "PENDING_UPDATE_CHANGES"}));
+        If("VICE_MANAGER_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "PENDING_VICE_MANAGER"}));
+        If("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action), Collect(proposalFilterStatusActioneed,{value: "PENDING_CEO"}));
+        If("IC" in LookUp(currenUserV2.permissionList,process_code = "Process4",name_team), Collect(proposalFilterStatusActioneed,{value: "PENDING_INVESTMENT_COMMITEE"}));
+        If("RM&IC-SC" in LookUp(currenUserV2.permissionList,process_code = "Process4",name_team), Collect(proposalFilterStatusActioneed,{value: "PENDING_RM&IC-SC"}));
+        
+         //Under process
+        ClearCollect(proposalFilterStatusUnderProcessing, []);
+        If(!("BROKER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "DRAFT"}));
+        If(!("RESEARCH_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_RESEARCHS_OPINION"}));
+        If(!("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_RISK_MANAGERMENTS_OPINION"}));
+        If(!("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "REVISED"}));
+        //If(!("RISK_MANAGER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_UPDATE_CHANGES"}));
+        If(!("VICE_MANAGER_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process4", Upper(action))), Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_VICE_MANAGER"}));
+        If(!("CEO_APPROVE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)), Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_CEO"}));
+        If(true, Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_INVESTMENT_COMMITEE"}));
+        If(true, Collect(proposalFilterStatusUnderProcessing,{value: "PENDING_RM&IC-SC"}));
+        
+         //Complete
+        ClearCollect(proposalFilterStatusComplete, [{value: "APPROVED"}, {value: "REJECTED"},{value: "PENDING_UPDATE_CHANGES"}]);
+              
+        If(!isFromDetailMargin, Set(isLoading, true), Set(isLoading, false));
+        
+        Concurrent(
+        //Action need
+        ClearCollect(listItem1ClientActionNeed,'TVS->FIndAllProposalProcess4-V1'.Run(
+             resKeyOpenAll.open,
+             resKeyOpenAll.close,
+               dateFromFilterVar,
+               dateToFilterVar,
+              If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+            PageSizeNumber,
+             currentPageIndex,
+             envDEV,
+             envTEST,
+             envUAT1,
+             envUAT2,
+              true, //isActionNeeded
+             isInIC,
+             isInIC_SC,
+               If(Len(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'")) - 1), "''"),
+               First(currentUserV2Res).id
+        
+         )),
+         //Under processing
+         ClearCollect(listItem1ClientUnderProcessing,'TVS->FIndAllProposalProcess4-V1'.Run(
+             resKeyOpenAll.open,
+             resKeyOpenAll.close,
+               dateFromFilterVar,
+               dateToFilterVar,
+              If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+            PageSizeNumber,
+             currentPageIndex,
+             envDEV,
+             envTEST,
+             envUAT1,
+             envUAT2,
+              false, //isActionNeeded
+             isInIC,
+             isInIC_SC,
+               If(Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) - 1), "''"),
+               First(currentUserV2Res).id
+        
+         )),
+         //Complete
+         ClearCollect(listItem1ClientComplete,'TVS->FIndAllProposalProcess4-V1'.Run(
+             resKeyOpenAll.open,
+             resKeyOpenAll.close,
+               dateFromFilterVar,
+               dateToFilterVar,
+              If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+            PageSizeNumber,
+             currentPageIndex,
+             envDEV,
+             envTEST,
+             envUAT1,
+             envUAT2,
+             false, // isActionNeeded
+             isInIC,
+             isInIC_SC,
+               If(Len(Concat(proposalFilterStatusComplete, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusComplete, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusComplete, "," & "'" & value & "'")) - 1), "''"),
+               First(currentUserV2Res).id
+        
+         )));
+        
+        ClearCollect(listRes1Client,listItem1ClientActionNeed.listItem);
+        Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount);
+        
+        
+        //pageIndex
+        Set(maxList,[1,2,3,4  ]);
+        
+        Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+        ClearCollect(listPageIndex, pageIndexFirst);
+        
+        ForAll(
+            maxList,
+            If(Last(listPageIndex).Value + 1 < pageCount,
+                Collect(listPageIndex,Last(listPageIndex).Value + 1);
+            );
+        );
+        Set(isShowButtonTable, true);
+        Set(isLoading, false);
+        
+        // Show notification
+        Set(IsError, false);
+        Switch(ShowNotificationCheck,
+        "SENT_SUCCESS", Set(NoticationText,"Sent successfully!");UpdateContext({ShowNotification: true}),
+        "CREATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "UPDATED_SUCCESS", Set(NoticationText,"Submitted successfully!");UpdateContext({ShowNotification: true}),
+        "REJECTED_SUCCESS", Set(NoticationText,"Rejected successfully!");UpdateContext({ShowNotification: true}),
+        "REVISED_SUCCESS", Set(NoticationText,"Revised successfully!");UpdateContext({ShowNotification: true}),
+        "APPROVED_SUCCESS", Set(NoticationText,"Approved successfully!");UpdateContext({ShowNotification: true}),
+        "DELETED_SUCCESS", Set(NoticationText,"Deleted successfully!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR", Set(IsError, true);Set(NoticationText,"The system is busy, please try again later!");UpdateContext({ShowNotification: true}),
+        "SYSTEM_ERROR_APPROVED", Set(IsError, true);Set(NoticationText,"This proposal has been approved, please check again.");UpdateContext({ShowNotification: true}),
+        "STATUS_CHANGED", Set(IsError, true);Set(NoticationText,"This proposal has been processed by another user, please reload this page.");UpdateContext({ShowNotification: true})
+        );
+        Set(ShowNotificationCheck, "");
+        Set(isFromDetailMargin, false);
+
+    Canvas1_7 As fluidGrid.fluidGridWithBlankCard:
+        BorderThickness: =0
+        Height: =App.Height
+        Width: =Parent.Width
+        Y: =56
+        ZIndex: =1
+
+        DataCard1_7 As dataCard:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =If(App.Width > 1400, App.Height, App.Width > 600, 1050, 1050)
+            Width: =Parent.Width
+            X: =0.00
+            Y: =0
+            ZIndex: =1
+
+            WhiteBackground_7 As htmlViewer:
+                Font: =Font.Arial
+                Height: |-
+                    =If(
+                        App.Width > 1400,
+                        Min(
+                            App.Height - 345,
+                            Max(
+                                TableContent_6.AllItemsCount * TableContent_6.TemplateHeight + ProposalInfomation_Title_4.Height + 82,
+                                ProposalInfomation_Title_4.Height + 140
+                            )
+                        ),
+                        Min(550, Max(TableContent_6.AllItemsCount, 1) * TableContent_6.TemplateHeight + ProposalInfomation_Title_4.Height + 92)
+                    )
+                HtmlText: |-
+                    ="<div style='width: calc(100% - 10px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                    '></div>"
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =11.00
+                Width: =If(Parent.Width > 800, Parent.Width - If(MobileShowMenu, 255, 70), Parent.Width + 5)
+                X: =If(Parent.Width > 800, If(MobileShowMenu, 255, 60), 0)
+                Y: =QT_Action_MR.Y + QT_Action_MR.Height + If(App.Width > 600, 0, 0) - If(!isAllowTab, 40)
+                ZIndex: =1
+
+            TableHoziContainer_2 As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =WhiteBackground_7.Height - ProposalInfomation_Title_4.Height - 35
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =Hr_3.Width + If(App.Width > 600, 0, -5)
+                X: =WhiteBackground_7.X + 16
+                Y: =ProposalInfomation_Title_4.Y + ProposalInfomation_Title_4.Height
+                ZIndex: =2
+
+                Container7_2 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    Height: =40
+                    LayoutMinHeight: =TableHoziContainer_2.Height
+                    LayoutMinWidth: =40
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =HeaderCreatedBy_2.X + HeaderCreatedBy_2.Width
+                    ZIndex: =4
+
+                    TableContent_6 As gallery.variableTemplateHeightGallery:
+                        '#CopilotOverlayLabel': ="Filtered"
+                        BorderColor: =
+                        Height: |-
+                            =Parent.Height - Self.Y - 20
+                            // Max(Max(Self.AllItemsCount, 1) * Self.TemplateHeight, Container7_2.Height - 70)
+                        Items: =AddColumns(First(listRes1Client).listItem, id_name, ThisRecord.id & " - " & ThisRecord.proposal_name)
+                        Layout: =Layout.Vertical
+                        LoadingSpinner: =LoadingSpinner.Data
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =42
+                        Width: =Container7_2.Width
+                        Y: =40
+                        ZIndex: =1
+
+                        No_Content_6 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent)
+                            Size: =10.5
+                            Text: =ThisItem.stt
+                            Width: =HeaderNo_6.Width
+                            ZIndex: =1
+
+                        Proposal_Content_4 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: |-
+                                =If(Len(If(IsBlank(ThisItem.id_name), If(IsBlank(ThisItem.id_name), "", ThisItem.id_name), ThisItem.id_name)) > 50,
+                                    Left(If(IsBlank(ThisItem.id_name), If(IsBlank(ThisItem.id_name), "", ThisItem.id_name), ThisItem.id_name), 50) & "...",
+                                    If(IsBlank(ThisItem.id_name), If(IsBlank(ThisItem.id_name), "", ThisItem.id_name), ThisItem.id_name)
+                                )
+                            Width: =HeaderProposalName_ML.Width
+                            X: =No_Content_6.X + No_Content_6.Width
+                            ZIndex: =2
+
+                        Proposal_type As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.type_of_proposal
+                            Width: =HeaderProposalType_ML_1.Width
+                            X: =Proposal_Content_4.X + Proposal_Content_4.Width
+                            Y: =2
+                            ZIndex: =3
+
+                        Status_Content_7 As label:
+                            Color: |-
+                                =If(ThisItem.status_view in ["Canceled", "Revised", "Rejected"],
+                                    RGBA(214, 27, 27, 1),
+                                    ThisItem.status_view in ["APPROVED"],
+                                    RGBA(11, 201, 75, 1),
+                                    ThisItem.status_view in ["PENDING_RESEARCHS_OPINION", "PENDING_RISK_MANAGERMENTS_OPINION", "PENDING_RM&IC-SC", "PENDING_INVESTMENT_COMMITEE", "PENDING_VICE_MANAGER", "PENDING_CEO", "PENDING_UPDATE_CHANGES"],
+                                    RGBA(181, 184, 24, 1),
+                                    ThisItem.status_view in ["Draft"],
+                                    RGBA(98,95,95,1),
+                                    ThisItem.status_view in ["UPDATED"],
+                                    RGBA(22, 63, 130, 1),
+                                    RGBA(181, 184, 24, 1)
+                                )
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Bold
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =29
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.status_view
+                            Width: =HeaderStatus_2.Width
+                            X: =Proposal_type.X + Proposal_type.Width
+                            ZIndex: =4
+
+                        ProposalName_Content_7 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.research_opinion
+                            Width: =HeaderPrincipal_1.Width
+                            X: =Status_Content_7.X + Status_Content_7.Width
+                            ZIndex: =5
+
+                        ValidityEndingTime_Content_3 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.risk_management_opinion
+                            Width: =HeaderValidityEndingTime_1.Width
+                            X: =ProposalName_Content_7.X + ProposalName_Content_7.Width
+                            ZIndex: =6
+
+                        RemainingDays_Content_3 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =Text(DateValue(ThisItem.created_date), "dd/mm/yyyy")
+                            Width: =HeaderRemainingDays_1.Width
+                            X: =ValidityEndingTime_Content_3.X + ValidityEndingTime_Content_3.Width
+                            ZIndex: =7
+
+                        CreatedDate_Content_3 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =10
+                            Size: =10.5
+                            Text: =ThisItem.created_by
+                            Width: =HeaderCreatedDate_1.Width
+                            X: =RemainingDays_Content_3.X + RemainingDays_Content_3.Width
+                            ZIndex: =8
+
+                        CreatedBy_Content_4 As label:
+                            Color: =//If(DateDiff(Now(),DateValue(ThisItem.validity_ending_time),  TimeUnit.Days) <= 7, RGBA(214, 27, 27, 1) ,RGBA(0, 0, 0, 1))
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Lighter
+                            OnSelect: =Select(Parent);
+                            PaddingLeft: =7
+                            PaddingRight: =45
+                            Size: =10.5
+                            Text: =Text(DateValue(ThisItem.closed_date), "dd/mm/yyyy")
+                            Width: =HeaderCreatedBy_2.Width
+                            X: =CreatedDate_Content_3.X + CreatedDate_Content_3.Width
+                            ZIndex: =9
+
+                        Status_Icon_5 As label:
+                            Color: =Status_Content_7.Color
+                            Fill: =RGBA(0,0,0,0)
+                            Font: =Font.Lato
+                            OnSelect: =Select(Parent);
+                            Size: =50
+                            Text: ="."
+                            VerticalAlign: =VerticalAlign.Bottom
+                            Visible: =Len(ThisItem.status) > 0
+                            Width: =30
+                            X: =Status_Content_7.X - 1
+                            Y: =2
+                            ZIndex: =10
+
+                        ClickButton_4 As button:
+                            BorderThickness: =0
+                            Color: =RGBA(0, 0, 0, 0)
+                            DisabledBorderColor: =RGBA(166, 166, 166, 0)
+                            DisabledColor: =RGBA(166, 166, 166, 0)
+                            DisabledFill: =RGBA(244, 244, 244, 0)
+                            Fill: =RGBA(56, 96, 178, 0)
+                            FocusedBorderThickness: =0
+                            Font: =Font.Arial
+                            Height: =TableContent_6.TemplateHeight
+                            HoverColor: =RGBA(255, 255, 255, 0)
+                            HoverFill: =ColorFade(RGBA(56, 96, 178, 0), -20%)
+                            OnSelect: |+
+                                =Set(isLoading, true);
+                                Set(saveEvent, 0);
+                                Set(submitEvent, 0);
+                                Set(isSubmited, false);
+                                Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+                                Set(marginDetail, ThisItem);
+                                Set(proposalNameInput, marginDetail.proposal_name);
+                                
+                                Clear(brokerageListDetail);
+                                Clear(marginDetailAttachment);
+                                Clear(listAttachFile);
+                                Reset(Cmt_Input);
+                                Reset(PIR_Input);
+                                Reset(PML_Input);
+                                Reset(Note_Input_1);
+                                
+                                Set(marginDetail1, Blank());
+                                Set(marginDetail1,'TVS->FindByIdProposalONSProcess4'.Run(resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.id,envDEV,envTEST,envUAT1,envUAT2));
+                                ForAll(marginDetail1.brokerage,Collect(brokerageListDetail, {
+                                    guid:GUID(),
+                                    id:ThisRecord.id,
+                                    ticket:ThisRecord.ticker,
+                                    CP_max_margin_ratio:ThisRecord.max_margin_ratio_cp,
+                                    CP_max_margined_amt_per_client:ThisRecord.max_margined_amt_per_client_cp,
+                                    CP_max_margined_amt_all_client:ThisRecord.max_margined_amt_all_client_cp,
+                                    BP_proposed_margin_ratio:ThisRecord.proposed_margin_ratio,
+                                    BP_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client,
+                                    BP_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client,
+                                    RO_research_opinion:ThisRecord.research_opinion,
+                                    RO_proposed_margin_ratio:ThisRecord.proposed_margin_ratio_re,
+                                    RO_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client_re,
+                                    RO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_re,
+                                    RMO_risk_management_opinion: ThisRecord.risk_management_opinion,
+                                    RMO_proposed_margin_ratio: ThisRecord.proposed_margin_ratio_rm,
+                                    RMO_proposed_margined_amt_per_client: ThisRecord.proposed_margined_loan_amt_per_client_rm,
+                                    RMO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_rm,
+                                    RMO_proposed_margined_qty_all_client:ThisRecord.proposed_margined_qty_all_client_rm,
+                                    RMO_proposed_margined_qty_one_client:ThisRecord.proposed_margined_qty_one_client_rm,
+                                    RMO_comment:ThisRecord.comment_rm,
+                                    RMO_proposed_interest_rate_rm: ThisRecord.proposed_interest_rate_rm,
+                                    record_status:"UPDATE"
+                                }));
+                                ClearCollect(MarginLimitPolicyList,brokerageListDetail);
+                                ForAll(marginDetail1.attachment,Collect(marginDetailAttachment,{
+                                    id_record:ThisRecord.id,
+                                    Name:ThisRecord.file_name,
+                                    By: ThisRecord.created_by
+                                }));
+                                ClearCollect(listAttachFile,marginDetailAttachment);
+                                
+                                Set(marginType, marginDetail.type_of_proposal);
+                                Set(marginType, First(marginDetail1.proposal).type_of_proposal);
+                                Set(marginLimitType, marginType);
+                                Navigate(DetailMarginLimit, ScreenTransition.Fade);
+                                Set(isLoading, false);
+                                
+                                
+                                
+                                
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            RadiusBottomLeft: =0
+                            RadiusBottomRight: =0
+                            RadiusTopLeft: =0
+                            RadiusTopRight: =0
+                            Size: =10
+                            Text: =""
+                            Width: =Parent.Width
+                            ZIndex: =11
+
+                        DeleteIconBg_4 As rectangle:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Height: =40
+                            OnSelect: =Select(Parent)
+                            Visible: =false
+                            Width: =DeleteIcon_5.Width
+                            X: =CreatedBy_Content_4.X + CreatedBy_Content_4.Width - Self.Width
+                            ZIndex: =12
+
+                        DeleteIcon_5 As htmlViewer:
+                            Fill: =If(Mod(Value(ThisItem.stt), 2) = 0, RGBA(246,246,246,1), RGBA(0,0,0,0))
+                            Font: =Font.Arial
+                            HtmlText: |-
+                                ="<div style=""cursor:pointer; width:40px; display:flex; justify-content:center; align-items:center""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 16 16"" fill=""none"">
+                                  <path d=""M4.66683 2.66634C4.66683 2.31272 4.8073 1.97358 5.05735 1.72353C5.3074 1.47348 5.64654 1.33301 6.00016 1.33301H10.0002C10.3538 1.33301 10.6929 1.47348 10.943 1.72353C11.193 1.97358 11.3335 2.31272 11.3335 2.66634V3.99967H14.0002C14.177 3.99967 14.3465 4.06991 14.4716 4.19494C14.5966 4.31996 14.6668 4.48953 14.6668 4.66634C14.6668 4.84315 14.5966 5.01272 14.4716 5.13775C14.3465 5.26277 14.177 5.33301 14.0002 5.33301H13.2875L12.7095 13.4277C12.6856 13.7641 12.535 14.0789 12.2882 14.3087C12.0415 14.5386 11.7167 14.6663 11.3795 14.6663H4.62016C4.28292 14.6663 3.95821 14.5386 3.71142 14.3087C3.46463 14.0789 3.31411 13.7641 3.29016 13.4277L2.7135 5.33301H2.00016C1.82335 5.33301 1.65378 5.26277 1.52876 5.13775C1.40373 5.01272 1.3335 4.84315 1.3335 4.66634C1.3335 4.48953 1.40373 4.31996 1.52876 4.19494C1.65378 4.06991 1.82335 3.99967 2.00016 3.99967H4.66683V2.66634ZM6.00016 3.99967H10.0002V2.66634H6.00016V3.99967ZM4.0495 5.33301L4.62083 13.333H11.3802L11.9515 5.33301H4.0495ZM6.66683 6.66634C6.84364 6.66634 7.01321 6.73658 7.13823 6.8616C7.26326 6.98663 7.3335 7.1562 7.3335 7.33301V11.333C7.3335 11.5098 7.26326 11.6794 7.13823 11.8044C7.01321 11.9294 6.84364 11.9997 6.66683 11.9997C6.49002 11.9997 6.32045 11.9294 6.19542 11.8044C6.0704 11.6794 6.00016 11.5098 6.00016 11.333V7.33301C6.00016 7.1562 6.0704 6.98663 6.19542 6.8616C6.32045 6.73658 6.49002 6.66634 6.66683 6.66634ZM9.3335 6.66634C9.51031 6.66634 9.67988 6.73658 9.8049 6.8616C9.92992 6.98663 10.0002 7.1562 10.0002 7.33301V11.333C10.0002 11.5098 9.92992 11.6794 9.8049 11.8044C9.67988 11.9294 9.51031 11.9997 9.3335 11.9997C9.15668 11.9997 8.98712 11.9294 8.86209 11.8044C8.73707 11.6794 8.66683 11.5098 8.66683 11.333V7.33301C8.66683 7.1562 8.73707 6.98663 8.86209 6.8616C8.98712 6.73658 9.15668 6.66634 9.3335 6.66634Z"" fill=""#D00C0C""/>
+                                </svg></div>"
+                            OnSelect: |-
+                                =Set(idProposalDelete, ThisItem.id);
+                                Set(isShowPopupDelete, true);
+                            Visible: =ThisItem.status in ["DRAFT"] && "BROKER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action)
+                            Width: =40
+                            X: =DeleteIconBg_4.X
+                            ZIndex: =13
+
+                    TableHeader_2 As group:
+                        Height: =5
+                        Width: =5
+                        X: =80
+                        Y: =80
+                        ZIndex: =14
+
+                        HeaderNo_6 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="No"
+                            Width: =40
+                            X: =5
+                            ZIndex: =2
+
+                        HeaderProposalName_ML As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Proposal name "
+                            Width: =Max((WhiteBackground_7.Width - 70) / 7 + 150, 200)
+                            X: =HeaderNo_6.X + HeaderNo_6.Width
+                            ZIndex: =3
+
+                        HeaderProposalType_ML_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Type of proposal"
+                            Width: =Max((WhiteBackground_7.Width - 70) / 7, 150)
+                            X: =HeaderProposalName_ML.X + HeaderProposalName_ML.Width
+                            ZIndex: =4
+
+                        HeaderStatus_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Status"
+                            Width: =Max((WhiteBackground_7.Width - 70) / 7 + 140, 250)
+                            X: =HeaderProposalType_ML_1.X + HeaderProposalType_ML_1.Width
+                            ZIndex: =5
+
+                        HeaderPrincipal_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Research’s Opinion"
+                            Width: =Max((WhiteBackground_7.Width - 70) / 7, 150)
+                            X: =HeaderStatus_2.X + HeaderStatus_2.Width
+                            ZIndex: =6
+
+                        HeaderValidityEndingTime_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Risk Management’s Opinion"
+                            Width: =Max((WhiteBackground_7.Width - 70) / 7 + 50, 200)
+                            X: =HeaderPrincipal_1.X + HeaderPrincipal_1.Width
+                            ZIndex: =7
+
+                        HeaderRemainingDays_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Created date"
+                            Width: =120
+                            X: =HeaderValidityEndingTime_1.X + HeaderValidityEndingTime_1.Width
+                            ZIndex: =8
+
+                        HeaderCreatedDate_1 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Created by"
+                            X: =HeaderRemainingDays_1.X + HeaderRemainingDays_1.Width
+                            Y: =HeaderRemainingDays_1.Y
+                            ZIndex: =9
+
+                        HeaderCreatedBy_2 As label:
+                            Font: =Font.Arial
+                            FontWeight: =FontWeight.Semibold
+                            Height: =42
+                            PaddingLeft: =0
+                            Size: =10.5
+                            Text: ="Closed date"
+                            X: =HeaderCreatedDate_1.X + HeaderCreatedDate_1.Width
+                            ZIndex: =10
+
+            ProposalInfomation_Title_4 As label:
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Bold
+                Height: =43
+                LineHeight: =2.2
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =12
+                Text: ="Proposal Infomation"
+                Width: =299
+                X: =WhiteBackground_7.X + 20
+                Y: =WhiteBackground_7.Y + 10
+                ZIndex: =3
+
+            Hr_3 As rectangle:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                Fill: =RGBA(191, 191, 192, 1)
+                Height: =2
+                Width: =WhiteBackground_7.Width - If(App.Width > 600, 40, 35)
+                X: =WhiteBackground_7.X + 15
+                Y: =ProposalInfomation_Title_4.Y + ProposalInfomation_Title_4.Height + 40
+                ZIndex: =4
+
+            DateFrom_InputBack_6 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: ="Đầu vào văn bản"
+                FocusedBorderThickness: =2
+                Font: =Font.Arial
+                Height: =44
+                HoverBorderColor: =RGBA(191, 191, 192, 1)
+                HoverFill: =RGBA(186, 202, 226, 0)
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                RadiusBottomLeft: =8
+                RadiusBottomRight: =8
+                RadiusTopLeft: =8
+                RadiusTopRight: =8
+                Size: =13.00
+                Width: =If(App.Width > 800, 210, (App.Width - 40)/2)
+                X: =DateFrom_Label_3.X
+                Y: =DateFrom_Label_3.Y + DateFrom_Label_3.Height
+                ZIndex: =20
+
+            DateFrom_Datepicker_6 As datepicker:
+                BorderThickness: =0
+                DefaultDate: =
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                Format: ="dd/mm/yyyy"
+                Height: =DateFrom_InputBack_6.Height - 6
+                IconBackground: =RGBA(255, 255, 255, 1)
+                IconFill: =RGBA(0, 0, 0, 1)
+                InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("From", Self.Format, Self.Language))
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =50
+                PaddingTop: =10
+                Size: =10.5
+                Width: =DateFrom_InputBack_6.Width - 6
+                X: =DateFrom_InputBack_6.X + 3
+                Y: =DateFrom_InputBack_6.Y + 3
+                ZIndex: =21
+
+            DateFrom_Label_3 As label:
+                Color: =RGBA(82, 82, 82, 1)
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                PaddingLeft: =0
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                Size: =10.5
+                Text: ="Created date"
+                Width: =150.00
+                X: =input_searchAll_2.X
+                Y: =input_searchAll_2.Y + input_searchAll_2.Height + 10
+                ZIndex: =22
+
+            DateTo_InputBack_5 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: ="Đầu vào văn bản"
+                FocusedBorderThickness: =2
+                Font: =Font.Arial
+                Height: =44
+                HoverBorderColor: =RGBA(191, 191, 192, 1)
+                HoverFill: =RGBA(186, 202, 226, 0)
+                PaddingRight: =5.00
+                PaddingTop: =5.00
+                RadiusBottomLeft: =8
+                RadiusBottomRight: =8
+                RadiusTopLeft: =8
+                RadiusTopRight: =8
+                Size: =13.00
+                Width: =DateFrom_InputBack_6.Width
+                X: =DateFrom_InputBack_6.X + DateFrom_InputBack_6.Width + 14
+                Y: =DateFrom_Label_3.Y + DateFrom_Label_3.Height
+                ZIndex: =23
+
+            DateTo_DatePicker_6 As datepicker:
+                BorderThickness: =0
+                DefaultDate: =
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                Format: ="dd/mm/yyyy"
+                Height: =DateTo_InputBack_5.Height - 6
+                IconBackground: =RGBA(255, 255, 255, 1)
+                IconFill: =RGBA(0, 0, 0, 1)
+                InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text("To", Self.Format, Self.Language))
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                Size: =10.5
+                StartYear: =If(IsBlank(DateFrom_Datepicker_6.SelectedDate), 1970, Year(DateFrom_Datepicker_6.SelectedDate))
+                Width: =DateTo_InputBack_5.Width - 6
+                X: =DateTo_InputBack_5.X + 3
+                Y: =DateTo_InputBack_5.Y + 3
+                ZIndex: =24
+
+            ClearFormDateQT2_4 As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =Reset(DateFrom_Datepicker_6);
+                    Set(dateFromFilterVar,DateFrom_Datepicker_6.SelectedDate);
+                    Set(dateToFilterVar,DateTo_DatePicker_6.SelectedDate);
+                Visible: =!IsBlank(DateFrom_Datepicker_6.SelectedDate)
+                Width: =15
+                X: =DateFrom_InputBack_6.X + DateFrom_InputBack_6.Width - 55
+                Y: =DateFrom_InputBack_6.Y + 15
+                ZIndex: =32
+
+            ClearToDateQT2_2 As icon.Cancel:
+                Color: =RGBA(0, 0, 0, 1)
+                Height: =15
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =Reset(DateTo_DatePicker_6);
+                    Set(dateFromFilterVar,DateFrom_Datepicker_6.SelectedDate);
+                    Set(dateToFilterVar,DateTo_DatePicker_6.SelectedDate);
+                Visible: =!IsBlank(DateTo_DatePicker_6.SelectedDate)
+                Width: =15
+                X: =DateTo_InputBack_5.X + DateTo_InputBack_5.Width - 55
+                Y: =DateTo_InputBack_5.Y + 15
+                ZIndex: =33
+
+            SearchAUMButton_10 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: |+
+                    =//UpdateContext({ShowNotification: false});
+                    Set(currentPageIndex,0);
+                    Set(dateFromFilterVar, DateFrom_Datepicker_6.SelectedDate);
+                    Set(dateToFilterVar, DateTo_DatePicker_6.SelectedDate);
+                    If(DateDiff(DateFrom_Datepicker_6.SelectedDate, DateTo_DatePicker_6.SelectedDate) < 0,
+                        Set(NoticationText, "The from date cannot be greater than the to date!"); Set(IsError, true); UpdateContext({ShowNotification: true}); Set(isLoading, false),
+                        Select(GetAll_ML);
+                    );
+                    //If(StatusSelectedValue="All",Set(statusFilterVar, ""),Set(statusFilterVar, StatusSelectedValue));
+                    
+                PaddingBottom: =10
+                PaddingLeft: =40
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Search"
+                Width: =44
+                X: =input_searchAll_2.X + input_searchAll_2.Width + 15
+                Y: =input_searchAll_2.Y
+                ZIndex: =35
+
+            SubmitButtonContainer_4 As group:
+                Height: =5
+                Width: =5
+                X: =-1121
+                Y: =30
+                ZIndex: =35
+
+                SubmitButton_5 As button:
+                    BorderThickness: =0
+                    Fill: =RGBA(17, 79, 144, 1)
+                    FocusedBorderThickness: =0
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    OnSelect: |-
+                        =Set(isCreatedPopup, false);
+                        Set(isShowCreateProposalPopup, true);
+                        Set(isSubmited, false);
+                        Reset(CreateProposalName_Input_2);
+                        Set(typeOfProposal, "");
+                    PaddingBottom: =10
+                    PaddingLeft: =40
+                    PaddingRight: =10
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: ="Create"
+                    Tooltip: =
+                    Visible: ="BROKER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action) 
+                    Width: =120
+                    X: =GoAUMButton_1.X - 130
+                    Y: =GoAUMButton_1.Y
+                    ZIndex: =12
+
+                SubmitButtonIcon_5 As icon.AddDocument:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.Add
+                    OnSelect: =Select(SubmitButton_5);
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Tooltip: =
+                    Visible: ="BROKER_CREATE" in LookUp(currenUserV2.permissionList,process_code = "Process4",action) 
+                    Width: =20
+                    X: =SubmitButton_5.X + 25
+                    Y: =SubmitButton_5.Y + 12
+                    ZIndex: =13
+
+            SearchAUMIcon_15 As htmlViewer:
+                Font: =Font.Arial
+                Height: =35
+                HtmlText: |-
+                    ="<div style=""cursor: pointer; width: 30px; height: 3-px; padding: 5px""><svg xmlns=""http://www.w3.org/2000/svg"" width=""21"" height=""20"" viewBox=""0 0 21 20"" fill=""none"">
+                      <path d=""M19.5002 19.0002L15.1572 14.6572M15.1572 14.6572C15.9001 13.9143 16.4894 13.0324 16.8914 12.0618C17.2935 11.0911 17.5004 10.0508 17.5004 9.00021C17.5004 7.9496 17.2935 6.90929 16.8914 5.93866C16.4894 4.96803 15.9001 4.08609 15.1572 3.34321C14.4143 2.60032 13.5324 2.01103 12.5618 1.60898C11.5911 1.20693 10.5508 1 9.50021 1C8.4496 1 7.40929 1.20693 6.43866 1.60898C5.46803 2.01103 4.58609 2.60032 3.84321 3.34321C2.34288 4.84354 1.5 6.87842 1.5 9.00021C1.5 11.122 2.34288 13.1569 3.84321 14.6572C5.34354 16.1575 7.37842 17.0004 9.50021 17.0004C11.622 17.0004 13.6569 16.1575 15.1572 14.6572Z"" stroke=""white"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round""/>
+                    </svg><div>"
+                OnSelect: =Select(SearchAUMButton_10);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Tooltip: ="Search"
+                Width: =30
+                X: =SearchAUMButton_10.X + 5
+                Y: =SearchAUMButton_10.Y + 6
+                ZIndex: =36
+
+            input_searchAll_2 As text:
+                BorderColor: =RGBA(191, 191, 192, 1)
+                BorderThickness: =1
+                Default: =""
+                FocusedBorderColor: =Self.HoverBorderColor
+                FocusedBorderThickness: =1
+                Font: =Font.Arial
+                Height: =44
+                HintText: ="Search ..."
+                HoverFill: =RGBA(186, 202, 226, 0)
+                Size: =If(App.Width > 600, 10.5, 12)
+                Width: =If(App.Width > 992, DateTo_InputBack_5.X + DateTo_InputBack_5.Width - DateFrom_InputBack_6.X, App.Width - SearchAUMButton_10.Width - btnRefresh_17.Width - 50) - If(App.Width > 950 && App.Width < 1100 && MobileShowMenu, 150, 0)
+                X: =If(App.Width > 800, If(MobileShowMenu, 260, 70), 10)
+                Y: =10
+                ZIndex: =37
+
+            _Label1_6 As label:
+                Align: =Align.Center
+                Font: =Font.Arial
+                Size: =10.5
+                Text: ="Empty data."
+                Visible: =TableContent_6.AllItemsCount = 0
+                Width: =Hr_3.Width
+                X: =Hr_3.X
+                Y: =Hr_3.Y + 10
+                ZIndex: =38
+
+            btnRefresh_17 As button:
+                BorderThickness: =0
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                Fill: =RGBA(17, 79, 144, 1)
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                Height: =44
+                OnSelect: |-
+                    =Reset(input_searchAll_2);
+                    Reset(DateFrom_Datepicker_6);
+                    Reset(DateTo_DatePicker_6);
+                    Select(GetAll_ML);
+                PaddingBottom: =10
+                PaddingLeft: =30
+                PaddingRight: =10
+                PaddingTop: =10
+                PressedColor: =Self.Color 
+                PressedFill: =Self.Fill
+                Size: =10.5
+                Text: =""
+                Tooltip: ="Click here to clear filters"
+                Width: =44
+                X: =SearchAUMButton_10.X + SearchAUMButton_10.Width + 10
+                Y: =SearchAUMButton_10.Y
+                ZIndex: =40
+
+            RefreshListIcon_18 As icon.Reload:
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =20
+                Icon: =Icon.Reload
+                OnSelect: =Select(btnRefresh_17);
+                Tooltip: ="Click here to clear filters"
+                Width: =20
+                X: =btnRefresh_17.X + btnRefresh_17.Width*0.5 - Self.Width*0.5
+                Y: =btnRefresh_17.Y + btnRefresh_17.Height*0.5 - Self.Height*0.5
+                ZIndex: =41
+
+            QT_Action_MR As groupContainer.horizontalAutoLayoutContainer:
+                DropShadow: =DropShadow.None
+                Height: =52
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowX: =LayoutOverflow.Scroll
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =Min(CR_Tab1_3.Width + CR_Tab3_3.Width + CR_Tab2_3.Width, App.Width - 20)
+                X: =DateFrom_Label_3.X
+                Y: =If(App.Width > 992, DateTo_InputBack_5.Y + DateTo_InputBack_5.Height + 10, GoAUMButton_1.Y + GoAUMButton_1.Height + 10)
+                ZIndex: =42
+
+                CR_Tab1_3 As groupContainer.manualLayoutContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =47
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =120
+                    ZIndex: =1
+
+                    Button8_32 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = 1, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = 1, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =RGBA(248, 248, 249, 1)
+                        OnSelect: |-
+                            =Set(DealDetailTab, 1);
+                            Set(currentPageIndex, 0);
+                            Set(PageSizeNumber, 10);
+                            Switch(
+                                DealDetailTab,
+                                1,
+                                Set(isActionNeeded, true);
+                                ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem);
+                                Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                2,
+                                ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem);
+                                Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                3,
+                                Set(isActionNeeded, false);
+                                ClearCollect(listRes1Client, listItem1ClientComplete.listItem);
+                                Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                ))
+                            );
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(proposalFilterStatus, proposalFilterStatusActioneed), 2, ClearCollect(proposalFilterStatus, proposalFilterStatusUnderProcessing),
+                            3, ClearCollect(proposalFilterStatus, proposalFilterStatusComplete));
+                            
+                            ClearCollect(listItem1ClientActionNeed,'TVS->FIndAllProposalProcess4-V1'.Run(
+                                 resKeyOpenAll.open,
+                                 resKeyOpenAll.close,
+                                 dateFromFilterVar,
+                                    dateToFilterVar,
+                                    If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),     
+                                PageSizeNumber,
+                                 currentPageIndex,
+                                 envDEV,
+                                 envTEST,
+                                 envUAT1,
+                                 envUAT2,
+                                  isActionNeeded,
+                                 isInIC,
+                                 isInIC_SC,
+                                   If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                                   First(currentUserV2Res).id
+                            
+                             )
+                            );
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem), 2, ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem),
+                            3, ClearCollect(listRes1Client, listItem1ClientComplete.listItem));
+                            
+                            Switch(DealDetailTab, 1, Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount), 2, Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount),
+                            3, Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount));
+                            
+                            //pageIndex
+                            Set(maxList,[1,2,3,4]);
+                            
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            
+                            ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                );
+                            );
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedColor: =Self.Color
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 10.5, 10.5)
+                        Text: ="Action needed"
+                        Tooltip: ="Action needed"
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    BottomBorder1_39 As rectangle:
+                        BorderColor: =If(DealDetailTab = 1, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = 1, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(DealDetailTab = 1, 2, 0)
+                        Width: =Parent.Width
+                        Y: =38
+                        ZIndex: =2
+
+                CR_Tab2_3 As groupContainer.manualLayoutContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =47
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =150
+                    ZIndex: =2
+
+                    Button8_33 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = 2, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = 3, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =RGBA(248, 248, 249, 1)
+                        OnSelect: |-
+                            =Set(DealDetailTab, 2);
+                            Set(currentPageIndex, 0);
+                            Set(PageSizeNumber, 10);
+                            Switch(
+                                DealDetailTab,
+                                1,
+                                Set(isActionNeeded, true);
+                                ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem);
+                                Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                2,
+                                ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem);
+                                Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                3,
+                                Set(isActionNeeded, false);
+                                ClearCollect(listRes1Client, listItem1ClientComplete.listItem);
+                                Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                ))
+                            );
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(proposalFilterStatus, proposalFilterStatusActioneed), 2, ClearCollect(proposalFilterStatus, proposalFilterStatusUnderProcessing),
+                            3, ClearCollect(proposalFilterStatus, proposalFilterStatusComplete));
+                            
+                            // Call API get datas
+                             ClearCollect(listItem1ClientUnderProcessing,'TVS->FIndAllProposalProcess4-V1'.Run(
+                                 resKeyOpenAll.open,
+                                 resKeyOpenAll.close,
+                                   dateFromFilterVar,
+                                   dateToFilterVar,
+                                  If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+                                PageSizeNumber,
+                                 currentPageIndex,
+                                 envDEV,
+                                 envTEST,
+                                 envUAT1,
+                                 envUAT2,
+                                  false, //isActionNeeded
+                                 isInIC,
+                                 isInIC_SC,
+                                   If(Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) - 1), "''"),
+                                   First(currentUserV2Res).id
+                            
+                             ));
+                                   
+                            Switch(DealDetailTab, 1, ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem), 2, ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem),
+                            3, ClearCollect(listRes1Client, listItem1ClientComplete.listItem));
+                            
+                            Switch(DealDetailTab, 1, Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount), 2, Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount),
+                            3, Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount));
+                            
+                            
+                            //pageIndex
+                            Set(maxList,[1,2,3,4  ]);
+                            
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            
+                            ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                );
+                            );
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedColor: =Self.Color
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 10.5, 10.5)
+                        Text: ="Under processing"
+                        Tooltip: ="Under processing"
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    BottomBorder1_40 As rectangle:
+                        BorderColor: =If(DealDetailTab = 2, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = 2, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(DealDetailTab = 2, 2, 0)
+                        Width: =Parent.Width
+                        Y: =38
+                        ZIndex: =2
+
+                CR_Tab3_3 As groupContainer.manualLayoutContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    DropShadow: =DropShadow.None
+                    FillPortions: =0
+                    LayoutMinHeight: =47
+                    LayoutMinWidth: =250
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Width: =100
+                    ZIndex: =3
+
+                    Button8_34 As button:
+                        BorderStyle: =BorderStyle.None
+                        Color: =If(DealDetailTab = 3, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        Height: =35
+                        HoverColor: =If(DealDetailTab = 2, RGBA(14, 63, 115, 1), RGBA(176, 176, 176, 1))
+                        HoverFill: =RGBA(248, 248, 249, 1)
+                        OnSelect: |-
+                            =Set(DealDetailTab, 3);
+                            Set(currentPageIndex, 0);
+                            Set(PageSizeNumber, 10);
+                            Switch(
+                                DealDetailTab,
+                                1,
+                                Set(isActionNeeded, true);
+                                ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem);
+                                Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                2,
+                                ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem);
+                                Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                )),
+                                3,
+                                Set(isActionNeeded, false);
+                                ClearCollect(listRes1Client, listItem1ClientComplete.listItem);
+                                Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount);
+                                Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                                ClearCollect(listPageIndex, pageIndexFirst);
+                                ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                ))
+                            );
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(proposalFilterStatus, proposalFilterStatusActioneed), 2, ClearCollect(proposalFilterStatus, proposalFilterStatusUnderProcessing),
+                            3, ClearCollect(proposalFilterStatus, proposalFilterStatusComplete));
+                            
+                            // Call API get datas
+                            ClearCollect(listItem1ClientComplete,'TVS->FIndAllProposalProcess4-V1'.Run(
+                                 resKeyOpenAll.open,
+                                 resKeyOpenAll.close,
+                                dateFromFilterVar,
+                                dateToFilterVar,
+                                If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),  
+                                PageSizeNumber,
+                                 currentPageIndex,
+                                 envDEV,
+                                 envTEST,
+                                 envUAT1,
+                                 envUAT2,
+                                  isActionNeeded,
+                                 isInIC,
+                                 isInIC_SC,
+                                   If(Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatus, "," & "'" & value & "'"), Len(Concat(proposalFilterStatus, "," & "'" & value & "'")) - 1), "''"),
+                                   First(currentUserV2Res).id
+                            
+                             )
+                            );
+                            
+                            Switch(DealDetailTab, 1, ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem), 2, ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem),
+                            3, ClearCollect(listRes1Client, listItem1ClientComplete.listItem));
+                            
+                            Switch(DealDetailTab, 1, Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount), 2, Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount),
+                            3, Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount));
+                            
+                            //pageIndex
+                            Set(maxList,[1,2,3,4  ]);
+                            
+                            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+                            ClearCollect(listPageIndex, pageIndexFirst);
+                            
+                            ForAll(
+                                maxList,
+                                If(Last(listPageIndex).Value + 1 < pageCount,
+                                    Collect(listPageIndex,Last(listPageIndex).Value + 1);
+                                );
+                            );
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PressedColor: =Self.Color
+                        PressedFill: =Self.Fill
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =If(App.Width > 600, 10.5, 10.5)
+                        Text: ="Completed"
+                        Tooltip: ="Completed"
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    BottomBorder1_41 As rectangle:
+                        BorderColor: =If(DealDetailTab = 3, RGBA(14,63,115,1),RGBA(176, 176, 176, 1))
+                        BorderThickness: =If(DealDetailTab = 3, 2, 0)
+                        Fill: =RGBA(246, 246, 246, 1)
+                        Height: =If(DealDetailTab = 3, 2, 0)
+                        Width: =Parent.Width
+                        Y: =38
+                        ZIndex: =2
+
+            Filter_Container_3 As group:
+                Height: =5
+                Width: =5
+                X: =40
+                Y: =40
+                ZIndex: =43
+
+                PreviousIcon_3 As icon.ChevronLeft:
+                    Height: =15
+                    Icon: =Icon.ChevronLeft
+                    OnSelect: |-
+                        =Set(currentPageIndex,currentPageIndex - 1);
+                        Select(GetAll_ML);
+                    Tooltip: ="Previous page"
+                    Visible: =If(currentPageIndex<=0,false,true) && TableContent_6.AllItemsCount > 0
+                    Width: =15
+                    X: =PageNumbers_3.X - 22
+                    Y: =PageNumbers_3.Y + 10
+                    ZIndex: =9
+
+                NextIcon_4 As icon.ChevronRight:
+                    Height: =15
+                    Icon: =Icon.ChevronRight
+                    OnSelect: |
+                        =Set(currentPageIndex,currentPageIndex + 1);
+                        Select(GetAll_ML);
+                    Tooltip: ="Next page"
+                    Visible: =If(currentPageIndex>=pageCount-1,false,true) && TableContent_6.AllItemsCount > 0
+                    Width: =15
+                    X: =WhiteBackground_7.X + WhiteBackground_7.Width - 50
+                    Y: =PageNumbers_3.Y + 10
+                    ZIndex: =10
+
+                "PageNumbers_3 As gallery.'BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    DelayItemLoading: =true
+                    Height: =42
+                    Items: =listPageIndex
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =35
+                    Visible: =TableContent_6.AllItemsCount > 0
+                    Width: =PageNumbers_3.AllItemsCount * 35
+                    X: =NextIcon_4.X - PageNumbers_3.Width
+                    Y: =WhiteBackground_7.Y + WhiteBackground_7.Height
+                    ZIndex: =11
+
+                    pageIndex_4 As htmlViewer:
+                        DisplayMode: |
+                            =DisplayMode.Edit
+                        Font: =Font.Arial
+                        HtmlText: |-
+                            ="<div style='font-family: Arial; width: 15px; display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 3px; background-color: transparent; border-radius: 5px; border: " & If(currentPageIndex = ThisItem.Value, "1px solid #1890FF", "none")&";'><font color=" & If(currentPageIndex = ThisItem.Value, "#1890FF", "black")&">" & (ThisItem.Value + 1) & "</font></div>"
+                        OnSelect: |
+                            =Set(currentPageIndex,ThisItem.Value);
+                            Select(GetAll_ML);
+                        PaddingRight: =0
+                        Width: =35
+                        ZIndex: =2
+
+                PageDropdown_3 As button:
+                    Align: =Align.Left
+                    BorderColor: =If(ShowPageSizeSelectPopup, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+                    BorderThickness: =1
+                    Color: =RGBA(82, 82, 82, 1)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    FocusedBorderThickness: =1
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =32
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RGBA(241, 244, 249, 1)
+                    OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+                    PaddingLeft: =10
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    PressedBorderColor: =
+                    PressedColor: =
+                    PressedFill: =
+                    Size: =10.5
+                    Text: =PageSizeNumber
+                    Visible: =App.Width > 600 && TableContent_6.AllItemsCount > 0
+                    Width: =50
+                    X: =PreviousIcon_3.X - 60
+                    Y: =PageNumbers_3.Y + 2 
+                    ZIndex: =14
+
+                PageChevron_2 As htmlViewer:
+                    Font: =Font.Arial
+                    Height: =44
+                    HtmlText: |-
+                        ="<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                        <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                        </svg></div>"
+                    OnSelect: =Set(ShowPageSizeSelectPopup, !ShowPageSizeSelectPopup)
+                    PaddingRight: =5.27
+                    PaddingTop: =5.27
+                    Size: =11.60
+                    Visible: =App.Width > 600 && TableContent_6.AllItemsCount > 0
+                    Width: =35
+                    X: =PageDropdown_3.X + PageDropdown_3.Width - 28
+                    Y: =PageDropdown_3.Y - 2
+                    ZIndex: =15
+
+                PageCloseDropdown_3 As rectangle:
+                    Fill: =RGBA(255, 255, 255, 0)
+                    Height: =App.Height - 100
+                    OnSelect: =Set(ShowPageSizeSelectPopup, false)
+                    Visible: =ShowPageSizeSelectPopup && App.Width > 600
+                    Width: =Parent.Width
+                    ZIndex: =16
+
+                "PageItems_2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    '#CopilotOverlayLabel': ="Filtered"
+                    BorderColor: =RGBA(191, 191, 192, 1)
+                    BorderThickness: =0.5
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =122
+                    Items: |-
+                        =[{value: 10}, {value: 20}, {value: 50}]
+                    Layout: =Layout.Vertical
+                    LoadingSpinner: =LoadingSpinner.Data
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Visible: =ShowPageSizeSelectPopup && App.Width > 600
+                    Width: =PageDropdown_3.Width
+                    X: =PageDropdown_3.X
+                    Y: =PageDropdown_3.Y - 130
+                    ZIndex: =17
+
+                    Button6_69 As button:
+                        Align: =Align.Left
+                        Color: =RGBA(82, 82, 82, 1)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.Arial
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(241, 244, 249, 1)
+                        OnSelect: |-
+                            =Set(PageSizeNumber, ThisItem.value);
+                            Set(ShowPageSizeSelectPopup, false);
+                            Set(currentPageIndex,0);
+                            Select(GetAll_ML);
+                        PaddingLeft: =15
+                        PaddingRight: =5.27
+                        PaddingTop: =5.27
+                        PressedFill: =
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =10.5
+                        Text: =ThisItem.value
+                        Width: =70
+                        ZIndex: =1
+
+            GoIssuerListButtonContainer_1 As group:
+                Height: =5
+                Width: =5
+                X: =60
+                Y: =60
+                ZIndex: =46
+
+                GoAUMButton_1 As button:
+                    BorderThickness: =0
+                    Fill: =RGBA(166, 166, 166, 1)
+                    Font: =Font.Arial
+                    FontWeight: =FontWeight.Normal
+                    Height: =44
+                    HoverFill: =Self.Fill
+                    OnSelect: |-
+                        =Set(DealDetailTab,1);
+                        Set(marginPolicyType,1);
+                        Navigate(MarginLimitList,ScreenTransition.Fade)
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =40
+                    PaddingTop: =10
+                    PressedColor: =Self.Color 
+                    PressedFill: =Self.Fill
+                    Size: =10.5
+                    Text: ="Margin policy"
+                    Width: =140
+                    X: =If(Parent.Width > 992, WhiteBackground_7.X + WhiteBackground_7.Width - 160, Parent.Width - Self.Width - 15)
+                    Y: = If(Parent.Width > 992, input_searchAll_2.Y, DateTo_InputBack_5.Y + DateTo_InputBack_5.Height + 15)
+                    ZIndex: =18
+
+                GoAUMButtonIcon_1 As icon.AddDocument:
+                    Color: =RGBA(255, 255, 255, 1)
+                    Height: =20
+                    Icon: =Icon.NextArrow
+                    OnSelect: |-
+                        =Set(DealDetailTab,1);
+                        Set(marginPolicyType,1);
+                        Navigate(MarginLimitList,ScreenTransition.Fade)
+                    PaddingRight: =0.00
+                    PaddingTop: =0.00
+                    Tooltip: ="New"
+                    Width: =20
+                    X: =GoAUMButton_1.X + GoAUMButton_1.Width - 35
+                    Y: =GoAUMButton_1.Y + 12
+                    ZIndex: =19
+
+    CreateProposalName_Required_2 As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Font: =Font.Arial
+        Height: =20
+        LineHeight: =2.2
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =8
+        Text: =If(IsBlank(CreateProposalName_Input_2.Text) || Len(Trim(CreateProposalName_Input_2.Text)) = 0, TextRequired, "Max length 150")
+        Visible: =isShowCreateProposalPopup && isSubmited && (IsBlank(CreateProposalName_Input_2.Text) || Len(CreateProposalName_Input_2.Text) > 150 || Len(Trim(CreateProposalName_Input_2.Text)) = 0)
+        Width: =299
+        X: =CreateProposal_Title_2.X
+        Y: =CreateProposalName_Input_2.Y + CreateProposalName_Input_2.Height
+        ZIndex: =2
+
+    CreateProposalEntity_Required_2 As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Font: =Font.Arial
+        Height: =20
+        LineHeight: =2.2
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =8
+        Text: =TextRequired
+        Visible: =isShowCreateProposalPopup && isSubmited && IsBlank(DropdownTypeOfProposal.Text)
+        Width: =299
+        X: =CreateProposal_Title_2.X
+        Y: =DropdownTypeOfProposal.Y + DropdownTypeOfProposal.Height
+        ZIndex: =3
+
+    GetAll_ML As button:
+        Font: =Font.Arial
+        OnSelect: |-
+            =
+            Set(isLoading, true);
+            Set(dateFromFilterVar,DateFrom_Datepicker_6.SelectedDate);
+            Set(dateToFilterVar,DateTo_DatePicker_6.SelectedDate);
+            Concurrent(
+            //Action need
+            ClearCollect(listItem1ClientActionNeed,'TVS->FIndAllProposalProcess4-V1'.Run(
+                resKeyOpenAll.open, resKeyOpenAll.close, dateFromFilterVar, dateToFilterVar,
+                If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text), PageSizeNumber, currentPageIndex, envDEV, envTEST, envUAT1, envUAT2,
+                true, //isActionNeeded
+                isInIC, isInIC_SC,
+                If(Len(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusActioneed, "," & "'" & value & "'")) - 1), "''"),
+                First(currentUserV2Res).id
+             )),
+             //Under processing
+             ClearCollect(listItem1ClientUnderProcessing,'TVS->FIndAllProposalProcess4-V1'.Run(
+                resKeyOpenAll.open, resKeyOpenAll.close, dateFromFilterVar, dateToFilterVar, If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+                PageSizeNumber, currentPageIndex, envDEV, envTEST, envUAT1, envUAT2,
+                false, //isActionNeeded
+                isInIC, isInIC_SC,
+                If(Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusUnderProcessing, "," & "'" & value & "'")) - 1), "''"),
+                First(currentUserV2Res).id
+             )),
+             //Complete
+             ClearCollect(listItem1ClientComplete,'TVS->FIndAllProposalProcess4-V1'.Run(
+                resKeyOpenAll.open, resKeyOpenAll.close, dateFromFilterVar, dateToFilterVar,
+                If(IsBlank(input_searchAll_2.Text), "", input_searchAll_2.Text),
+                PageSizeNumber, currentPageIndex, envDEV, envTEST, envUAT1, envUAT2,
+                false, // isActionNeeded
+                isInIC, isInIC_SC,
+                If(Len(Concat(proposalFilterStatusComplete, "," & "'" & value & "'")) > 0, Right(Concat(proposalFilterStatusComplete, "," & "'" & value & "'"), Len(Concat(proposalFilterStatusComplete, "," & "'" & value & "'")) - 1), "''"),
+                First(currentUserV2Res).id
+             )));
+            
+            Switch(DealDetailTab, 1, ClearCollect(listRes1Client, listItem1ClientActionNeed.listItem), 2, ClearCollect(listRes1Client, listItem1ClientUnderProcessing.listItem),
+            3, ClearCollect(listRes1Client, listItem1ClientComplete.listItem));
+            
+            Switch(DealDetailTab, 1, Set(pageCount,First(listItem1ClientActionNeed.pageCount).pageCount), 2, Set(pageCount,First(listItem1ClientUnderProcessing.pageCount).pageCount),
+            3, Set(pageCount,First(listItem1ClientComplete.pageCount).pageCount));
+            
+            
+            //pageIndex
+            Set(maxList,[1,2,3,4]);
+            Set(pageIndexFirst, 5*RoundDown(currentPageIndex/5, 0));
+            ClearCollect(listPageIndex, pageIndexFirst);
+            
+            ForAll(maxList,If(Last(listPageIndex).Value + 1 < pageCount,Collect(listPageIndex,Last(listPageIndex).Value + 1);););
+            Set(isShowButtonTable, true);
+            Set(isLoading, false);
+        Text: ="Button"
+        Visible: =false
+        X: =40
+        Y: =40
+        ZIndex: =4
+
+    Header_7 As Header:
+        ZIndex: =5
+
+    MenuItemsSideBar_9 As MenuItemsSideBar:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_9.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_9.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_9.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_9.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_9.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_9.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_9.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_9.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_9.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_9.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_9.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_9.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_9.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_9.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_9.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoration&A",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_9.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =MobileShowMenu
+        Width: =If(App.Width > 600, 240, App.Width)
+        Y: =56
+        ZIndex: =7
+
+    MenuItemsSideBar_Small_14 As MenuItemsSideBar_Small:
+        Height: =Parent.Height - Self.Y
+        MenuItems: |-
+            =Table(
+                {
+                    MenuLabel: "Dashboard",
+                    MenuIcon: MenuItemsSideBar_Small_14.IconDasboard,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 1,
+                    MenuIconDropDown: MenuItemsSideBar_Small_14.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_14.IconDropUp,
+                    Submenu: []
+                },
+                {
+                    MenuLabel: "Portal",
+                    MenuIcon: MenuItemsSideBar_Small_14.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 2,
+                    MenuIconDropDown: MenuItemsSideBar_Small_14.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_14.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "'Information of non-listed compan",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconDasboard,
+                            MenuScreenNavigate: Portal,
+                            MenuID: 2.1
+                        },
+                        {
+                            MenuLabel: "Comunication Records (Minutes of meeting)",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.2
+                        },
+                        {
+                            MenuLabel: "Investment Research",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconDasboard,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 2.3
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Business process",
+                    MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 3,
+                    MenuIconDropDown: MenuItemsSideBar_Small_14.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_14.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "M&A",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.1
+                        },
+                        {
+                            MenuLabel: "Fixed Income Investment ProcessA",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 3.2
+                        },
+                        {
+                            MenuLabel: "Margin limit approvalprocess (ad-hoc)",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.3
+                        },
+                        {
+                            MenuLabel: "PEVC",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 3.4
+                        }
+                    )
+                },
+                {
+                    MenuLabel: "Admin",
+                    MenuIcon: MenuItemsSideBar_Small_14.IconSettings,
+                    MenuScreenNavigate: Dashboard,
+                    MenuID: 4,
+                    MenuIconDropDown: MenuItemsSideBar_Small_14.IconDropDown,
+                    MenuIconDropUp: MenuItemsSideBar_Small_14.IconDropUp,
+                    Submenu: Table(
+                        {
+                            MenuLabel: "Manager Authoiation&A",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: Dashboard,
+                            MenuID: 4.1
+                        },
+                        {
+                            MenuLabel: "Decentralization",
+                            MenuIcon: MenuItemsSideBar_Small_14.IconFile,
+                            MenuScreenNavigate: TableProposalQT2,
+                            MenuID: 4.2
+                        }
+                    )
+                }
+            )
+        Visible: =App.Width > 800 && !MobileShowMenu
+        Y: =56
+        ZIndex: =8
+
+    DeleteConfirm_6 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =22
+
+        RejectPopupBack_18 As rectangle:
+            Fill: =RGBA(0.3, 0.3, 0.3, 0.3)
+            Height: =Parent.Height
+            Visible: =isShowPopupDelete
+            Width: =Parent.Width
+            ZIndex: =24
+
+        DeleteConfirmBg_15 As htmlViewer:
+            Font: =Font.Arial
+            Height: =If(Parent.Width > 600, 200, 200)
+            HtmlText: |-
+                ="<div style='margin-left: 8px; width: calc(100% - 16px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowPopupDelete
+            Width: =If(App.Width > 600, 550, App.Width + 5)
+            X: =If(App.Width > 600, App.Width * 0.5 - DeleteConfirmBg_15.Width *0.5, -3)
+            Y: =App.Height / 2 - Self.Height
+            ZIndex: =25
+
+        CancelResearchOpinionButton_12 As button:
+            BorderColor: =Self.Color
+            BorderThickness: =1
+            Color: =RGBA(214, 27, 27, 1)
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(214, 27, 27, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HoverColor: =RGBA(214, 27, 27, 1)
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            PressedBorderColor: =RGBA(214, 27, 27, 1)
+            PressedColor: =RGBA(214, 27, 27, 1)
+            PressedFill: =
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="No"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteResearchOpinionButton_12.X - Self.Width - 10
+            Y: =DeleteResearchOpinionButton_12.Y
+            ZIndex: =26
+
+        DeleteResearchOpinionButton_12 As button:
+            BorderThickness: =
+            DisabledBorderColor: =RGBA(214, 27, 27, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(214, 27, 27, 1)
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =
+            Font: =Font.Arial
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isLoading, true); Set(IsError, false);
+                UpdateContext({ShowNotification: false});
+                
+                Set(deleteStatus,'TVS->DeleteProposalProcess4'.Run(resKeyOpenAll.open, resKeyOpenAll.close, idProposalDelete,envDEV,envTEST,envUAT1,envUAT2, currenUserV2.id).result);
+                Set(isLoading, false);
+                If(Value(deleteStatus) = 200,
+                Select(CancelResearchOpinionButton_12);
+                Select(GetAll_ML);
+                Set(NoticationText,"Deleted successfully!");UpdateContext({ShowNotification: true});,
+                Set(IsError, true);Set(NoticationText,"System error, please reload this page again.");UpdateContext({ShowNotification: true});
+                );
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =RGBA(214, 27, 27, 1)
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Yes"
+            Visible: =isShowPopupDelete
+            Width: =120
+            X: =DeleteConfirmBg_15.X + DeleteConfirmBg_15.Width - 150
+            Y: =DeleteConfirmBg_15.Y + DeleteConfirmBg_15.Height - Self.Height - 40
+            ZIndex: =27
+
+        DeleteConfirmCloseIcon_17 As icon.Cancel:
+            Color: =RGBA(26, 26, 26, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(varEncryptionDeleteSelectedId, Blank());
+                Set(isShowPopupDelete, false);
+            Visible: =isShowPopupDelete
+            Width: =20
+            X: =DeleteConfirmBg_15. X + DeleteConfirmBg_15.Width -50
+            Y: =DeleteConfirmBg_15.Y + 20
+            ZIndex: =28
+
+        DeleteConfirmLabel_18 As label:
+            Font: =Font.Arial
+            Size: =12
+            Text: ="Are you sure to delete this proposal?"
+            Visible: =isShowPopupDelete
+            Width: =DeleteConfirmBg_15.Width - 100 - DeleteConfirmCloseIcon_17.Width
+            X: =Label2_12.X
+            Y: =Label2_12.Y + Label2_12.Height
+            ZIndex: =29
+
+        Label2_12 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Size: =14
+            Text: ="Delete"
+            Visible: =isShowPopupDelete
+            X: =DeleteConfirmBg_15.X + 30
+            Y: =DeleteConfirmBg_15.Y + 10
+            ZIndex: =30
+
+    CreateProposalPopup_2 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =30
+
+        CreateProposalPopupBack_3 As rectangle:
+            Fill: =RGBA(166, 166, 166, 0.5)
+            Height: =App.Height
+            Visible: =isShowCreateProposalPopup
+            Width: =App.Width
+            ZIndex: =9
+
+        CreateProposalPopupBg_2 As htmlViewer:
+            Font: =Font.Arial
+            Height: =CreateProposal_Title_2.Height + CreateProposalName_Title_2.Height + CreateProposalName_Title_2.Height + CreateProposalEntity_Title_2.Height + DropdownTypeOfProposal.Height + Label_Rq_name.Height + Label_Rq_type.Height + CreateProposalCreateButton_2.Height + 100
+            HtmlText: |-
+                ="<div style='width: calc(100% - 10px); height: "& Self.Height - 20 &"px; background-color: white; border-radius: 12px;box-shadow: 5px 4px 8px 0px rgba(0, 0, 0, 0.10);
+                '></div>"
+            PaddingRight: =5.00
+            PaddingTop: =5.00
+            Size: =11.00
+            Visible: =isShowCreateProposalPopup
+            Width: =If(Parent.Width > 600, 600, Parent.Width)
+            X: =If(Parent.Width > 600, App.Width / 2 - Self.Width / 2, 5)
+            Y: =If(Parent.Width > 600, 72, (App.Height - Self.Height) / 2)
+            ZIndex: =10
+
+        CreateProposal_Title_2 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Create proposal"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposalPopupBg_2.X + 20
+            Y: =CreateProposalPopupBg_2.Y + 10
+            ZIndex: =11
+
+        CreateProposalName_Title_2 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10.5
+            Text: ="Proposal name"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposal_Title_2.X
+            Y: =CreateProposal_Title_2.Y + CreateProposal_Title_2.Height + 10
+            ZIndex: =12
+
+        CreateProposalName_Input_2 As text:
+            BorderColor: =If(isSubmited && (IsBlank(Self.Text) || Len(Self.Text) > 150 || Len(Trim(Self.Text)) = 0), RGBA(255, 0, 0, 1), RGBA(191, 191, 192, 1))
+            BorderThickness: =1
+            Default: =
+            FocusedBorderColor: =Self.HoverBorderColor
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            Height: =44
+            HintText: =""
+            HoverFill: =RGBA(186, 202, 226, 0)
+            Size: =If(App.Width > 600, 10.5, 12)
+            Visible: =isShowCreateProposalPopup
+            Width: =CreateProposalPopupBg_2.Width - 50
+            X: =CreateProposalName_Title_2.X
+            Y: =CreateProposalName_Title_2.Y + CreateProposalName_Title_2.Height
+            ZIndex: =13
+
+        CreateProposalEntity_Title_2 As label:
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            LineHeight: =2.2
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10.5
+            Text: ="Type of proposal"
+            Visible: =isShowCreateProposalPopup
+            Width: =299
+            X: =CreateProposal_Title_2.X
+            Y: =Label_Rq_name.Y + Label_Rq_name.Height + 10
+            ZIndex: =14
+
+        CreateProposalCreateButton_2 As button:
+            BorderThickness: =0
+            Fill: =RGBA(17, 79, 144, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |
+                =Set(isCreatedPopup, true);
+                If(!IsBlank(DropdownTypeOfProposal.Text) && !IsBlank(CreateProposalName_Input_2.Text),
+                    // clear data form one client
+                    Reset(ClientID_Input);
+                    Reset(CompanyName_Input);
+                    Reset(MaxML_Input);
+                    Reset(ProposalML_Input);
+                    Reset(ProposalInterestRate_Input);
+                    Reset(PML_Input);
+                    Reset(PIR_Input);
+                    Reset(Cmt_Input);
+                    Reset(Note_Input_1);
+                    Clear(listAttachFile);
+                    Reset(InMarginPolicyCheckbox);
+                    Set(oneClientRMOption, Blank());
+                    // end clear data form one client
+                    Set(marginDetail, Blank());
+                    Set(isSubmited, false);
+                    Clear(approvelLog);
+                    Set(marginDetail1,Blank());
+                    If(!IsBlank(CreateProposalName_Input_2.Text) && !IsBlank(typeOfProposal) && (Len(CreateProposalName_Input_2.Text) <= 150 && Len(Trim(CreateProposalName_Input_2.Text)) > 0),
+                        Set(isCreateProposalInfo, true);
+                        Set(isProposalView, false);
+                        Set(proposalInfoEdit, Blank());
+                        Set(isShowCreateProposalPopup, false);
+                        Set(proposalNameInput,CreateProposalName_Input_2.Text);
+                        Set(marginType, typeOfProposal);
+                        Set(marginLimitType, marginType);
+                        Navigate(DetailMarginLimit,ScreenTransition.Fade),
+                        Set(isSubmited, true)
+                    );
+                
+                    ClearCollect(MarginLimitPolicyList,
+                        [{no: 1, id: "", guid: GUID(), ticket: "",
+                        CP_max_margin_ratio: "", CP_max_margined_amt_per_client: "", CP_max_margined_amt_all_client: "",
+                        BP_proposed_margin_ratio: "", BP_proposed_margined_amt_per_client: "", BP_proposed_margined_amt_all_client: "",
+                        RO_research_opinion: "", RO_proposed_margin_ratio: "", RO_proposed_margined_amt_per_client: "", RO_proposed_margined_amt_all_client: "",
+                        RMO_risk_management_opinion: "", RMO_proposed_margin_ratio: "", RMO_proposed_margined_amt_per_client: "", RMO_proposed_margined_amt_all_client: "",RMO_proposed_margined_qty_all_client: "", RMO_proposed_margined_qty_one_client: "", RMO_comment: "", record_status:"INSERT"
+                        }]
+                    );
+                    Set(marginLimitType, marginType);
+                );
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Create"
+            Visible: =isShowCreateProposalPopup
+            Width: =120
+            X: =CreateProposalPopupBg_2.X + CreateProposalPopupBg_2.Width - 150
+            Y: =CreateProposalPopupBg_2.Y + CreateProposalPopupBg_2.Height - 70
+            ZIndex: =15
+
+        CreateProposalCancelButton_2 As button:
+            BorderThickness: =0
+            DisabledFill: =Self.Fill
+            Fill: =RGBA(214, 27, 27, 1)
+            FocusedBorderThickness: =0
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            HoverFill: =ColorFade(Self.Fill , -15%)
+            OnSelect: |-
+                =Set(isShowCreateProposalPopup, false);
+                Set(isCreatedPopup, false);
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedColor: =Self.Color 
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =10.5
+            Text: ="Cancel"
+            Visible: =isShowCreateProposalPopup
+            Width: =120
+            X: =CreateProposalCreateButton_2.X - 130
+            Y: =CreateProposalPopupBg_2.Y + CreateProposalPopupBg_2.Height - 70
+            ZIndex: =16
+
+        CreateProposalPopupCloseIcon_2 As icon.Cancel:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =20
+            Icon: =Icon.Cancel
+            OnSelect: |-
+                =Set(isShowCreateProposalPopup, false);
+                Set(isCreatedPopup, false);
+            Visible: =isShowCreateProposalPopup
+            Width: =20
+            X: =CreateProposalPopupBg_2.X + CreateProposalPopupBg_2.Width - 50
+            Y: =CreateProposal_Title_2.Y + 10
+            ZIndex: =17
+
+        DropdownTypeOfProposal As button:
+            Align: =Align.Left
+            BorderColor: =If(reportWeekShowDropdown, RGBA(0, 18, 107, 1), ColorFade(Self.Fill, -15%))
+            BorderThickness: =1
+            Color: =RGBA(82, 82, 82, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            FocusedBorderThickness: =1
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Normal
+            Height: =44
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(241, 244, 249, 1)
+            OnSelect: =Set(typeOfProposalDropdown, !typeOfProposalDropdown)
+            PaddingLeft: =15
+            PaddingRight: =40
+            PaddingTop: =5.27
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            RadiusBottomLeft: =5
+            RadiusBottomRight: =5
+            RadiusTopLeft: =5
+            RadiusTopRight: =5
+            Size: =10.5
+            Text: =typeOfProposal
+            Visible: =isShowCreateProposalPopup
+            Width: =CreateProposalPopupBg_2.Width - 50
+            X: =CreateProposalName_Title_2.X
+            Y: =CreateProposalEntity_Title_2.Y + CreateProposalEntity_Title_2.Height
+            ZIndex: =18
+
+        iconDropdownTypeOfProposal As htmlViewer:
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.Arial
+            Height: =44
+            HtmlText: |-
+                ="<div style=""cursor: pointer""><svg xmlns=""http://www.w3.org/2000/svg"" width=""24"" height=""24"" viewBox=""0 0 24 24"" fill=""none"">
+                <path fill-rule=""evenodd"" clip-rule=""evenodd"" d=""M12.7069 15.7071C12.5193 15.8946 12.265 15.9999 11.9999 15.9999C11.7347 15.9999 11.4804 15.8946 11.2929 15.7071L5.63585 10.0501C5.54034 9.95785 5.46416 9.84751 5.41175 9.7255C5.35934 9.6035 5.33176 9.47228 5.3306 9.3395C5.32945 9.20672 5.35475 9.07504 5.40503 8.95215C5.45531 8.82925 5.52957 8.7176 5.62346 8.6237C5.71735 8.52981 5.829 8.45556 5.9519 8.40528C6.0748 8.355 6.20648 8.32969 6.33926 8.33085C6.47204 8.332 6.60325 8.35959 6.72526 8.412C6.84726 8.46441 6.95761 8.54059 7.04985 8.6361L11.9999 13.5861L16.9499 8.6361C17.1385 8.45394 17.3911 8.35315 17.6533 8.35542C17.9155 8.3577 18.1663 8.46287 18.3517 8.64828C18.5371 8.83369 18.6423 9.0845 18.6445 9.3467C18.6468 9.60889 18.546 9.8615 18.3639 10.0501L12.7069 15.7071Z"" fill=""#525252""/>
+                </svg></div>"
+            OnSelect: =Select(DropdownTypeOfProposal);
+            PaddingRight: =5.27
+            PaddingTop: =5.27
+            Size: =11.60
+            Visible: =isShowCreateProposalPopup
+            Width: =35
+            X: =DropdownTypeOfProposal.X + DropdownTypeOfProposal.Width - 40
+            Y: =DropdownTypeOfProposal.Y + 5
+            ZIndex: =19
+
+        Label_Rq_name As label:
+            Color: =Color.Red
+            Font: =Font.Arial
+            Height: =If(Self.Visible, 25, 0)
+            Size: =10.5
+            Text: =TextRequired
+            Visible: =IsBlank(CreateProposalName_Input_2.Text) && isCreatedPopup
+            Width: =CreateProposalName_Input_2.Width
+            X: =CreateProposalName_Input_2.X
+            Y: =CreateProposalName_Input_2.Y + CreateProposalName_Input_2.Height
+            ZIndex: =20
+
+        Label_Rq_type As label:
+            Color: =Color.Red
+            Font: =Font.Arial
+            Height: =If(Self.Visible, 25, 0)
+            Size: =10.5
+            Text: =TextRequired
+            Visible: =IsBlank(DropdownTypeOfProposal.Text) && isCreatedPopup
+            Width: =CreateProposalName_Input_2.Width
+            X: =CreateProposalName_Input_2.X
+            Y: =DropdownTypeOfProposal.Y + DropdownTypeOfProposal.Height
+            ZIndex: =21
+
+        SearchCloseDropdown_10 As rectangle:
+            Fill: =RGBA(255, 255, 255, 0)
+            Height: =App.Height
+            OnSelect: =Set(typeOfProposalDropdown, false);
+            Visible: =MR_DropdownType.Visible
+            Width: =Parent.Width
+            ZIndex: =22
+
+        "MR_DropdownType As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtered"
+            BorderColor: =RGBA(191, 191, 192, 1)
+            BorderThickness: =0.5
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Min(Self.AllItemsCount, 4) * Self.TemplateHeight + 10
+            Items: =["One Stock", "Many Stock", "One Client"]
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =40
+            Visible: =typeOfProposalDropdown
+            Width: =DropdownTypeOfProposal.Width
+            X: =DropdownTypeOfProposal.X
+            Y: =DropdownTypeOfProposal.Y + 50
+            ZIndex: =23
+
+            Button6_70 As button:
+                Align: =Align.Left
+                BorderThickness: =0
+                Color: =RGBA(82, 82, 82, 1)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(244, 244, 244, 0)
+                Fill: =If(typeOfProposal = ThisItem.Value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderColor: =If(typeOfProposal = ThisItem.Value, RGBA(241, 244, 249, 1), RGBA(0, 0, 0, 0))
+                FocusedBorderThickness: =0
+                Font: =Font.Arial
+                FontWeight: =FontWeight.Normal
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(241, 244, 249, 1)
+                OnSelect: |
+                    =If(typeOfProposal = ThisItem.Value, 
+                        Set(typeOfProposal, Blank()),
+                        Set(typeOfProposal, ThisItem.Value);
+                    );
+                    Set(typeOfProposalDropdown, false);
+                PaddingLeft: =15
+                PaddingRight: =5.27
+                PaddingTop: =5.27
+                PressedColor: =Self.Color
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10.5
+                Text: =ThisItem.Value
+                Width: =Parent.Width
+                X: =0.00
+                ZIndex: =1
+
+    Timer1_17 As timer:
+        Duration: =3000
+        Font: =Font.Arial
+        OnTimerEnd: |-
+            =Reset(Timer1_17); UpdateContext({ShowNotification: false}); Set(IsError, false);
+        Start: =ShowNotification
+        Visible: =false
+        X: =1235
+        Y: =692
+        ZIndex: =31
+
+    NotificationBox_17 As button:
+        Align: =Align.Left
+        BorderColor: =RGBA(40, 167, 69, 1)
+        BorderThickness: =0
+        DisabledFill: =Self.Fill
+        Fill: =If(IsError, RGBA(209, 50, 50, 1), RGBA(40, 167, 69, 1))
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =50
+        HoverBorderColor: =Self.Fill
+        HoverFill: =Self.Fill
+        PaddingLeft: =15
+        PaddingRight: =30
+        PressedColor: =RGBA(255, 255, 255, 1)
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Size: =10.5
+        Text: =NoticationText
+        Visible: =Timer1_17.Value <> 0
+        Width: =320
+        X: =App.Width - Self.Width - 2
+        Y: =100
+        ZIndex: =32
+
+    CloseNotiIcon_17 As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =15
+        Icon: =Icon.Cancel
+        OnSelect: =Reset(Timer1_17); Set(IsError, false);
+        Visible: =NotificationBox_17.Visible
+        Width: =15
+        X: =NotificationBox_17.X + NotificationBox_17.Width - 25
+        Y: =NotificationBox_17.Y + 17.5
+        ZIndex: =33
+
+    LoadingComponent_9 As LoadingComponent:
+        Visible: =isLoading
+        ZIndex: =34
+
+    NotificationScreen_16 As NotificationScreen:
+        Visible: =ShowNotificationPopup
+        ZIndex: =35
+

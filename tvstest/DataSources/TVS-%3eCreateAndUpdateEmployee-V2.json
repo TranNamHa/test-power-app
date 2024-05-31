@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "bd94750f-b58c-4c99-9151-2e856621587d",
+    "Name": "TVS->CreateAndUpdateEmployee-V2",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "a179b561-e19e-ee11-be37-6045bd58b6cb"
+  }
+]

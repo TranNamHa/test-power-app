@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "d42de0cb-4960-46c7-9502-9fd644b1e505",
+    "Name": "TVS->FindAllWithFilterPagingSortingInvestment-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "97b49c02-dea2-ee11-be37-6045bd58b6cb"
+  }
+]

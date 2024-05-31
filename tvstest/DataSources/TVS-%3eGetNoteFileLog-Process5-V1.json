@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "770f647c-d15d-4123-9ef2-6858826d4be9",
+    "Name": "TVS->GetNoteFileLog-Process5-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "8256f848-08b1-ee11-a569-6045bd58b6cb"
+  }
+]

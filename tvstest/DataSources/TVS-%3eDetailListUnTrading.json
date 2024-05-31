@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "5016647a-ab49-44b7-9bf8-12e49b13c198",
+    "Name": "TVS->DetailListUnTrading",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "90dce548-e1b8-ee11-9078-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "IsComponentScoped": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "Name": "listTickSearchProcess1",
+    "Type": "CollectionDataSourceInfo"
+  }
+]

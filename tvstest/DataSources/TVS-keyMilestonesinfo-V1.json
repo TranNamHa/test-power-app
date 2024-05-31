@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "899cb6ae-9734-4d69-b41c-a13f654d7a7d",
+    "Name": "TVS-keyMilestonesinfo-V1",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "26d3fca8-68bb-ee11-9078-6045bd58b6cb"
+  }
+]

@@ -1,0 +1,944 @@
+NotificationScreen As CanvasComponent:
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =App.Height
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    NotificationBg As rectangle:
+        Fill: =RGBA(0, 0, 0, 0.2)
+        Height: =Parent.Height
+        OnSelect: =Set(ShowNotificationPopup, false)
+        Width: =Parent.Width
+        ZIndex: =1
+
+    NotificationMainBg As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =Parent.Height
+        Width: =If(App.Width > 600, 400, App.Width)
+        X: =Parent.Width - NotificationMainBg.Width
+        ZIndex: =2
+
+    NotificationHeader As rectangle:
+        Fill: =RGBA(17, 79, 144, 1)
+        Height: =56
+        Width: =NotificationMainBg.Width
+        X: =NotificationMainBg.X
+        Y: =NotificationMainBg.Y
+        ZIndex: =3
+
+    NotificationTitle As label:
+        Color: =RGBA(255, 255, 255, 1)
+        Font: =Font.Arial
+        FontWeight: =FontWeight.Bold
+        Height: =NotificationHeader.Height
+        PaddingLeft: =10
+        Size: =11.5
+        Text: ="Notifications"
+        Width: =NotificationHeader.Width
+        X: =NotificationHeader.X
+        Y: =NotificationHeader.Y
+        ZIndex: =4
+
+    CloseNotificationIcon As icon.Cancel:
+        Color: =RGBA(255, 255, 255, 1)
+        Height: =20
+        Icon: =Icon.Cancel
+        OnSelect: =Set(ShowNotificationPopup, false)
+        Width: =20
+        X: =NotificationTitle.X + NotificationTitle.Width - 50
+        Y: =NotificationTitle.Y + 20
+        ZIndex: =5
+
+    MaskAsRead_1 As button:
+        Align: =Align.Right
+        BorderThickness: =0
+        Color: =RGBA(97, 76, 76, 1)
+        DisabledFill: =RGBA(0, 0, 0, 0)
+        DisplayMode: =If(Value(countNotify.count) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+        Fill: =RGBA(0, 0, 0, 0)
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        FontWeight: =FontWeight.Normal
+        Height: =30
+        HoverColor: =RGBA(97, 76, 76, 1)
+        HoverFill: =
+        OnSelect: |
+            =Set(
+                isLoading,
+                true
+            );
+            ClearCollect(
+                colUpdateNotification,
+                'TVS->UpdateNotification-V1'.Run(
+                    0,
+                    First(currentUserV2Res).id,
+                    envDEV,
+                    envTEST,
+                    envUAT1,
+                    envUAT2,resKeyOpenAll.open, resKeyOpenAll.close
+                )
+            );
+            Set(
+                PageSizeNotification,
+                10
+            );
+            Concurrent(
+                ClearCollect(
+                    colAllNotification,
+                    'TVS->GetAllNotification-V1'.Run(
+                        resKeyOpenAll.open,
+                        resKeyOpenAll.close,
+                        User().Email,
+                        PageSizeNotification,
+                        envDEV,
+                        envTEST,
+                        envUAT1,
+                        envUAT2
+                    )
+                ),
+                Set(
+                    countNotify,
+                    'TVS->CountNotifyByCurrentUser-V1'.Run(
+                        User().Email,
+                        envDEV,
+                        envTEST,
+                        envUAT1,
+                        envUAT2,resKeyOpenAll.open, resKeyOpenAll.close
+                    )
+                )
+            );
+            Set(
+                isLoading,
+                false
+            );
+        PaddingRight: =30
+        PressedColor: =MaskAsRead_1.Color
+        PressedFill: =
+        Size: =10.5
+        Text: ="Mark as read"
+        Width: =120
+        X: =Parent.Width - MaskAsRead_1.Width
+        Y: =NotificationTitle.Y + NotificationTitle.Height
+        ZIndex: =6
+
+    "ListNotification_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+        '#CopilotOverlayLabel': ="Filtered"
+        DelayItemLoading: =true
+        Height: =NotificationMainBg.Height - 121
+        Items: =colAllNotification
+        Layout: =Layout.Vertical
+        LoadingSpinner: =LoadingSpinner.Data
+        TemplatePadding: =0
+        TemplateSize: =105
+        Width: =NotificationMainBg.Width
+        X: =NotificationMainBg.X
+        Y: =MaskAsRead_1.Y + MaskAsRead_1.Height + 5 
+        ZIndex: =7
+
+        Rectangle6_1 As rectangle:
+            Fill: =If(ThisItem.is_seen = "1", RGBA(0, 0, 0, 0), RGBA(204, 204, 204, 0.4))
+            Height: =Parent.TemplateHeight - 2
+            OnSelect: =Select(Parent)
+            Width: =Parent.Width
+            ZIndex: =1
+
+        Content_1 As label:
+            Font: =Font.Arial
+            Height: =80
+            PaddingLeft: =10
+            PaddingRight: =If(App.Width > 600, 30, 10)
+            PaddingTop: =0
+            Size: =10.5
+            Text: =If(Len(ThisItem.content) > 210, Left(ThisItem.content, 210) & "...", ThisItem.content) 
+            VerticalAlign: =VerticalAlign.Top
+            Width: =Parent.Width
+            Y: =NotiTitle_1.X + NotiTitle_1.Height
+            ZIndex: =2
+
+        NotiTitle_1 As label:
+            Color: =RGBA(97, 76, 76, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =20
+            PaddingTop: =0
+            Size: =10.5
+            Text: =ThisItem.title
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =false
+            Width: =Parent.Width - Time_1.Width
+            ZIndex: =3
+
+        Time_1 As label:
+            Font: =Font.Arial
+            Height: =NotiTitle_1.Height
+            Italic: =true
+            OnSelect: =Select(Parent)
+            PaddingLeft: =10
+            PaddingRight: =If(App.Width > 600, 30, 10)
+            PaddingTop: =8
+            Size: =10.5
+            Text: |-
+                =Text(DateTimeValue(ThisItem.created_date), "dd/mm/yyyy hh:mm:ss")
+            Width: =180
+            Y: =NotiTitle_1.Y
+            ZIndex: =4
+
+        Status_Title As label:
+            Color: =RGBA(97, 76, 76, 1)
+            Font: =Font.Arial
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =20
+            Size: =10.5
+            Text: |-
+                ="Status: "
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =false
+            Width: =70
+            Y: =NotiTitle_1.Y + NotiTitle_1.Height
+            ZIndex: =5
+
+        Status_Content As label:
+            Font: =Font.Arial
+            Height: =30
+            PaddingLeft: =0
+            Size: =10.5
+            Text: =ThisItem.status
+            VerticalAlign: =VerticalAlign.Top
+            Visible: =false
+            Width: =Parent.Width - Status_Title.Width
+            X: =Status_Title.X + Status_Title.Width
+            Y: =Status_Title.Y
+            ZIndex: =6
+
+        HrBottom As rectangle:
+            BorderColor: =RGBA(191, 191, 192, 1)
+            Fill: =RGBA(191, 191, 192, 1)
+            Height: =2
+            Width: =Parent.Width
+            Y: =Content_1.Y + Content_1.Height - Self.Height
+            ZIndex: =7
+
+        ButtonClick_1 As button:
+            BorderThickness: =0
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.Arial
+            Height: =Parent.TemplateHeight
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 0.2), -20%)
+            OnSelect: |-
+                =Set(isLoading,true);
+                // Update notifications
+                ClearCollect(colUpdateNotification,
+                    'TVS->UpdateNotification-V1'.Run(
+                        ThisItem.id,
+                        First(currentUserV2Res).id,
+                        envDEV,
+                        envTEST,
+                        envUAT1,
+                        envUAT2,resKeyOpenAll.open, resKeyOpenAll.close
+                    )
+                );
+                
+                    If( ThisItem.process_code = "Process3",
+                        Set(proposalInfoEdit,'TVS->FindByIdProposal_Process3-V1'.Run(ThisItem.record_id,resKeyOpenAll.open,resKeyOpenAll.close,envDEV,envTEST,envUAT1,envUAT2)),
+                        ThisItem.process_code = "Process1.3",
+                        Set(investmentDetail, 'TVS->GetByIdInvestmentResearch-V1'.Run(ThisItem.record_id, resKeyOpenAll.open, resKeyOpenAll.close, envDEV,envTEST, envUAT1, envUAT2)),
+                        ThisItem.process_code = "Process1.1",
+                        Set(recordItemSelected,'TVS->FindCommunicationRecordsByIdExternal'.Run(resKeyOpenAll.open, resKeyOpenAll.close, ThisItem.record_id, envDEV, envTEST, envUAT1, envUAT2));,
+                        ThisItem.process_code = "Process2",
+                        ClearCollect(dealSelected1, 'TVS->FindByIDDeal'.Run(resKeyOpenAll.open,resKeyOpenAll.close,ThisItem.record_id));
+                        Set(dealSelected, First(dealSelected1)),
+                        ThisItem.process_code = "Process1.2",
+                        Set(companyDetailById, 'TVS->GetByIdCompanyInformation-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, ThisItem.record_id,envDEV,envTEST,envUAT1,envUAT2));
+                        ClearCollect(attachInsertRes, AddColumns(companyDetailById.listAttach, Name, file_name, By, created_by)),
+                        ThisItem.process_code = "Process4",
+                        Set(marginDetail1, Blank());
+                        Set(marginDetail1,'TVS->FindByIdProposalONSProcess4'.Run(resKeyOpenAll.open,resKeyOpenAll.close, ThisItem.record_id,envDEV,envTEST,envUAT1,envUAT2));
+                        Set(marginDetail, First(marginDetail1.proposal)),
+                        ThisItem.process_code = "Process5",
+                        Set(isDivestment, "D" in ThisItem.record_id);
+                        Set(pevcId, Left(ThisItem.record_id, Len(ThisItem.record_id) - 1));
+                        Select(Process5Click);,
+                        false
+                        // Set(recordItemSelected, recordItemRes.record)
+                    );
+                    
+                If( ThisItem.process_code = "Process3",
+                    Set(ShowNotificationPopup,false);
+                    Navigate(DetailProposal);
+                    Set(DealDetailTab,1);
+                    Set(ShowMenu,3);
+                    Set(ShowSubMenu,3.2);
+                    Set(ShowNotificationPopup,false);
+                    Set(principalValue,Text(Value(Substitute(Substitute(proposalInfoEdit.principal,".",""),",","")),"[$-en-GB]#,###"));
+                    ClearCollect(proposalDetailLogs,
+                        'TVS->FindByProposalIdComment-V1'.Run(
+                            resKeyOpenAll.open,
+                            resKeyOpenAll.close,
+                            proposalInfoEdit.id,
+                            envDEV,
+                            envTEST,
+                            envUAT1,
+                            envUAT2
+                    ));
+                    ClearCollect(listAttachFileRes,proposalInfoEdit.listAttach);
+                    Clear(listAttachFile);
+                    ForAll(listAttachFileRes,Collect(listAttachFile,{Id: ThisRecord.id,Name: ThisRecord.file_name,Date: ThisRecord.created_date,By: ThisRecord.name_employee}));,
+                // --------------------------------------------------------------------
+                    ThisItem.process_code = "Process1.3",
+                    Set(ShowNotificationPopup,false);
+                    Navigate(DetailInvestmentResearch);
+                    Set(irDetail, investmentDetail);
+                    Reset(ReportName_Input);
+                    Reset(Note_Input);
+                    Set(reportTypeValue, investmentDetail.report_type);
+                    Set(reportQuarterValue, investmentDetail.quarterly_report);
+                    Set(reportWeekValue, investmentDetail.week_report);
+                    Set(reportMonthValue, investmentDetail.monthly_report);
+                    Set(reportYearValue, investmentDetail.annaul_report);
+                    Set(reportPrivacyValue, Proper(investmentDetail.allow_access));
+                    Set(MenuSelect,"Portal");
+                    Set(MenuSelect2,"Investment research");
+                    Set(DealDetailTab,1);
+                    Set(ShowMenu,2);
+                    Set(ShowSubMenu,2.3);
+                    Set(HeaderText,If(IsError(investmentDetail) || IsBlank(investmentDetail),"Create",
+                        (investmentDetail.status = "DRAFT" || investmentDetail.status = "REVISED") && "CREATE" in LookUp(currenUserV2.permissionList, process_code = "Process3", action),
+                        "Update","View "
+                    ));
+                    Set(isDisable, !(IsBlank(investmentDetail) || (investmentDetail.status in ["DRAFT", "REVISED"] && investmentDetail.created_id = currenUserV2.id)));
+                    If(!IsBlank(investmentDetail),
+                        ClearCollect(listReportAttachFile, Filter(investmentDetail.listAttach, type = "RP"));
+                        ClearCollect(listOthersAttachFile, Filter(investmentDetail.listAttach, type = "ORP"));
+                        ClearCollect(listReportAttachFileVn, Filter(investmentDetail.listAttach, type = "RPVN"));
+                        ClearCollect(listOthersAttachFileVn, Filter(investmentDetail.listAttach, type = "ORPVN"));
+                    );,
+                
+                    ThisItem.process_code = "Process1.1",
+                    //Check division
+                    If("Research" in LookUp(currenUserV2.permissionList,process_code = "Process1.1", division), 
+                        Set(TypeDivison, "Research"),
+                        Set(TypeDivison, "IBPE")
+                    );
+                    Set(ShowMenu,1);
+                    Set(ShowSubMenu,1.1);
+                    If(recordItemSelected.meeting_nature = "EXTERNAL", Set(TypeNature, "External"), Set(TypeNature, "Internal"));
+                    If(Upper(LookUp(listDepartment, id = recordItemSelected.division).name) = "RESEARCH", Set(TypeInformationNonList, "Research"));
+                    Set(DivisionSelected, LookUp(listDepartment, id = recordItemSelected.division));
+                    // ------
+                    If(TypeNature = "External",
+                        Set(childRecordSelected, recordItemSelected);
+                        ClearCollect(HasTags, childRecordSelected.has_tag);
+                        ClearCollect(ShareTo, childRecordSelected.share_to);
+                        ClearCollect(colExternalFiles, RenameColumns(RenameColumns(RenameColumns(RenameColumns(childRecordSelected.attachment, created_date, Date), file_name, Name), created_by, By), id, Id));
+                        UpdateIf(colExternalFiles As f, true, {By: LookUp(allEmployeesNoPaging, id = f.By).name});
+                        Reset(AttachFile_3);
+                        Set(DivisionSelected, LookUp(listDepartment, id = recordItemSelected.division));
+                
+                        ////dynamic table
+                        Set(splitIssuer, RenameColumns(childRecordSelected.dynamic_table, col, Value));
+                        Set(header, Split(First(splitIssuer).Value, "<"));
+                        ClearCollect(splitIssuerNotFirst, Filter(splitIssuer, Value <> First(splitIssuer).Value));
+                        ClearCollect(Quaters, RenameColumns(Filter(header, Upper(Value) <> "ITEM" && Upper(Value) <> "UNIT"), Value, value));
+                        Clear(Values);
+                        ForAll(splitIssuerNotFirst As item, 
+                        RemoveIf(firstSlash, true);
+                        RemoveIf(secondSlash, true);
+                            Collect(firstSlash, {value: Find("<", item.Value)});
+                            Collect(secondSlash, {value: (Find("<", item.Value, First(firstSlash).value + 1))});
+                            Collect(Values, {items: Split(Mid(item.Value, First(secondSlash).value + 1, Len(item.Value) - First(secondSlash).value), "<")})
+                        );
+                        
+                        ClearCollect(ListPartyExternal, ShowColumns(RenameColumns(GroupBy(childRecordSelected.party, id, party_name, party_value, _data), party_value, value), id, party_name, value));
+                        UpdateIf(ListPartyExternal As item, true, {
+                            markId: GUID(),
+                    partyMembers: AddColumns(RenameColumns(
+                        ShowColumns(GroupBy(Filter(childRecordSelected.party, id = item.id && member_id <> Blank()), member_value, member_id, party_value, _data), member_value, member_id, party_value), member_value, email), id, GUID(), internal_email, "", name, "")
+                        });
+                        RenameColumns(ShowColumns(childRecordSelected.party, member_value), member_value, email);
+                        Clear(attachments);
+                        ForAll(Filter(GroupBy(childRecordSelected.party, file_id, file_name, id, _data), !IsBlank(file_id)) As p, Collect(attachments, {id: p.file_id, name: p.file_name, markId: LookUp(ListPartyExternal, id = p.id).markId}))
+                    );
+                        //Set dataCommon
+                        If(!IsBlank(recordItemSelected),Set(meetingTypeValue, recordItemSelected.meeting_type));
+                        ClearCollect(colInternalFiles, RenameColumns(RenameColumns(RenameColumns(recordInternalSelected.attachments, file_name, Name), created_date, Date), created_by, By));
+                        UpdateIf(colInternalFiles As f, true, {By: LookUp(allEmployeesNoPaging, id = f.By).name});
+                        Set(isLoading, false);
+                        Set(ShowNotificationPopup,false);
+                        Navigate(DetailCommunicationRecords);
+                        Concurrent(
+                            ClearCollect(NonListPartyExternal, AddColumns('TVS->GetAllCompanyInformation'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2), type, "company")),
+                            Set(ListItemUnitConfig, 'TVS->GetAllItemUnitConfig'.Run(resKeyOpenAll.open,resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2)));
+                        ,
+                        // M&A
+                        ThisItem.process_code = "Process2",
+                        Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false); Set(isSummitedPopup, false);
+                        ClearCollect(listDealSupport,'TVS->GetEmployeeDeall'.Run(resKeyOpenAll.open,resKeyOpenAll.close,dealSelected.id,"DEV"));
+                        Concurrent(
+                            Set(reasonOfDeal,
+                                AddColumns('TVS->getReasonOfDeal'.Run(dealSelected.id,resKeyOpenAll.open,resKeyOpenAll.close),step,
+                                Switch(status, "PENDING_SERVICE_CONTRACT", 4.1, "PENDING_REVIEW_DEAL_OWNER", 4.2, "PENDING_REVIEW_HEAD_DIVISION", 4.3, "PENDING_APPROVE_CEO", 4.4, "PENDING_CONTRACT_DATE", 4.5))),
+                            ClearCollect(noteOfDeal,'TVS->GetNoteByDealID-DEV'.Run(resKeyOpenAll.open,resKeyOpenAll.close,dealSelected.id)),
+                            ClearCollect(listFile,'TVS->GetFileByIDDeal'.Run(resKeyOpenAll.open,resKeyOpenAll.close,dealSelected.id))
+                        );
+                        ClearCollect(reasonOfOwner,Filter(reasonOfDeal, status="PENDING_REVIEW_DEAL_OWNER"));
+                        ClearCollect(reasonOfCEO,Filter(reasonOfDeal, status="PENDING_APPROVE_CEO"));
+                        ClearCollect(reasonOfDealForLogs, If(dealSelected.is_request_edit || IsBlank(dealSelected.close_date),
+                            reasonOfDeal,
+                            Filter(reasonOfDeal, DateTimeValue(created_date) < DateTimeValue(DateAdd(dealSelected.close_date, 0, TimeUnit.Hours))));
+                        );
+                        Navigate(DetailQT1, ScreenTransition.Fade),
+                        ThisItem.process_code = "Process1.2",
+                    Set(companyEdit, companyDetailById);
+                    Set(isUpdateTableFinancial, false);
+                    Set(TableHistory, true);
+                    Set(TableCreate, false);
+                    Set(inputChangeKey, false);
+                    Set(inputChangeKeyHis, true);
+                    Set(TableHistoryFundra, true);
+                    Set(TableCreateFundra, false);
+                    Set(DealDetailTab,1);
+                    Set(ShowMenu,2);
+                    Set(ShowSubMenu,2.2);
+                    Navigate(DetailNonListedCompany, ScreenTransition.Fade);
+                
+                    ClearCollect(DataContact, companyDetailById.listContact);
+                    ClearCollect(DataFounder, companyDetailById.listFounder);
+                    ClearCollect(DataFounderOther, companyDetailById.listShareholder);
+                    Clear(ListKeyMilestonesNew);
+                    ForAll(companyDetailById.listKeyMilestones As item, Collect(ListKeyMilestonesNew, {Id: item.id, Date: item.date, Note: item.note, Event: item.event}));
+                
+                    If(!IsBlank(ListKeyMilestonesNew),
+                    ClearCollect(ListKeyMilestonesHistory, []);
+                    ForAll(companyDetailById.listKeyMilestones As data,
+                        Collect(ListKeyMilestonesHistory, {
+                            Date: data.date,
+                            Id: data.id,
+                            MarkId: GUID(),
+                            Note: data.note,
+                            Event: data.event
+                        });
+                    ));
+                
+                    UpdateIf(DataContact, true, {guid: GUID()});
+                    UpdateIf(DataFounder, true, {guid: GUID()});
+                    UpdateIf(DataFounderOther, true, {guid: GUID()});
+                    //UpdateIf(ListKeyMilestonesNew, true, {MarkId: GUID()});
+                
+                    Set(
+                        splitIssuerFinancialInfo,
+                        RenameColumns(companyDetailById.financialInfo, col, Value)
+                    );
+                    Set(headerFinancialInfo, Split(First(splitIssuerFinancialInfo).Value, "<"));
+                    ClearCollect(splitIssuerNotFirstFinancialInfoNl, Filter(splitIssuerFinancialInfo, Value <> First(splitIssuerFinancialInfo).Value));
+                    Set(headerFinancialInfoHistory, headerFinancialInfo);
+                    ClearCollect(splitIssuerNotFirstFinancialInfoNlHistory, splitIssuerNotFirstFinancialInfoNl);
+                
+                    ClearCollect(splitIssuerFundraisingHistory,RenameColumns(companyDetailById.fundraisingHistory, col, Value));
+                    Set(headerFundraisingHistory, Split(First(splitIssuerFundraisingHistory).Value, "<"));
+                    ClearCollect(splitIssuerNotFirstFundraisingHistory, Filter(splitIssuerFundraisingHistory, Value <> First(splitIssuerFundraisingHistory).Value));
+                    Set(headerFundraisingHistoryApi, headerFundraisingHistory);
+                    ClearCollect(splitIssuerNotFirstFundraisingHistoryApi, splitIssuerNotFirstFundraisingHistory),
+                
+                    // MR
+                     ThisItem.process_code = "Process4",
+                        Set(isLoading, true);
+                        Set(saveEvent, 0);
+                        Set(submitEvent, 0);
+                        Set(isSubmited, false);
+                        Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+                        Set(DealDetailTab,1);
+                        Set(ShowMenu,3);
+                        Set(ShowSubMenu,3.3);
+                
+                        Set(proposalNameInput, marginDetail.proposal_name);
+                        Clear(brokerageListDetail);
+                        Clear(marginDetailAttachment);
+                        Clear(listAttachFile);
+                        Reset(Cmt_Input);
+                        Reset(PIR_Input);
+                        Reset(PML_Input);
+                        ForAll(marginDetail1.brokerage,Collect(brokerageListDetail,{
+                            guid:GUID(),
+                            id:ThisRecord.id,
+                            ticket:ThisRecord.ticker,
+                            CP_max_margin_ratio:ThisRecord.max_margin_ratio_cp,
+                            CP_max_margined_amt_per_client:ThisRecord.max_margined_amt_per_client_cp,
+                            CP_max_margined_amt_all_client:ThisRecord.max_margined_amt_all_client_cp,
+                            BP_proposed_margin_ratio:ThisRecord.proposed_margin_ratio,
+                            BP_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client,
+                            BP_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client,
+                            RO_research_opinion:ThisRecord.research_opinion,
+                            RO_proposed_margin_ratio:ThisRecord.proposed_margin_ratio_re,
+                            RO_proposed_margined_amt_per_client:ThisRecord.proposed_margined_loan_amt_per_client_re,
+                            RO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_re,
+                            RMO_risk_management_opinion: ThisRecord.risk_management_opinion,
+                            RMO_proposed_margin_ratio: ThisRecord.proposed_margin_ratio_rm,
+                            RMO_proposed_margined_amt_per_client: ThisRecord.proposed_margined_loan_amt_per_client_rm,
+                            RMO_proposed_margined_amt_all_client:ThisRecord.proposed_margined_loan_amt_all_client_rm,
+                            RMO_proposed_margined_qty_all_client:ThisRecord.proposed_margined_qty_all_client_rm,
+                            RMO_proposed_margined_qty_one_client:ThisRecord.proposed_margined_qty_one_client_rm,
+                            RMO_comment:ThisRecord.comment_rm,
+                            RMO_proposed_interest_rate_rm: ThisRecord.proposed_interest_rate_rm,
+                            record_status:"UPDATE"
+                        }));
+                        ClearCollect(MarginLimitPolicyList,brokerageListDetail);
+                        ForAll(marginDetail1.attachment,Collect(marginDetailAttachment,{
+                            id_record:ThisRecord.id,
+                            Name:ThisRecord.file_name,
+                            By: ThisRecord.created_by
+                        }));
+                        ClearCollect(listAttachFile,marginDetailAttachment);
+                        Set(marginType, First(marginDetail1.proposal).type_of_proposal);
+                        Set(marginLimitType, marginType);
+                        Set(isLoading, false);
+                        Set(DealDetailTab, 1);        
+                        Navigate(DetailMarginLimit, ScreenTransition.Fade);
+                    // end MR
+                );
+                
+                Set(ShowNotificationPopup,false);
+                Set(isLoading,false);
+                Set(PageSizeNotification,10);
+                Concurrent(
+                ClearCollect(colAllNotification,'TVS->GetAllNotification-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,User().Email,PageSizeNotification,envDEV,envTEST,envUAT1,envUAT2)),
+                If(CountRows(currentUserV2Res) > 0,
+                        Set(countNotify,
+                            'TVS->CountNotifyByCurrentUser-V1'.Run(
+                                User().Email,
+                                envDEV,
+                                envTEST,
+                                envUAT1,
+                                envUAT2,resKeyOpenAll.open, resKeyOpenAll.close
+                            )
+                        )
+                    )
+                );
+                Select(ShowMore_1);
+            PressedFill: =RGBA(0, 0, 0, 0)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Tooltip: =If(Len(ThisItem.content) > 210, ThisItem.content, "")
+            Width: =Parent.Width
+            ZIndex: =8
+
+        Process5Click As button:
+            Font: =Font.Arial
+            OnSelect: |-
+                =Set(isLoading, true);
+                Concurrent(
+                    ClearCollect(listUserAsignPEVC,'TVS->GetByRoleEmployeeDealPEVC-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close));,
+                    ClearCollect(investmentPortfolioList, 'TVS->FindAlllInvestmentPortfolio'.Run(resKeyOpenAll.open,resKeyOpenAll.close).listItem);
+                );
+                Set(DealDetailTab,1);
+                Set(ShowMenu,3);
+                Set(ShowSubMenu,3.5);
+                // Go PEVC by link
+                If(!IsBlank(ThisItem.record_id),
+                    Set(oldDealDetailTab, 1);
+                    Set(ShowHideButton, false);
+                    Set(DealDetailTab, 1);
+                    Set(detailPEVCById, Blank());
+                    Set(showRejectPopup, false); Set(showApprovePopup, false); Set(showRevisePopup, false);
+                
+                    If(isDivestment,
+                        Concurrent(
+                            Set(pevcNoteFileLog, 'TVS->GetNoteFileLogDivestment-Process5-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                            Set(detailPEVCById, 'TVS->FindByIdPEVCDivestmentProcess5'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                            ClearCollect(listDealPEVC,'TVS->GetDealEmployeeDivestment-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,pevcId));
+                        );,
+                        Concurrent(
+                            Set(pevcNoteFileLog, 'TVS->GetNoteFileLog-Process5-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId)),
+                            Set(detailPEVCById, 'TVS->FindByIdPEVCPreProcess5'.Run(resKeyOpenAll.open, resKeyOpenAll.close, pevcId, envDEV, envTEST, envUAT1, envUAT2)),
+                            ClearCollect(listDealPEVC,'TVS->GetDealEmployee-Process5-V1'.Run(resKeyOpenAll.open,resKeyOpenAll.close,pevcId))
+                        );
+                    );
+                    Set(prePEVCInfoEdit, detailPEVCById);
+                    Set(PEVCgroups, pevcNoteFileLog.group);
+                    Set(PEVClogs, pevcNoteFileLog.log);
+                
+                    ClearCollect(voteLogs, Sort(PEVClogs, created_date, SortOrder.Descending));
+                    ClearCollect(voteResult, []);
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_ISCVC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_ISCPE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "COMPLETE_DISCUSSION_PAPER_PENDING_IC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_ISCVC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_ISCPE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_PENDING_IC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_ISCVC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_ISCPE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "INVESTMENT_MEMO_ADJUSTED_PENDING_IC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISCVC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISCPE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_IC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_ISC_PE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_ISC_VC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "PROPOSED_DIVESTMENT_PENDING_IC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISC_PE")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_ISC_VC")));
+                    Collect(voteResult, First(Filter(voteLogs, !IsBlank(status_group) && status = "APPROVE_RESOLUTION_PENDING_IC")));
+                    Set(estimatedLegalFeeValue, Text(Value(Substitute(If(isDivestment, detailPEVCById.estimated_legal_fee, detailPEVCById.dd_legal_fee), ",","")), "[$-en-GB]#,###"));
+                    Set(estimatedDDFeeValue, Text(Value(Substitute(detailPEVCById.estimate_dd_fee, ",","")), "[$-en-GB]#,###"));
+                
+                    Set(CompanyNameSelectedValue, detailPEVCById.company_id);
+                    Set(dealTypeSelectedValue, detailPEVCById.deal_type);
+                    ClearCollect(levelOfApprovalList, If(IsBlank(detailPEVCById.level_of_approval), [], Split(detailPEVCById.level_of_approval, "#")));
+                    Set(roleDealUserCurrent,First(Filter(listDealPEVC,id=currenUserV2.id)).type);
+                
+                    // Convert notes
+                    Set(noteListValue, Blank());
+                    ClearCollect(pevcListDeleteFiles, []);
+                    ClearCollect(noteOfPEVC, pevcNoteFileLog.note);
+                
+                    // Setup tracking progress JSON for Son.Nguyen component
+                    ClearCollect(groupIC, Filter(PEVCgroups, group_team = "IC"));
+                    ClearCollect(groupISCVC, Filter(PEVCgroups, group_team = "ISC-VC"));
+                    ClearCollect(groupISCPE, Filter(PEVCgroups, group_team = "ISC-PE"));
+                    ClearCollect(PEVCGroupsObject, []);
+                    ClearCollect(listProgessPEVCForTracking, []);
+                    Set(action, If(IsEmpty(Filter(PEVClogs, status in ["COMPLETE_DISCUSSION_PAPER_PENDING_IC"] && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+                    First(Filter(PEVClogs, status in ["COMPLETE_DISCUSSION_PAPER_PENDING_IC"] && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group));
+                    If(prePEVCInfoEdit.status = "APPROVED",
+                        Set(CurrentLevel, Last(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC)).level),
+                        Set(CurrentLevel, First(Filter(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC), prePEVCInfoEdit.status in currentStatus)).level);
+                    );
+                
+                    ForAll(If(isDivestment, listProgessDivestmentPEVC, listProgessPEVC) As progress,
+                        Collect(listProgessPEVCForTracking,
+                        {
+                            Text: progress.Text,
+                            Code: progress.Code,
+                            level: progress.level,
+                            subTitle: {
+                                name: If(
+                                !("_IC" in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                                !(If(isDivestment, "_ISC_VC", "_ISCVC") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                                !(If(isDivestment, "_ISC_PE", "_ISCPE") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status),
+                                Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).name_employee,
+                                !(progress.shortStatus&"_PENDING_IC" in progress.currentStatus),
+                                Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).name_employee,
+                                If( !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-VC, ISC-PE, IC",
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "REJECTED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-PE, IC",
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "REJECTED",
+                                    "ISC-VC, IC",
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-VC, ISC-PE",
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "REJECTED",
+                                    "ISC-VC",
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "REJECTED" &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-PE",
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-PE, IC",
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                                    "ISC-VC, IC",
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                                    "IC",
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)).status_group = "APPROVED" &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)),
+                                    "ISC-VC",
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status)) &&
+                                    IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_VC", "_PENDING_ISCVC") in status)) &&
+                                    !IsEmpty(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)) &&
+                                    First(Filter(voteResult, progress.shortStatus&If(isDivestment, "_PENDING_ISC_PE", "_PENDING_ISCPE") in status)).status_group = "APPROVED",
+                                    "ISC-PE",
+                                    ""
+                                )),
+                                action: If(!(progress.shortStatus&"_PENDING_IC" in progress.currentStatus),
+                                Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).action,
+                                !("_IC" in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                                !(If(isDivestment, "_ISC_VC", "_ISCVC") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status) &&
+                                !(If(isDivestment, "_ISC_PE", "_ISCPE") in Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).status),
+                                Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).action,
+                                If(IsEmpty(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status && IsBlank(is_not_action))),
+                                    If(Value(CurrentLevel) > Value(progress.level), "APPROVE", ""),
+                                    First(Filter(voteResult, progress.shortStatus&"_PENDING_IC" in status && IsBlank(is_not_action))).action
+                                )),
+                                time: Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), status in progress.currentStatus && !IsBlank(action))).created_date), "dd/mm/yyyy")
+                            },
+                            actionLogs: Filter(Sort(PEVClogs, created_date), status in progress.currentStatus),
+                            clickScreen: progress.clickScreen,
+                            currentStatus: progress.currentStatus,
+                            activeArray: progress.activeArray,
+                            statusLogFilter: progress.statusLogFilter,
+                            Groups: [
+                                {
+                                    groupName: "ISC-VC",
+                                    showGroup: "ISC-VC" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"] && If(Switch(
+                                            If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "",
+                                            First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "", !("ISC-VC" in detailPEVCById.group_rejected), true),
+                                    subTitle: {
+                                        action: Switch(
+                                            If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "",
+                                            First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                        time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_VC", "_ISCVC") in status)).created_date), "",
+                                        Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_VC", "_ISCVC") in status)).created_date), "dd/mm/yyyy"))
+                                    },
+                                    children:
+                                    If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                                        AddColumns(Filter(PEVCgroups, group_team = "ISC-VC") As gr,
+                                            name, gr.name_user,
+                                            action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_VC", "_ISCVC") in logs.status)).action),
+                                            time, Text(DateTimeValue(
+                                                Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                    logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_VC", "_ISCVC") in logs.status
+                                                )).created_date), "dd/mm/yyyy")
+                                        ),
+                                        AddColumns(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_VC", "_ISCVC") in status),
+                                            name, name_employee,
+                                            time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                        )
+                                    )
+                                },
+                                {
+                                    groupName: "ISC-PE",
+                                    showGroup: "ISC-PE" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"] && If(Switch(
+                                            If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+                                            First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "", !("ISC-PE" in detailPEVCById.group_rejected), true),
+                                    subTitle: {
+                                        action: Switch(
+                                            If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "",
+                                            First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                        time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_PE", "_ISCPE") in status)).created_date), "",
+                                        Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), If(isDivestment, "_ISC_PE", "_ISCPE") in status)).created_date), "dd/mm/yyyy"))
+                                    },
+                                    children:
+                                    If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                                    AddColumns(Filter(PEVCgroups, group_team = "ISC-PE") As gr,
+                                        name, gr.name_user,
+                                        action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                            logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_PE", "_ISCPE") in logs.status)).action),
+                                        time, Text(DateTimeValue(
+                                                    Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                        logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && If(isDivestment, "_ISC_PE", "_ISCPE") in logs.status
+                                                    )).created_date), "dd/mm/yyyy")
+                                    ),
+                                        AddColumns(Filter(PEVClogs, status in progress.currentStatus && If(isDivestment, "_ISC_PE", "_ISCPE") in status),
+                                            name, name_employee,
+                                            time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                        )
+                                    )
+                                },
+                                {
+                                    groupName: "IC",
+                                    showGroup: "IC" in detailPEVCById.level_of_approval && progress.Text in ["Complete Discussion Paper", "Investment Memo", "Investment Memo (adjusted)", "Proposed divestment", "Approve resolutions", "Approve resolution"],
+                                    subTitle: {
+                                        action: Switch(
+                                            If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)), "",
+                                            First(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", ""),
+                                        time: If(IsBlank(Last(Filter(Sort(PEVClogs, created_date), "IC" in status)).created_date), "",
+                                        Text(DateTimeValue(Last(Filter(Sort(PEVClogs, created_date), "IC" in status)).created_date), "dd/mm/yyyy"))
+                                    },
+                                    children:
+                                    If(Switch(If(IsEmpty(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)), "", First(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status)).status_group),
+                                        "APPROVED", "APPROVE", "REJECTED", "REJECT", "") = "",
+                                    AddColumns(Filter(PEVCgroups, group_team = "IC") As gr,
+                                        name, gr.name_user,
+                                        action, Text(Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                            logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && "_IC" in logs.status)).action),
+                                        time, Text(DateTimeValue(
+                                                    Last(Filter(Sort(PEVClogs, created_date) As logs,
+                                                        logs.status in progress.currentStatus && logs.employee_id = gr.employee_id && "_IC" in logs.status
+                                                    )).created_date), "dd/mm/yyyy")
+                                    ),
+                                        AddColumns(Filter(PEVClogs, status in progress.currentStatus && "_IC" in status),
+                                            name, name_employee,
+                                            time, Text(DateTimeValue(created_date), "dd/mm/yyyy")
+                                        )
+                                    )
+                                }
+                            ]
+                        }
+                        );
+                    );
+                
+                    Set(dealTypeSelectedValue, detailPEVCById.deal_type);
+                
+                    ClearCollect(note_APPROVE_RESOLUTION,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_RESOLUTION" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_APPROVE_RESOLUTION), ClearCollect(note_APPROVE_RESOLUTION, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_RESOLUTION", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_NEW_LEAD_CREATION,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "NEW_LEAD_CREATION" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_NEW_LEAD_CREATION), ClearCollect(note_NEW_LEAD_CREATION, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NEW_LEAD_CREATION", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_NEW_LEAD_CREATION_PENDING,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "NEW_LEAD_CREATION_PENDING" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_NEW_LEAD_CREATION_PENDING), ClearCollect(note_NEW_LEAD_CREATION_PENDING, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NEW_LEAD_CREATION_PENDING", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_NDA_APPROVAL,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "NDA_APPROVAL" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_NDA_APPROVAL), ClearCollect(note_NDA_APPROVAL, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "NDA_APPROVAL", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_COMPLETE_DISCUSSION_PAPER,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_DISCUSSION_PAPER" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_COMPLETE_DISCUSSION_PAPER), ClearCollect(note_COMPLETE_DISCUSSION_PAPER, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_DISCUSSION_PAPER", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_INVESTMENT_MEMO_PENDING,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_MEMO_PENDING" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_INVESTMENT_MEMO_PENDING), ClearCollect(note_INVESTMENT_MEMO_PENDING, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_MEMO_PENDING", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_COMPLETE_TERM_SHEET,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_TERM_SHEET" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_COMPLETE_TERM_SHEET), ClearCollect(note_COMPLETE_TERM_SHEET, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_TERM_SHEET", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_INVESTMENT_MEMO,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_MEMO" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_INVESTMENT_MEMO), ClearCollect(note_INVESTMENT_MEMO, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_MEMO", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_DD_CONTRACT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "DD_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_DD_CONTRACT), ClearCollect(note_DD_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "DD_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_LEGAL_CONTRACT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "LEGAL_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_LEGAL_CONTRACT), ClearCollect(note_LEGAL_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "LEGAL_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_INVESTMENT_CONTRACT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "INVESTMENT_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_INVESTMENT_CONTRACT), ClearCollect(note_INVESTMENT_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "INVESTMENT_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_COMPLETE_DISBURSEMENT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETE_DISBURSEMENT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_COMPLETE_DISBURSEMENT), ClearCollect(note_COMPLETE_DISBURSEMENT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETE_DISBURSEMENT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_APPROVE_RESOLUTIONS,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_RESOLUTIONS" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_APPROVE_RESOLUTIONS), ClearCollect(note_APPROVE_RESOLUTIONS, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_RESOLUTIONS", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_LEGAL_CONTRACTS,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "LEGAL_CONTRACTS" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_LEGAL_CONTRACTS), ClearCollect(note_LEGAL_CONTRACTS, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "LEGAL_CONTRACTS", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_APPROVE_THE_DIVESTMENT_CONTRACT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "APPROVE_THE_DIVESTMENT_CONTRACT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_APPROVE_THE_DIVESTMENT_CONTRACT), ClearCollect(note_APPROVE_THE_DIVESTMENT_CONTRACT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "APPROVE_THE_DIVESTMENT_CONTRACT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                    ClearCollect(note_COMPLETED_DIVESTMENT,
+                        Sort(AddColumns(Filter(noteOfPEVC, screen = "COMPLETED_DIVESTMENT" && Len(Trim(note)) > 0), guid_mark, GUID(), isSelected, If(isLastest = "true", true, false), note_old, note), write_date)
+                    );
+                    If(IsEmpty(note_COMPLETED_DIVESTMENT), ClearCollect(note_COMPLETED_DIVESTMENT, [{created_by: "", created_date: "", id_deal_note: "", isSelected: true, isLastest: "true", location: "1", note: "", screen: "COMPLETED_DIVESTMENT", write_by: "", write_date: "", guid_mark: GUID(), note_old: ""}]));
+                
+                    If(!IsBlank(prePEVCInfoEdit),
+                        Set(currentStatus, If(prePEVCInfoEdit.status = "APPROVED",
+                            If(isDivestment, "PROPOSED_DIVESTMENT_NEW", "NEW_LEAD_CREATION_NEW"), prePEVCInfoEdit.status)); Set(PEVCCurrentStatus, prePEVCInfoEdit.status);,
+                        Set(currentStatus, "BLANK"); Set(PEVCCurrentStatus, "BLANK");
+                    ); 
+                    Set(isShowSubmit, PEVCCurrentStatus in ["BLANK", "NEW_LEAD_CREATION_NEW", "NEW_LEAD_CREATION_DONE", "NDA_APPROVAL_ATTACH_FILE", "NDA_APPROVAL_DONE", "COMPLETE_DISCUSSION_PAPER_DONE", "INVESTMENT_MEMO_DONE", "COMPLETE_TERM_SHEET_DONE", "INVESTMENT_MEMO_ADJUSTED_DONE", "DD_CONTRACT_ATTACH_FILE", "DD_CONTRACT_DONE", "LEGAL_CONTRACT_PENDING_DONE", "INVESTMENT_CONTRACT_ATTACH_FILE", "INVESTMENT_CONTRACT_DONE", "COMPLETE_DISBURSEMENT_ATTACH_FILE"]);
+                
+                    Set(companyPEVC, 'TVS->FindAllCompanyPEVC-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2));
+                    If(!IsBlank(CompanyNameSelectedValue),
+                        Set(PEVCFouderSharehoderData, 'TVS->FindByIdPVECLeadCreationFounderAndShareHolder-V1'.Run(CompanyNameSelectedValue,resKeyOpenAll.open, resKeyOpenAll.close, envDEV, envTEST, envUAT1, envUAT2));
+                        ClearCollect(PEVC_founderData, AddColumns(PEVCFouderSharehoderData.listFounder, isTotal, false));
+                        Collect(PEVC_founderData, {id: "", name: "Total", isTotal: true, ownership: Text(Sum(PEVC_founderData, ownership))});
+                        ClearCollect(PEVC_shareholderData, AddColumns(PEVCFouderSharehoderData.listShareholder, isTotal, false));
+                        Collect(PEVC_shareholderData, {id: "", name: "Total", isTotal: true, ownership: Text(Sum(PEVC_shareholderData, ownership))});
+                    );
+                    Set(calledFindByID, true);
+                    Set(ShowHideButton, true);
+                    Set(isShowSubmitButton, false);
+                    Set(isShowSaveButton, false);
+                    Set(isShowApproveButton, false);
+                    Set(isShowReviseButton, false);
+                    Set(isShowRejectButton, false);
+                    Navigate(DetailPEVC, ScreenTransition.Fade);
+                );
+                // END Go PEVC by link
+                Set(isLoading, false);
+            Text: ="Button"
+            Visible: =false
+            X: =40
+            Y: =40
+            ZIndex: =9
+
+    HrBottomNotification As rectangle:
+        BorderColor: =RGBA(191, 191, 192, 1)
+        Fill: =RGBA(191, 191, 192, 1)
+        Height: =2
+        Width: =NotificationMainBg.Width
+        X: =NotificationMainBg.X
+        Y: =ListNotification_1.Y - 2
+        ZIndex: =8
+
+    ShowMore_1 As button:
+        BorderThickness: =0
+        Color: =RGBA(97, 76, 76, 1)
+        DisabledFill: =RGBA(255, 255, 255, 1)
+        Fill: =RGBA(255, 255, 255, 1)
+        FocusedBorderThickness: =0
+        Font: =Font.Arial
+        Height: =30
+        HoverColor: =RGBA(97, 76, 76, 1)
+        HoverFill: =
+        OnSelect: |-
+            =Set(isLoading, true);
+            Set(PageSizeNotification,PageSizeNotification+10);
+            Concurrent(
+            ClearCollect(colAllNotification, 'TVS->GetAllNotification-V1'.Run(resKeyOpenAll.open, resKeyOpenAll.close, User().Email, PageSizeNotification,envDEV,envTEST, envUAT1, envUAT2)),
+            Set(countNotify, 'TVS->CountNotifyByCurrentUser-V1'.Run(User().Email, envDEV,envTEST, envUAT1, envUAT2,resKeyOpenAll.open, resKeyOpenAll.close)));
+            Set(isLoading, false);
+        PressedColor: =ShowMore_1.Color
+        PressedFill: =
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Size: =10.5
+        Text: ="Show more"
+        Visible: =Value(countNotify.countall) > PageSizeNotification
+        Width: =NotificationMainBg.Width
+        X: =NotificationMainBg.X
+        Y: =NotificationMainBg.Y + NotificationMainBg.Height - ShowMore_1.Height
+        ZIndex: =9
+

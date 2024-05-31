@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "b1e2d170-b00c-4f30-b984-4d2cd1778a9d",
+    "Name": "TVS->DeleteRole",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "8b493b18-bacf-ee11-9079-6045bd5b2c0e"
+  }
+]
