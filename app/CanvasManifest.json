@@ -116,7 +116,7 @@
     "Id": "1de6528a-2939-4b68-8da3-5bf69ba9f414",
     "InstrumentationKey": "",
     "LocalDatabaseReferences": "",
-    "ManualOfflineProfileId": "",
+    "ManualOfflineProfileId": null,
     "Name": "TestSettingAPP",
     "OriginatingVersion": "1.341",
     "ParserErrorCount": 0,
