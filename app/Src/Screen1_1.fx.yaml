@@ -1,0 +1,38 @@
+Screen1_1 As screen:
+
+    Label1_1 As label:
+        Text: ="GE"
+        X: =40
+        Y: =40
+        ZIndex: =1
+
+    TextInput1_2 As text:
+        Default: ="Text input"
+        X: =80
+        Y: =216
+        ZIndex: =2
+
+    TextInput2_2 As text:
+        Default: ="Text input"
+        X: =80
+        Y: =295
+        ZIndex: =3
+
+    TextInput3_1 As text:
+        Default: ="Text input"
+        X: =80
+        Y: =392
+        ZIndex: =4
+
+    TextInput1_3 As text:
+        Default: ="Text input"
+        X: =80
+        Y: =488
+        ZIndex: =4
+
+    TextInput2_3 As text:
+        Default: ="Text input"
+        X: =80
+        Y: =581
+        ZIndex: =5
+
