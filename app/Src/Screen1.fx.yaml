@@ -37,7 +37,7 @@ Screen1 As screen:
         ZIndex: =5
 
     TextInput3_2 As text:
-        Default: ="DAsdad"
+        Default: ="Commit test Viet"
         X: =443
         Y: =276
         ZIndex: =6
