@@ -24,3 +24,15 @@ Screen1 As screen:
         Y: =216
         ZIndex: =4
 
+    TextInput1_1 As text:
+        Default: ="Text input"
+        X: =840
+        Y: =512
+        ZIndex: =4
+
+    TextInput2_1 As text:
+        Default: ="Text input"
+        X: =840
+        Y: =616
+        ZIndex: =5
+
