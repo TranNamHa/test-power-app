@@ -309,3 +309,15 @@ WelcomePage As screen:
         Y: =478
         ZIndex: =12
 
+    Label11_2 As label:
+        Text: ="Leu leju"
+        X: =368
+        Y: =628
+        ZIndex: =13
+
+    Label11_3 As label:
+        Text: ="Leu leju"
+        X: =304
+        Y: =553
+        ZIndex: =14
+
