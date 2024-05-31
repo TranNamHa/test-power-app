@@ -8,19 +8,19 @@ Screen1 As screen:
 
     TextInput1 As text:
         Default: ="Text input"
-        X: =80
-        Y: =216
+        X: =840
+        Y: =295
         ZIndex: =2
 
     TextInput2 As text:
         Default: ="Text input"
-        X: =80
-        Y: =295
+        X: =840
+        Y: =392
         ZIndex: =3
 
     TextInput3 As text:
         Default: ="Text input"
-        X: =912
+        X: =840
         Y: =216
         ZIndex: =4
 
